@@ -569,15 +569,15 @@ function SelfVue (options) {
 
 
 
-#### Vue2.0和Vue3.0的区别
+#### Vue2.0和Vue3.0的区别（5种）
 
 1.项目目录结构
 vue-cli2.0与3.0在目录结构方面，有明显的不同
-vue-cli3.0移除了配置文件目录，config 和 build 文件夹
-同时移除了 static 静态文件夹，新增了 public 文件夹，打开层级目录还会发现， index.html 移动到 public 中
+vue-cli3.0移除了配置文件目录，config 和 build 文件夹，同时移除了 static 静态文件夹
+新增了 public 文件夹，打开层级目录还会发现， index.html 移动到 public 中
 
 2.配置项
-3.0 config文件已经被移除，但是多了.env.production和env.development文件，除了文件位置，实际配置起来和2.0没什么不同
+3.0中config文件已经被移除，但是多了.env.production和env.development文件，除了文件位置，实际配置起来和2.0没什么不同
 没了config文件，跨域需要配置域名时，从config/index.js 挪到了vue.config.js中，配置方法不变
 
 3.渲染
@@ -587,7 +587,13 @@ Vue3.0不论是原生的html标签还是vue组件，他们都会通过h函数来
 4.数据监听
 Vue2.x大家都知道使用的是es5的object.defineproperties中getter和setter实现的，而vue3.0的版本，是基于Proxy进行监听的，其实基于proxy监听就是所谓的lazy by default，什么意思呢，就是只要你用到了才会监听，可以理解为‘按需监听’，官方给出的诠释是：速度加倍，同时内存占用还减半。
 
-相比于vue2.x，使用proxy的优势如下：defineProperty只能监听某个属性，不能对全对象监听。可以省去for in、闭包等内容来提升效率（直接绑定整个对象即可）。可以监听数组，不用再去单独的对数组做特异性操作 vue3.x可 3.以检测到数组内部数据的变化。
+相比于vue2.x，使用proxy的优势如下：
+
+```
+defineProperty只能监听某个属性，不能对全对象监听。
+可以省去for in、闭包等内容来提升效率（直接绑定整个对象即可）。
+可以监听数组，不用再去单独的对数组做特异性操作 vue3.x可以检测到数组内部数据的变化。
+```
 
 4.按需引入
 Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这样其实无论你用到还是没用到，都会跑一变。而vue3.0中可以用ES module imports按需引入，如：keep-alive内置组件、v-model指令，等等。
@@ -624,7 +630,7 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 
 **Virtual DOM 作用是什么？**
 
-虚拟DOM的最终目标是将虚拟节点渲染到视图上。但是如果直接使用虚拟节点覆盖旧节点的话，会有很多不必要的DOM操作。例如，一个ul标签下很多个li标签，其中只有一个li有变化，这种情况下如果使用新的ul去替代旧的ul,因为这些不必要的DOM操作而造成了性能上的浪费。
+**虚拟DOM的最终目标是将虚拟节点渲染到视图上。**但是如果直接使用虚拟节点覆盖旧节点的话，会有很多不必要的DOM操作。例如，一个ul标签下很多个li标签，其中只有一个li有变化，这种情况下如果使用新的ul去替代旧的ul,因为这些不必要的DOM操作而造成了性能上的浪费。
 
 为了避免不必要的DOM操作，虚拟DOM在虚拟节点映射到视图的过程中，将虚拟节点与上一次渲染视图所使用的旧虚拟节点（oldVnode）做对比，找出真正需要更新的节点来进行DOM操作，从而避免操作其他无需改动的DOM。
 
@@ -828,7 +834,7 @@ export default {
 
 
 
-#### vue页面传参
+#### vue页面传参（3种）
 
 ##### query传值--地址栏可见
 
@@ -901,9 +907,9 @@ eventBus.$off('eventBusName');
 
 答: 共同点：都能控制元素的显示和隐藏；
 
-不同点：实现本质方法不同，v-show本质就是通过控制css中的display设置为none，控制隐藏，只会编译一次；v-if是动态的向DOM树内添加或者删除DOM元
+不同点：实现本质方法不同，v-show本质就是通过控制css中的display设置为none，控制隐藏，只会编译一次；
 
-素，若初始值为false，就不会编译了。而且v-if不停的销毁和创建比较消耗性能。
+v-if是动态的向DOM树内添加或者删除DOM元素，若初始值为false，就不会编译了。而且v-if不停的销毁和创建比较消耗性能。
 
 总结：如果要频繁切换某节点，使用v-show(切换开销比较小，初始开销较大)。如果不需要频繁切换某节点使用v-if（初始渲染开销较小，切换开销比较大）。
 
@@ -1014,7 +1020,7 @@ var var vm = new Vue({
 
 **不应该使用箭头函数来定义 watcher 函数**，因为箭头函数没有 this，它的 this 会继承它的父级函数，但是它的父级函数是 window，导致箭头函数的 this 指向 window，而不是 Vue 实例。
 
-deep无法监听到数组的变动和对象的新增，参考vue数组变异,只有以响应式的方式触发才会被监听到
+**deep无法监听到数组的变动和对象的新增**，参考vue数组变异,只有以响应式的方式触发才会被监听到
 
 监听的对象也可以写成字符串的形式
 
@@ -1061,44 +1067,110 @@ vue.config.js文件中配置：productionSourceMap: false,
 
 
 
-#### **怎么注册全局插件**
+#### **vue怎么注册全局插件**
 
+首先建一个自定义组件的文件夹，比如叫components，里面有一个index.js，还有一个自定义组件loading.vue。
+
+在index.js中，规定了使用这个组件的名字，以及使用方法，如：
+
+```js
+import loadingComponent from './loading.vue'
+
+const loadingComponent={
+    install:function(Vue){
+        Vue.component('Loading',loadingComponent)
+    }  //'Loading'这就是后面可以使用的组件的名字，install是默认的一个方法
+};
+
+export default loadingComponent;
 ```
-使用全局方法Vue.use()
-Vue.use( MyPlugin)
 
-com.js中
-import com from './xx.vue'
-let test = {}
-test.install = function(Vue, options){
-    Vue.component(panel.name, panel)  // 注册全局组件
+只要在index.js中规定了install方法，就可以像一些公共的插件一样使用Vue.use()来使用，在入口文件main.js中引入：
+
+```js
+import loadingComponent from './components'
+
+Vue.use(loading)
+```
+
+
+这时可以看到就像vue-resource一样，可以在项目中的任何地方使用自定义的组件了，比如在home.vue中使用
+
+```html
+<template>
+    <div>
+        <Loading></Loading>
+    </div>
+</template>
+```
+
+**另外一种表达方式：**
+
+第一步：在components文件下创建组件，及index.js文件，如下图：
+
+![](前端图片/20190531112104416.png)
+
+第二步：在index.js引入组件
+
+```js
+import vHeader from '@/components/Header'
+import vContent from '@/components/Content'
+import vFooter from '@/components/Footer'
+// 组件安装
+function vComponent(Vue) {
+  // 组件是否已安装
+  if(vComponent.installed){
+    return;
+  }
+  Vue.component('vHeader',vHeader);
+  Vue.component('vContent',vContent);
+  Vue.component('vFooter',vFooter);
 }
-export default com
-
-main.js中
-import com from './com.js'
-Vue.use(com)
-
-所有vue文件中都可以调用组件<com></com>
+// 导出组件
+export default vComponent
 ```
+
+第三步：在main.js中，全局注册组件
+
+```js
+import Vue from 'vue'
+import App from './App'
+import router from './router'
+import vComponent from './components'
+
+// 全局注册组件
+Vue.use(vComponent);
+
+Vue.config.productionTip = false
+
+new Vue({
+  el: '#app',
+  router,
+  components: { App },
+  template: '<App/>'
+})
+```
+
+第四步：在页面home.vue中直接运用组件，无需重新引入
 
 
 
 #### **依赖版本~和^**
 
-```
 （1）~
-会匹配最近的小版本依赖包，比如~1.2.3会匹配所有1.2.x版本，但是不包括1.3.0
+会**匹配最近的小版本依赖包**，比如~1.2.3会匹配所有1.2.x版本，但是不包括1.3.0
 （2）^
-会匹配最新的大版本依赖包，比如^1.2.3会匹配所有1.x.x的包，包括1.3.0，但是不包括2.0.0
-```
+会**匹配最新的大版本依赖包**，比如^1.2.3会匹配所有1.x.x的包，包括1.3.0，但是不包括2.0.0
+
+
 
 
 
 #### **router的meta有什么用**
 
-```
-在meta对象中可以设置一些状态，通常设置标题或是否需要缓存。$route.meta.keepAlive/$route.meta.title
+在meta对象中可以设置一些状态，通常**设置标题或是否需要缓存**。$route.meta.keepAlive/$route.meta.title
+
+```js
 {
     path:"/test",
     name:"test",
@@ -1243,7 +1315,9 @@ created(){
 
 #### **template 模板编译**
 
-`compile` 编译可以分成 `parse`、`optimize` 与 `generate` 三个阶段，最终需要得到 render function。
+Vue.js通过编译将template 模板转换成渲染函数(render ) 
+
+`compile` 编译可以分成 `parse`、`optimize` 与 `generate` 三个阶段，最终需要得到render函数。
 
 ```
 <div :class="c" class="demo" v-if="isShow">
@@ -1373,12 +1447,7 @@ vm.$set(vm.userProfile, 'age', 27);// 等同方案一
 vm.userProfile = Object.assign({}, vm.userProfile, {
   age: 27,
   favoriteColor: 'Vue Green'
-});// 方案二
-//方案二是用两个对象的属性创建一个新的对象，注意不要使用以下方式，因为此种方式是与vm.userProfile.age = 27的本质是一样的，均是非响应属性。
-Object.assign(vm.userProfile, {
-  age: 27,
-  favoriteColor: 'Vue Green'
-})
+});// 方案二，方案二是用两个对象的属性创建一个新的对象
 ```
 
 
@@ -1427,8 +1496,6 @@ created () {
 #### **vue弹窗后如何禁止滚动条滚动**
 
 ```js
-methods : {
-
 //禁止滚动
 stop(){
     var mo=function(e){e.preventDefault();};
@@ -1531,23 +1598,23 @@ export default service
 
 
 
-#### **如何进行网站性能优化**
+#### **如何进行网站性能优化**（13种）
 
 **1.合并js和css文件**
 
-将js和css分别合并到一个共享文件，这样不仅能够简化代码，而且在执行js文件是，如果js文件较多，就需要多次向服务器请求数据，这样将会延长加载速度，将js文件合并在一起，减少了请求的次数，就能够提高加载的速度；
+将js和css分别合并到一个共享文件，这样不仅能够简化代码，而且在执行js文件时，如果js文件较多，就需要多次向服务器请求数据，这样将会延长加载速度，将js文件合并在一起，减少了请求的次数，就能够提高加载的速度；
 
 **2.Sprites图片技术（图片精灵技术）**
 
 图片精灵技术是一种常用的页面速度加载优化的方式，它是将一个页面涉及到的所有的零星图片（注意：只是那些晓得图片、icon）都包含到一张大图中，然后利用css的背景属性将其相应的图片在现在响应的文字，这样当访问一面时，只用加载一张大图即可，而不用一幅一幅的去请求。这种方法既减少了图片的大小，有减少了http请求的次数，可以很大程度的优化页面的加载熟读
 
-**3.压缩图片和文本**
+**3.压缩图片、文本和代码**
 
 压缩图片和文本也可以减小数据的大小，尤其是代码的压缩，如HTML、XML、JSON、javascript、css等代码的压缩率可达70%以上，代码压缩后可以大大减少文件的体积，是页面可以快速的加载
 
 **4.按需加载（及可见区域以外的区域延时加载）**
 
-为了让用户可以更快的看到网页中交重要的内容，可以优先加载可见区域的内容，延时加载不可见区域的内容，为了避免页面变形可以使用占位符，占位图片来固定宽高。如jquery中的ImageLazyLoad等一些插件就可以很好的实现按需加载，只有当用户鼠标向下滚动式，下面得图片才会加载。当然也可以用原生的js来实现。
+为了让用户可以更快的看到网页中最重要的内容，可以优先加载可见区域的内容，延时加载不可见区域的内容，为了避免页面变形可以使用占位符，占位图片来固定宽高。如jquery中的ImageLazyLoad等一些插件就可以很好的实现按需加载，只有当用户鼠标向下滚动式，下面得图片才会加载。当然也可以用原生的js来实现。
 
 **5.确保功能图片优先加载**
 
@@ -1565,13 +1632,13 @@ Progressive JPEGs图片是JPEG格式的一个特殊变种，名为“高级JPEG�
 
 代码的精简是最直接的方法，也是对于一个程序员编程能力的考验。对代码进行优化，以最少的代码来实现所需的功能，及减少了文件的体积，同时也减少了不必要的时间的浪费。同时不必要的空格、注释、换行等的减少，也可以减少文件的体积。
 
-**9.延迟加载和执行非必要代码**
+**9.延迟加载**
 
-网页中的大部分js代码都是在页面加载后才需要执行的，所以对于这些代码可以写在window.onload事件的回掉函数中。这样可以使页面主体和一些必要的js代码优先加载的出来，然后来去请求非一开始就需要的代码。
+网页中的大部分js代码都是在页面加载后才需要执行的，所以对于这些代码可以写在window.onload事件的回调函数中。这样可以使页面主体和一些必要的js代码优先加载的出来，然后来去请求非一开始就需要的代码。
 
 **10.使用Ajax**
 
-当一个页面只有一部分需要更新时，可以使用ajax来对页面进行异步的更新，这样不需要重新的刷新整个页面，重新请求整个1页面的数据，而只需要请求需要的那部分数据更新页面即可。这样既提高了页面的加载速度，有提高了体验性。
+当一个页面只有一部分需要更新时，可以使用ajax来对页面进行异步的更新，这样不需要重新的刷新整个页面，重新请求整个页面的数据，而只需要请求需要的那部分数据更新页面即可。这样既提高了页面的加载速度，有提高了体验性。
 
 **11.数据缓存**
 
@@ -1713,15 +1780,11 @@ SEO具体是指通过网站结构调整、网站内容建设、网站代码优�
 
 1、 合理的title，description，keyswords 搜索引擎对这三项的权重逐个减小，title 值强调重点即可，重要的关键词出现不要超过两次，而且要靠前。
 
-2 、不同页面的tilte要有所不同；description把页面的内容高度概括，长度合适，不可过分堆叠关键词，不同页面
-
-description有所不同。keyswords列举出重要的关键词即可。
+2 、不同页面的tilte要有所不同；description把页面的内容高度概括，长度合适，不可过分堆叠关键词，不同页面description有所不同。keyswords列举出重要的关键词即可。
 
 3、语义化的HTML代码，符合W3C 规范：语义化代码有利于搜索引擎理解网页。
 
-4 、重要的内容HTML代码放在前面：搜索引擎抓取HTML 的顺序是从上到下，有的搜索引擎对抓取长度有限制，保
-
-证重要内容一定会被抓取。
+4 、重要的内容HTML代码放在前面：搜索引擎抓取HTML 的顺序是从上到下，有的搜索引擎对抓取长度有限制，保证重要内容一定会被抓取。
 
 5 、重要的内容不要用js输出，爬虫不会执行js获取内容。
 
@@ -1743,7 +1806,7 @@ description有所不同。keyswords列举出重要的关键词即可。
 
 ##### keep-alive标签的作用是什么
 
-keep-alive 是 Vue 内置的一个组件，可以使被包含的组件保留状态，或避免重新渲染。
+keep-alive标签用于切换组件时保留隐藏组件的状态。例如当组件a变更了组件a的data，然后把组件a切换为组件b，再切回组件a：如果组件被keep-alive包裹，则组件a的data为变更后的状态；如果组件未被keep-alive包裹，则组件a的data为初始化状态。
 
 ------
 
@@ -1845,9 +1908,9 @@ export default {
 
 ##### Vue-router跳转和location.href有什么区别
 
-使用location.href='/url'来跳转，简单方便，但是刷新了页面；
+使用location.href='/url'来跳转，简单方便，但是**刷新了页面**；
 
-使用history.pushState('/url')，无刷新页面，静态跳转；
+使用history.pushState('/url')，**无刷新页面，静态跳转**；
 
 引进router，然后使用router.push('/url')来跳转，使用了diff算法，实现了按需加载，减少了dom的消耗。
 
@@ -1871,6 +1934,4 @@ export default {
 
 6、后端判断请求头中有无token，有token，就拿到token并验证token，验证成功就返回数据，验证失败（例如：token过期）就返回401，请求头中没有token也返回401
 
-7、如果前端拿到状态码为401，就清除token信息并跳转到登录页面
-
-调取登录接口成功，会在回调函数中将token存储到localStorage和vuex中
+7、如果前端拿到状态码为401，就清除token信息并跳转到登录页面。调取登录接口成功，会在回调函数中将token存储到localStorage和vuex中

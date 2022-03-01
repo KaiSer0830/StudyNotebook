@@ -348,11 +348,53 @@ f.apply(zs,[23,'nan']);
 
 通过apply和call改变函数的this指向，他们两个函数的第一个参数都是一样的表示要改变指向的那个对象，第二个参数，apply是数组，而call则是arg1,arg2...这种形式。通过bind改变this作用域会返回一个新的函数，这个函数不会马上执行。
 
+##### call
+
+原生的call函数：
+
+```js
+Function.prototype.call = function(context, ...args){
+	context = context? Object(context) : window;
+	// 改变 this 
+	context.fn = this;
+	// 执行函数
+	return  context.fn(...args);
+}
+```
+
+如下：
+
+```js
+function fn(){
+	console.log(11)
+}
+
+function fn2(){
+	console.log(22)
+}
+```
+
+问：fn.call.call.call.call(fn2) 的结果是什么？
+
+解析：
+
+前面的一串 fn.call.call.call.call 并没有调用，只是获取对象的call属性，所以，这一串的结果是 Function.call 属性。
+
+所以那一串 就是 Function.call.call(fn2)；还可以解理为 fn3.call(fn2)。
+
+根据call的原理（可参考上面的call模拟），在 fn3执行call，其实际是这样执行的 fn2.fn3()。
+
+由于 fn3实际上就是 call 函数，所以, fn2.fn3() 等价于 fn2.call()。
+
+所以，上面那一串代码的最终结果，就是调用 fn2，所以结果输出 22。
+
 
 
 #### __proto__和prototype
 
-【1】对象有属性`_proto_`，指向该对象的构造函数的原型对象。
+**实例对象->构造函数->原型**
+
+【1】对象有属性`_proto_`，指向该对象的**构造函数**的原型对象。
 
 【2】方法除了有属性`_proto_`，还有属性prototype，prototype指向该方法的原型对象。
 
@@ -583,7 +625,7 @@ res.value.then(res => gen.next(res));12345678910
 
 如果B**没有改变**，说明是深拷贝，自食其力！（修改堆内存中的不同的值）
 
-##### 深拷贝的方法
+##### 对象深拷贝的方法（3种）
 
 1.使用递归的方式实现深拷贝
 
@@ -624,7 +666,7 @@ function deepClone2(obj) {
 
 ![](前端图片/903119-20200303224117804-1770050647.png)
 
-##### 数组深拷贝的几种方法
+##### 数组深拷贝的几种方法（2种）
 
 1.concat(arr1, arr2,....)
 
@@ -648,7 +690,7 @@ function deepClone2(obj) {
 
 
 
-#### JS继承
+#### JS继承（6种）
 
 ```js
 // 定义一个动物类
@@ -851,7 +893,7 @@ console.log(cat instanceof Cat); //true感谢 @bluedrink 提醒，该实现没�
 
 
 
-#### **JS内存泄露**
+#### **JS内存泄露**（4种）
 
 内存泄漏是指一块被分配的内存既不能使用，也不能回收，直到浏览器进程结束。
 1、意外的全局变量
@@ -904,16 +946,25 @@ JavaScript 在定义变量时就完成了内存分配。当不在使用变量了
 **标记清除法**
 这是最常见的垃圾回收方式，当变量进入环境时，就标记这个变量为”进入环境“,从逻辑上讲，永远不能释放进入环境的变量所占的内存，永远不能释放进入环境变量所占用的内存，只要执行流程进入相应的环境，就可能用到他们。当离开环境时，就标记为离开环境。
 
-垃圾回收器在运行的时候会给存储在内存中的变量都加上标记（所有都加），然后去掉环境变量中的变量，以及被环境变量中的变量所引用的变量（条件性去除标记），删除所有被标记的变量，删除的变量无法在环境变量中被访问所以会被删除，最后垃圾回收器，完成了内存的清除工作，并回收他们所占用的内存。
+垃圾回收器在运行的时候会给存储在内存中的变量都加上标记（所有都加），然后去掉环境变量中的变量，以及被环境变量中的变量所引用的变量（条件性去除标记），删除所有被标记的变量，删除的变量无法在环境变量中被访问所以会被删除，最后垃圾回收器完成了内存的清除工作，并回收他们所占用的内存。
 
 **引用计数法**
-另一种不太常见的方法就是引用计数法，引用计数法的意思就是每个值引用的次数，当声明了一个变量，并用一个引用类型的值赋值给改变量，则这个值的引用次数为1,；相反的，如果包含了对这个值引用的变量又取得了另外一个值，则原先的引用值引用次数就减1，当这个值的引用次数为0的时候，说明没有办法再访问这个值了，因此就把所占的内存给回收进来，这样垃圾收集器再次运行的时候，就会释放引用次数为0的这些值。
+引用计数法的意思就是每个值引用的次数，当声明了一个变量，并用一个引用类型的值赋值给该变量，则这个值的引用次数为1,；相反的，如果包含了对这个值引用的变量又取得了另外一个值，则原先的引用值引用次数就减1，当这个值的引用次数为0的时候，说明没有办法再访问这个值了，因此就把所占的内存给回收进来，这样垃圾收集器再次运行的时候，就会释放引用次数为0的这些值。如果一个值不再需要了，引用数却不为`0`，垃圾回收机制无法释放这块内存，从而导致内存泄漏。
+
+```js
+const arr = [1, 2, 3, 4];
+```
+
+上面代码中，数组`[1, 2, 3, 4]`是一个值，会占用内存。变量`arr`是仅有的对这个值的引用，因此引用次数为`1`。尽管后面的代码没有用到`arr`，它还是会持续占用内存。
+
+如果增加一行代码，解除`arr`对`[1, 2, 3, 4]`引用，这块内存就可以被垃圾回收机制释放了。
+
 （2）内存管理
 内存分配=》内存使用=》内存回收
 
 
 
-#### js事件循环机制(Event Loop)
+#### JS事件循环机制(Event Loop)
 
 event loop它最主要是分三部分：主线程、宏队列（macrotask）、微队列（microtask）。
 
@@ -962,7 +1013,7 @@ setTimeout(() => {
   new Promise(() => {
     console.log(11)
   })
-})
+}, 0);
 requestIdleCallback(() => {
   console.log(7)
 })// 特殊说明： new Promise（）属于主线程任务
@@ -970,8 +1021,8 @@ let promise = new Promise((resolve,reject) => {
   setTimeout(() => {
     console.log(10)
   })
-  resolve()  // 这个console也属于主线程任务
-  console.log(4)
+  resolve()
+  console.log(4)  // 这个console也属于主线程任务
 })
 fn()
 console.log(3)
@@ -1020,6 +1071,181 @@ promise.then因为它属于微队列，但是它在promise实例化的时候被�
 到这里主线程、宏队列（macrotask）、微队列（microtask）就全都跑完了，在全部跑完的时候，requestIdleCallback才会执行，打印 **7** ；
 
 requesIdleCallback会在当前浏览器空闲时期去依次执行，在整个过程当中你可能添加了多个requestIdleCallback，但是都不会执行，只会在空闲时期，去依次根据调用的顺序就执行。
+
+
+
+`setTimeout(fn,0)`的含义是，指定某个任务在主线程最早可得的空闲时间执行，意思就是不用再等多少秒了，只要主线程执行栈内的同步任务全部执行完成，栈为空就马上执行。
+
+关于`setTimeout`要补充的是，即便主线程为空，0毫秒实际上也是达不到的。根据HTML的标准，最低是4毫秒。
+
+
+
+#### Web Woker
+
+JavaScript 语言采用的是单线程模型，也就是说，所有任务只能在一个线程上完成，一次只能做一件事。前面的任务没做完，后面的任务只能等着。随着电脑计算能力的增强，尤其是多核 CPU 的出现，单线程带来很大的不便，无法充分发挥计算机的计算能力。
+
+Web Worker 的作用，就是为 JavaScript 创造多线程环境，允许主线程创建 Worker 线程，将一些任务分配给后者运行。在主线程运行的同时，Worker 线程在后台运行，两者互不干扰。等到 Worker 线程完成计算任务，再把结果返回给主线程。这样的好处是，一些计算密集型或高延迟的任务，被 Worker 线程负担了，主线程（通常负责 UI 交互）就会很流畅，不会被阻塞或拖慢。
+
+Worker 线程一旦新建成功，就会始终运行，不会被主线程上的活动（比如用户点击按钮、提交表单）打断。这样有利于随时响应主线程的通信。但是，这也造成了 Worker 比较耗费资源，不应该过度使用，而且一旦使用完毕，就应该关闭。
+
+Web Worker 有以下几个使用注意点。
+
+（1）**同源限制**
+
+分配给 Worker 线程运行的脚本文件，必须与主线程的脚本文件同源。
+
+（2）**DOM 限制**
+
+Worker 线程所在的全局对象，与主线程不一样，**无法读取主线程所在网页的 DOM 对象**，也无法使用`document`、`window`、`parent`这些对象。但是，Worker 线程可以创建`navigator`对象和`location`对象。
+
+（3）**通信联系**
+
+Worker 线程和主线程不在同一个上下文环境，它们不能直接通信，必须通过消息完成。
+
+（4）**脚本限制**
+
+Worker 线程不能执行`alert()`方法和`confirm()`方法，但可以使用 XMLHttpRequest 对象发出 AJAX 请求。
+
+（5）**文件限制**
+
+Worker 线程无法读取本地文件，即不能打开本机的文件系统（`file://`），它所加载的脚本，必须来自网络。
+
+**基本用法：**
+
+**1.主线程**
+
+主线程采用new命令，调用Worker()构造函数，新建一个 Worker 线程。
+Worker()构造函数的参数是一个脚本文件，该文件就是 Worker 线程所要执行的任务。由于 Worker 不能读取本地文件，所以这个脚本必须来自网络。如果下载没有成功（比如404错误），Worker 就会默默地失败。
+
+```js
+var worker = new Worker('work.js');
+```
+
+然后，主线程调用worker.postMessage()方法，向 Worker 发消息。
+worker.postMessage()方法的参数，就是主线程传给 Worker 的数据。它可以是各种数据类型，包括二进制数据。
+
+```js
+worker.postMessage('Hello World');
+worker.postMessage({method: 'echo', args: ['Work']});
+```
+
+接着，主线程通过`worker.onmessage`指定监听函数，接收子线程发回来的消息。
+
+```js
+worker.onmessage = function (event) {
+  console.log('Received message ' + event.data);
+  doSomething();
+}
+
+function doSomething() {
+  // 执行任务
+  worker.postMessage('Work done!');
+}
+```
+
+上面代码中，事件对象的`data`属性可以获取 Worker 发来的数据。
+
+Worker 完成任务以后，主线程就可以把它关掉。
+
+```js
+worker.terminate();
+```
+
+**2.Woker线程**
+
+Worker 线程内部需要有一个监听函数，监听`message`事件。
+
+```js
+self.addEventListener('message', function (e) {
+	self.postMessage('You said: ' + e.data);
+}, false);
+```
+
+上面代码中，`self`代表子线程自身，即子线程的全局对象。因此，等同于下面两种写法。
+
+```js
+// 写法一
+this.addEventListener('message', function (e) {
+  this.postMessage('You said: ' + e.data);
+}, false);
+
+// 写法二
+addEventListener('message', function (e) {
+  postMessage('You said: ' + e.data);
+}, false);
+```
+
+除了使用`self.addEventListener()`指定监听函数，也可以使用`self.onmessage`指定。监听函数的参数是一个事件对象，它的`data`属性包含主线程发来的数据。`self.postMessage()`方法用来向主线程发送消息。
+
+根据主线程发来的数据，Worker 线程可以调用不同的方法，下面是一个例子。
+
+```js
+self.addEventListener('message', function (e) {
+  var data = e.data;
+  switch (data.cmd) {
+    case 'start':
+      self.postMessage('WORKER STARTED: ' + data.msg);
+      break;
+    case 'stop':
+      self.postMessage('WORKER STOPPED: ' + data.msg);
+      self.close(); // Terminates the worker.
+      break;
+    default:
+      self.postMessage('Unknown command: ' + data.msg);
+  };
+}, false);
+```
+
+上面代码中，`self.close()`用于在 Worker 内部关闭自身。
+
+**3.Worker 加载脚本**
+
+Worker 内部如果要加载其他脚本，有一个专门的方法`importScripts()`。
+
+> ```javascript
+> importScripts('script1.js');
+> ```
+
+该方法可以同时加载多个脚本。
+
+> ```javascript
+> importScripts('script1.js', 'script2.js');
+> ```
+
+**4.错误处理**
+
+主线程可以监听 Worker 是否发生错误。如果发生错误，Worker 会触发主线程的`error`事件。
+
+> ```javascript
+> worker.onerror(function (event) {
+> console.log([
+>  'ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message
+> ].join(''));
+> });
+> 
+> // 或者
+> worker.addEventListener('error', function (event) {
+> // ...
+> });
+> ```
+
+Worker 内部也可以监听`error`事件。
+
+**5.关闭Woker**
+
+使用完毕，为了节省系统资源，必须关闭 Worker。
+
+> ```javascript
+> // 主线程
+> worker.terminate();
+> 
+> // Worker 线程
+> self.close();
+> ```
+
+主线程与 Worker 之间的通信内容，可以是文本，也可以是对象。需要注意的是，这种通信是拷贝关系，即是传值而不是传址，Worker 对通信内容的修改，不会影响到主线程。事实上，浏览器内部的运行机制是，先将通信内容串行化，然后把串行化后的字符串发给 Worker，后者再将它还原。
+
+Worker 线程内部还能再新建 Worker 线程（目前只有 Firefox 浏览器支持）。
 
 
 
@@ -1091,9 +1317,9 @@ var sum_curry =function(a){
 
 JSONP 是一种非正式传输协议，允许用户传递一个callback给服务端，然后服务端返回数据时会将这个callback 参数作为函数名来包裹住 JSON 数据，这样客户端就可以随意定制自己的函数来自动处理返回数据了。当GET请求从后台页面返回时，可以返回一段JavaScript代码，这段代码会自动执行，可以用来负责调用后台页面中的一个callback函数。
 它们的实质不同
-ajax的核心是通过xmlHttpRequest获取非本页内容
-jsonp的核心是动态添加script标签调用服务器提供的js脚本
-jsonp只支持get请求，ajax支持get和post请求
+**ajax的核心是通过xmlHttpRequest获取非本页内容**
+**jsonp的核心是动态添加script标签调用服务器提供的js脚本**
+**jsonp只支持get请求，ajax支持get和post请求**
 
 
 
@@ -1119,7 +1345,7 @@ ul 元素如何知道 li 元素点击了呢?
 
 ul 元素如何知道是在哪个 li 元素上点击的呢?
 
-在 ul 的事件处理程序中检测事件对象的 target 属性, 就可以得到真正点击的目标元素。
+在 ul 的事件处理程序中检测事件对象的 **target 属性**, 就可以得到真正点击的目标元素。
 
 **事件代理的优点：**
 
@@ -1589,11 +1815,11 @@ xmlhttp.send();
 
 **如何跨域**
 
-- 降域
+- **降域**
 
   可以通过设置 `document.damain='a.com'`，浏览器就会认为它们都是同一个源。想要实现以上任意两个页面之间的通信，两个页面必须都设置`documen.damain='a.com' `。
 
-- `JSONP`跨域
+- **`JSONP`跨域**
 
 - `CORS` 跨域
 
@@ -1939,9 +2165,9 @@ public class FromAjaxservlet extends HttpServlet{
 
 www.a.a.com不能直接请求www.b.b.com的内容，可以通过nginx，根据同域名，但项目名不同进行区分。什么意思呢？这么说可能有点抽象。假设我们公司域名叫www.nginxtest.com
 
-当我们需要访问www.a.a.com通过www.nginxtest.com/A访问，并通过nginx转发到www.a.a.com
+当我们需要访问www.a.a.com时通过www.nginxtest.com/A访问，并通过nginx转发到www.a.a.com
 
-当我们需要访问www.b.b.com通过www.nginxtest.com/B访问，并通过nginx转发到www.a.a.com
+当我们需要访问www.b.b.com时通过www.nginxtest.com/B访问，并通过nginx转发到www.a.a.com
 
 我们访问公司的域名时，是"同源"的，只是项目名不同，此时项目名的作用只是为了区分，方便转发。如果你还不理解的话，先看看我是怎么进行配置的：
 
@@ -1970,7 +2196,7 @@ server {
 
 **JSONP的优点**
 
-它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制；它的兼容性更好，在更加古老的浏览器中都 可以运行，不需要XMLHttpRequest或ActiveX的支持；并且在请求完毕后可以通过调用callback的方式回传结果。
+它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制；它的**兼容性更好**，在更加古老的浏览器中都 可以运行，不需要XMLHttpRequest或ActiveX的支持；并且在请求完毕后可以通过调用callback的方式回传结果。
 
 **JSONP的缺点**
 
@@ -2147,7 +2373,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 
 回调函数你可以写到<script>下(默认属于window对象)，或者指明写到window对象里，看jquery源码，可以看到jsonp调用回调函数时，是调用的window.callback。
 
-然后看调用结果，发现请求时带的参数是：callback=showData；调用回调函数的时候，先调用了指定的showData，然后再调用了success。所以，success是返回成功后必定会调用的函数，就看你怎么写了。
+然后看调用结果，发现请求时带的参数是：callback=showData；**调用回调函数的时候，先调用了指定的showData，然后再调用了success。所以，success是返回成功后必定会调用的函数，就看你怎么写了。**
 
 ```js
 $("#btn").click(function () {
@@ -2304,11 +2530,31 @@ eval("（{b:2}）") // 返回对象{b:2}
 
 在相等运算中，应注意以下几个问题：
 
-- 如果操作数是布尔值，则先转换为数值，其中 false 转为 0，true 转换为 1。
-- 如果一个操作数是字符串，另一个操作数是数字，则先尝试把字符串转换为数字。
-- 如果一个操作数是字符串，另一个操作数是对象，则先尝试把对象转换为字符串。
-- 如果一个操作数是数字，另一个操作数是对象，则先尝试把对象转换为数字。
-- 如果两个操作数都是对象，则比较引用地址。如果引用地址相同，则相等；否则不等。
+- 如果`x`不是正常值（比如抛出一个错误），中断执行。
+
+- 如果`y`不是正常值，中断执行。
+
+- 如果`Type(x)`与`Type(y)`相同，执行严格相等运算`x === y`。
+
+- 如果`x`是`null`，`y`是`undefined`，返回`true`。
+
+- 如果`x`是`undefined`，`y`是`null`，返回`true`。
+
+- 如果`Type(x)`是数值，`Type(y)`是字符串，返回`x == ToNumber(y)`的结果。
+
+- 如果`Type(x)`是字符串，`Type(y)`是数值，返回`ToNumber(x) == y`的结果。
+
+- 如果`Type(x)`是布尔值，返回`ToNumber(x) == y`的结果。
+
+- 如果`Type(y)`是布尔值，返回`x == ToNumber(y)`的结果。
+
+- 如果`Type(x)`是字符串或数值或`Symbol`值，`Type(y)`是对象，返回`x == ToPrimitive(y)`的结果。
+
+- 如果`Type(x)`是对象，`Type(y)`是字符串或数值或`Symbol`值，返回`ToPrimitive(x) == y`的结果。
+
+- 返回`false`。
+
+  由于`0`的类型是数值，`null`的类型是Null。因此上面的前11步都得不到结果，要到第12步才能得到`false`。
 
 ------
 
@@ -2369,7 +2615,7 @@ var arr3 = ['h', 'e', 'l', 'l', 'o', '2', 1, 2, 1, 3, 2];
 function noRepeat3(arr) {
     var newArr = [];
     newArr = arr.filter(function (item, index, array) {
-    //利用下标 先得出原数组元素中的索引再与下标进行匹配  
+    	//利用下标 先得出原数组元素中的索引再与下标进行匹配  
         //相等则返回true 添加到新数组newArr中 当循环出相同元素不会与下标相同 返回false忽略
         return array.indexOf(item) == index; 
     });
@@ -2401,7 +2647,7 @@ console.log(result4);   //[ "h", "e", "l", "o", "2", 1, 2, 3 ]
 
 ------
 
-##### 数组扁平化
+##### 数组扁平化（6种）
 
 数组扁平化是指将一个多维数组变为一维数组。
 
@@ -2528,6 +2774,14 @@ let/const关键字未出现之前，typeof运算符是百分之百安全的，�
 
 ------
 
+##### 为什么JavaScript是单线程？
+
+JavaScript的单线程，与它的用途有关。作为浏览器脚本语言，JavaScript的主要用途是**与用户互动**，以及**操作DOM**。这决定了它只能是单线程，否则会带来很复杂的同步问题。比如，假定JavaScript同时有两个线程，一个线程在某个DOM节点上添加内容，另一个线程删除了这个节点，这时浏览器应该以哪个线程为准？
+
+为了利用多核CPU的计算能力，HTML5提出Web Worker标准，允许JavaScript脚本创建多个线程，但是子线程完全受主线程控制，且不得操作DOM。所以，这个新标准并没有改变JavaScript单线程的本质。
+
+------
+
 ##### C++,Java，JavaScript的区别
 
 **从静态类型还是动态类型来看**
@@ -2563,4 +2817,98 @@ Java语言，分为两个阶段。首先像C++语言一样，经过编译器编�
 对于JavaScript，这些都是
 
 ------
+
+##### 数字如何调用函数
+
+首先，在 Number.prototype 对象上，部署一个 add 方法。
+
+> ```javascript
+> Number.prototype.add = function (x) {
+>   return this + x;
+> };
+> ```
+
+上面代码为 Number 的实例定义了一个 add 方法。由于 Number 的实例就是数值，在数值上调用某个方法，数值会自动转为实例对象，所以就得到了下面的结果。
+
+> ```javascript
+> 8['add'](2)
+> // 10
+> ```
+
+上面代码中，调用方法之所以写成`8['add']`，而不是`8.add`，是因为数值后面的点，会被解释为小数点，而不是点运算符。
+
+将数值放在圆括号中，就可以使用点运算符调用方法了。
+
+> ```javascript
+> (8).add(2)
+> // 10
+> ```
+
+其实，还有另一种写法。
+
+> ```javascript
+> 8..add(2)
+> // 10
+> ```
+
+上面代码的第一个点解释为小数点，第二个点解释为点运算符。后面一对圆括号看着有点碍眼，有没有可能去掉圆括号呢？也就是说，能不能将下面的表达式
+
+> ```javascript
+> (8).double().square()
+> ```
+
+写成另一种样子？
+
+> ```javascript
+> (8).double.suqare
+> ```
+
+这是可以做到的。ES5规定，每个对象的属性都有一个[取值方法get](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get)，用来自定义该属性的读取操作。
+
+> ```javascript
+> Number.prototype = Object.defineProperty(
+>   Number.prototype, "double", {
+>     get: function (){return (this + this)} 
+>   }
+> );
+> 
+> Number.prototype =  Object.defineProperty(
+>   Number.prototype, "square", {
+>     get: function (){return (this * this)} 
+>   }
+> );
+> ```
+
+上面代码在 Number.prototype 上定义了两个属性 double 和 square ，以及它们的取值方法 get 。
+
+因此，在任一数值上，读取这两个属性，就可以写成下面的样子。
+
+> ```javascript
+> (8).double.square
+> // 256
+> ```
+
+也可以改用方括号运算符。
+
+> ```javascript
+> 8["double"]["square"]
+> // 256
+> ```
+
+------
+
+##### JS弱类型
+
+JavaScript 是一种[弱类型](https://en.wikipedia.org/wiki/Strong_and_weak_typing)（或称[动态类型](https://en.wikipedia.org/wiki/Dynamic_programming_language)）语言，即变量的类型是不确定的。
+
+> ```javascript
+> x = 5; // 5
+> x = x + 'A'; // '5A'
+> ```
+
+上面代码中，变量x起先是一个数值，后来是一个字符串，类型完全由当前的值决定，这就叫弱类型。
+
+弱类型的好处是十分灵活，可以写出非常简洁的代码。但是，对于大型项目来说，强类型更有利，可以降低系统的复杂度，在编译时就发现类型错误，减轻程序员的负担。
+
+一直有人尝试，让 JavaScript 变成强类型语言。在[官方](http://wiki.ecmascript.org/doku.php?id=strawman:types)最终支持强类型之前，目前有三种可用的解决方案。TypeScript，Flowcheck和Flow。
 

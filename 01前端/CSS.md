@@ -1,16 +1,24 @@
-### xCSS（层叠样式表）
+### CSS（层叠样式表）
 
-#### css引用
+#### css引用优先级（4种）
 
-一共有三种方法创建CSS，控制优先级为1>2>3：
+1.就近原则
 
-1、使用元素内嵌样式表
+2.理论上：行内>内嵌>链接>导入
+
+3.实际上：内嵌、链接、导入在同一个文件头部，谁离相应的代码近，谁的优先级高.
+
+如果同一个css定义分布在两个css文件中，那么样式取后引入的css文件。
+
+最好将第三方组件的css放在html靠前位置，自定义的css放到html后面位置。
+
+1、行内方式
 
 ```html
 <a style="font-size:40px;color:#000000">靠谱学院</a>
 ```
 
-2、使用文档内嵌样式表
+2、内嵌方式
 
 ```html
 <head>
@@ -38,7 +46,7 @@
 </head>
 ```
 
-3、使用外部样式表
+3、链接方式
 
 引用外部样式时需要执行以下操作：
 
@@ -47,6 +55,25 @@
     <link rel="stylesheet" type="text/css" href="文件名.css">
 </head>
 ```
+
+4.导入方式.
+
+```html
+<style>
+    @import url(style.css);
+</style>
+```
+
+我们应尽量使用 **<link>** 标签导入外部 CSS 文件，避免或者少用使用其他三种方式。
+
+
+
+#### link标签与import标签区别
+
+- link 属于 HTML，通过 **<link>** 标签中的 href 属性来引入外部文件，而 **@import** 属于 CSS，所以导入语句应写在 CSS 中，要注意的是**导入语句应写在样式表的开头**，否则无法正确导入外部文件；
+- 页面被加载时，link会同时被加载，而@import引用的css会等到页面加载结束后加载。
+- link是html标签，因此没有兼容性，而@import只有IE5以上才能识别。
+- link方式样式的权重高于@import的。
 
 
 
@@ -76,9 +103,9 @@ CSS3动画如animation等。
 
 CSS的命名方式：
 
-1、结构化命名法；（根据位置命名）
+1、**结构化命名法**；（根据位置命名）
 
-2、语义化命名法。 ( 根据功能命名 )
+2、**语义化命名法**。 ( 根据功能命名 )
 
 ```
 结构化命名法：
@@ -105,11 +132,69 @@ CSS的命名方式：
 
 
 
-#### CSS优先级
+#### CSS的继承性
 
-##### 样式优先级
+CSS 的继承特性指的是应用在一个标签上的那些 CSS 属性被传到其子标签上。看下面的 HTML 结构：
 
-优先级最高的-!important
+```html
+<div>
+    <p></p>
+</div>
+```
+
+如果 **<div>** 有个属性 **color: red**，则这个属性将被 **<p>** 继承，即 **<p>** 也拥有属性 **color: red**。
+
+由上可见，当网页比较复杂， HTML 结构嵌套较深时，一个标签的样式将深受其祖先标签样式的影响。影响的规则是：
+
+**CSS 优先规则1：** 最近的祖先样式比其他祖先样式优先级高。
+
+例1：
+
+```html
+<!-- 类名为 son 的 div 的 color 为 blue -->
+<div style="color: red">
+    <div style="color: blue">
+        <div class="son"></div>
+    </div>
+</div>
+```
+
+如果我们把一个标签从祖先那里继承来的而自身没有的属性叫做"祖先样式"，那么"直接样式"就是一个标签直接拥有的属性。又有如下规则：
+
+**CSS 优先规则2：**"直接样式"比"祖先样式"优先级高。
+
+例2：
+
+```html
+<!-- 类名为 son 的 div 的 color 为 blue -->
+<div style="color: red">
+    <div class="son" style="color: blue"></div>
+</div>
+```
+
+
+
+#### CSS样式优先级（5种）
+
+CSS 7 种基础的选择器：
+
+- ID 选择器， 如 #id{}
+
+- 类选择器， 如 .class{}
+
+- 属性选择器， 如 a[href="segmentfault.com"]{}
+
+- 伪类选择器， 如 :hover{}
+
+- 伪元素选择器， 如 ::before{}
+
+- 标签选择器， 如 span{}
+
+- 通配选择器， 如 *{}
+
+  **优先级关系：内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器**
+
+1.优先级最高的-!important
 
 ```html
 <style>
@@ -119,7 +204,7 @@ CSS的命名方式：
 </style>
 ```
 
-然后是行内样式
+2.行内样式（会导致回流，最好用class)
 
 ```html
 <body>
@@ -129,7 +214,7 @@ CSS的命名方式：
 </body>
 ```
 
- ID选择器
+3. ID选择器
 
 ```css
 #text {
@@ -137,7 +222,7 @@ CSS的命名方式：
 }
 ```
 
-类选择器
+4.类选择器
 
 ```css
 .text {
@@ -145,13 +230,17 @@ CSS的命名方式：
 }
 ```
 
-标签
+5.标签
 
 ```css
 div p span {
 	color: blue;
 }
 ```
+
+当一个标签同时被多个选择符选中，我们便需要确定这些选择符的优先级。我们有如下规则：
+
+计算选择符中 ID 选择器的个数（a），计算选择符中类选择器、属性选择器以及伪类选择器的个数之和（b），计算选择符中标签选择器和伪元素选择器的个数之和（c）。按 a、b、c 的顺序依次比较大小，大的则优先级高，相等则比较下一个。若最后两个的选择符中 a、b、c 都相等，则按照"就近原则"来判断。
 
 
 
@@ -616,8 +705,8 @@ ul,ol,li{
 ####  inline-block、inline和block
 
 1）行内元素（display:inline;），又称内联元素
-特性：不能更改元素的宽高属性，大小由内容撑开，margin左右值有效，上下值无效，padding在水平方向垂直方向都有效，与其他元素在一行上。
-常见如：a、em、b、i、span、strong、small、lable等，准确的来说是行内非替换元素，特殊一点：border可设置，但不会影响文档流，而行高会影响文档流，但会自动忽视border。
+特性：不能更改元素的宽高属性，大小由内容撑开，**margin左右值有效，上下值无效**，padding在水平方向垂直方向都有效，与其他元素在一行上。
+常见如：a、em、b、i、span、strong、small、label等，准确的来说是行内非替换元素，特殊一点：border可设置，但不会影响文档流，而行高会影响文档流，但会自动忽视border。
 
 2）块级元素（display:block;）
 特性：独占一行，宽度继承父元素的宽度，可设置宽高内外边距等。
@@ -629,7 +718,7 @@ ul,ol,li{
 
 元素有几种方法会转换行块属性？
 方法一：最简单的肯定是display：block/inline/inline-block/table等
-方法二：行内元素设置float属性后，此元素的display会赋值为block，且拥有浮动特性，原留白也会消失。
+方法二：**行内元素设置float属性后，此元素的display会赋值为block**，且拥有浮动特性，原留白也会消失。
 方法三：行内元素设置position属性值为absolute或fixed后，此元素的display也会赋值为block。
 注意：方法二和方法三转换为块级元素后，这两种方法不会拥有块级元素的特性之一：未继承父元素的宽度。
 
@@ -720,7 +809,7 @@ ul,ol,li{
 浮动之后会有什么样的影响？ 
 由于浮动元素会脱离文档流，所以导致不占据页面空间，所以会对父元素高度带来一定影响。如果一个元素中包含的元素全部是浮动元素，那么该元素高度将变成0（高度塌陷）
 
-##### 清除浮动
+##### 清除浮动(3种)
 
 **方法一：**使用带clear属性的空元素
 
@@ -728,7 +817,7 @@ ul,ol,li{
 
 **方法二：**使用CSS的overflow属性
 
-给浮动元素的父级样式添加overflow:hidden;或overflow:auto;可以清除浮动，另外在 IE6 中还需要触发 hasLayout ，例如为父元素设置容器宽高或设置 zoom:1。
+当子元素浮动时，给浮动元素的父级样式添加overflow:hidden;或overflow:auto;可以清除浮动，另外在 IE6 中还需要触发 hasLayout ，例如为父元素设置容器宽高或设置 zoom:1。
 
 在添加overflow属性后，浮动元素又回到了容器层，把容器高度撑起，达到了清理浮动的效果。
 
@@ -900,12 +989,12 @@ JS在执行会出现DOM树解析和渲染阻塞。
 
 我们设置3G这样加载CSS慢了。
 
-得出的结果是先解析了等加载完CSS才渲染了。其实我觉得，这可能也是浏览器的一种优化机制。因为你加载css的时候，可能会修改下面DOM节点的样式，如果css加载不阻塞DOM树渲染的话，那么当css加载完之后，DOM树可能又得重新重绘或者回流了，这就造成了一些没有必要的损耗。所以我干脆就先把DOM树的结构先解析完，把可以做的工作做完，然后等你css加载完之后，在根据最终的样式来渲染DOM树，这种做法性能方面确实会比较好一点。
+得出的结果是先解析了等加载完CSS才渲染。其实我觉得，这可能也是浏览器的一种优化机制。因为你加载css的时候，可能会修改下面DOM节点的样式，如果css加载不阻塞DOM树渲染的话，那么当css加载完之后，DOM树可能又得重新重绘或者回流了，这就造成了一些没有必要的损耗。所以我干脆就先把DOM树的结构先解析完，把可以做的工作做完，然后等你css加载完之后，在根据最终的样式来渲染DOM树，这种做法性能方面确实会比较好一点。
 由上所述，我们可以得出以下结论:
 
-css加载不会阻塞DOM树的解析
+**css加载不会阻塞DOM树的解析**
 
-css加载会阻塞DOM树的渲染
+**css加载会阻塞DOM树的渲染**
 
 css加载会阻塞后面js语句的执行
 因此，为了避免让用户看到长时间的白屏时间，我们应该尽可能的提高css加载速度，比如可以使用以下几种方法:
@@ -1242,8 +1331,7 @@ p {
 
 ```html
 <div style="height: 100px;width: 100px;float: left;background: lightblue">我是一个左浮动的元素</div>
-<div style="width: 200px; height: 200px;background: #eee">我是一个没有设置浮动, 
-也没有触发 BFC 元素, width: 200px; height:200px; background: #eee;</div>
+<div style="width: 200px; height: 200px;background: #eee">我是一个没有设置浮动, 也没有触发 BFC 元素, width: 200px; height:200px;background: #eee;</div>
 ```
 
 ![](前端图片/v2-dd3e636d73682140bf4a781bcd6f576b_r.png)
@@ -1368,121 +1456,218 @@ Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14
 
 ##### 圣杯布局
 
-**圣杯布局和双飞翼布局解决的问题是相同的，就是两边顶宽，中间自适应的三栏布局，中间栏要在放在文档流前面以优先渲染。**
+**圣杯布局和双飞翼布局解决的问题是相同的，就是两边定宽，中间自适应的三栏布局，中间栏要在放在文档流前面以优先渲染。**
 
 圣杯布局：为了让中间div内容不被遮挡，将中间div设置了左右padding-left和padding-right后，将左右两个div用相对布局position: relative并分别配合right和left属性，以便左右两栏div移动后不遮挡中间div。
 
-优点：不需要添加dom节点
+**优点：不需要添加dom节点**
 
-缺点：圣杯布局的缺点：正常情况下是没有问题的，但是特殊情况下就会暴露此方案的弊端，如果将浏览器无线放大时，「圣杯」将会「破碎」掉。当middle部分的宽小于left部分时就会发生布局混乱。（middle<left即会变形）
+缺点：圣杯布局的缺点：正常情况下是没有问题的，但是特殊情况下就会暴露此方案的弊端，如果将浏览器无限放大时，「圣杯」将会「破碎」掉。当middle部分的宽小于left部分时就会发生布局混乱。（middle<left即会变形）
+
+首先在 container 里面有三栏，分别是 left、middle、right，**注意这里 middle 需要放在最前面，保证可以得到优先渲染**：
 
 ```html
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8" />
-        <title>圣杯布局</title>
-        <style>
-
-            #bd{
-                padding: 0 200px 0 180px;
-                height: 100px;
-            }
-            #middle{
-                float: left;
-                width: 100%;
-                height: 500px;
-                background:blue;
-
-            }
-            #left{
-                float:left;
-                width:180px;
-                height:500px;
-                margin-left:-100%;
-                background: #0c9;
-                position: relative;
-                left: -180px;
-            }
-            #right{
-                float: left;
-                width: 200px;
-                height: 500px;
-                margin-left: -200px;
-                background: #0c9;
-                position: relative;
-                right: -200px;
-            }
-
-        </style>
-    </head>
-    <body>
-
-        <div id="bd">
-            <div id="middle">middle</div>
-            <div id="left">left</div>
-            <div id="right">right</div>
-
-
-        </div>
-
-    </body>
-</html>
+<div class="grail-container">
+    <div class="grail-middle">
+        Grail main
+    </div>
+    <div class="grail-left">
+        Grail left
+    </div>
+    <div class="grail-right">
+        Grail right
+    </div>
+</div>
 ```
+
+对于 container ，设置一个属性 overflow: hidden; 让其形成一个 BFC ，然后使其三栏浮动，并使用相对定位：
+
+```css
+.grail-container {
+    overflow: hidden;
+}
+.grail-container>div {
+    position: relative;
+    float: left;
+    height: 100%;
+}
+```
+
+这时执行以下的步骤：
+
+　　① 置 middle 的 width: 100%，给 left 和 right 定宽度，这里假设都是 width: 200px;
+
+　　② 这时 left 被挤到下面去了，所以我们要把它拉回来，设置 margin-left: -100%;
+
+　　③ 还有一个 right 没有拉回来，同样，设置 margin-left: 200px;，这里的长度等于 right 自身的长度
+
+　　④ 这时 middle 的两边被 left 和 right 给覆盖了，于是我们要把两边怼回来，设置 container padding: 0 200px 0 200px;
+
+　　⑤ middle 怼回来了，可是 left 和 right 也跟着回来，所以现在我们要把 left 和 right 给怼回去，分别设置 left left: -200px;，right right: -200px;(这就是之前为什么要用相对定位)
+
+```css
+.grail-container {
+    overflow: hidden;
+    padding: 0 200px;
+}
+.grail-container>div {
+    position: relative;
+    float: left;
+    height: 100%;
+}
+.grail-middle {
+    width: 100%;
+    background-color: blue;
+}
+.grail-left {
+    width: 200px;
+    background-color: green;
+    margin-left: -100%;
+    left: -200px;
+}
+.grail-right {
+    width: 200px;
+    background-color: brown;
+    margin-left: -200px;
+    right: -200px;
+}
+```
+
+
 
 ##### 双飞翼布局
 
-双飞翼布局：为了让中间div内容不被遮挡，直接在中间div内部创建子div用于放置内容，在该div里用margin-left和margin-right为左右两栏div留出位置。
+双飞翼布局使于淘宝，是淘宝团队提出来的一种实现三栏布局的方案，其和圣杯布局是同门兄弟，同样将页面分为 header、container、footer ，不过在 container 里面有所区别。圣杯布局的缺陷在于内容区被 container 的 padding 夹在里面，使得页面宽度过小时会出现布局紊乱，这时候双飞翼布局就不使用 padding 来将内容区夹在里面，而是给内容区添加一个 main ，设置 margin 将页面主动的撑开，其 DOM 结构与圣杯类似，区别在于在 middle 中多了一个 main。
 
-优点：不会像圣杯布局那样变形
+**优点：不会像圣杯布局那样变形**
 
 缺点是：多加了一层dom节点
 
 ```html
-1 <!DOCTYPE html>
- 2 <html>
- 3     <head>
- 4         <meta charset="UTF-8">
- 5         <title>双飞翼布局</title>
- 6         <style>
- 7 
- 8 #center{
- 9     float:left;
-10     width:100%;/*左栏上去到第一行*/     
-11     height:100px;
-12     background:blue;
-13 }
-14 #left{
-15     float:left;
-16     width:180px;
-17     height:100px;
-18     margin-left:-100%;
-19     background:#0c9;
-20 }
-21 #right{
-22     float:left;
-23     width:200px;
-24     height:100px;
-25     margin-left:-200px;
-26      background:#0c9;
-27 }
-28 
-29 /*给内部div添加margin，把内容放到中间栏，其实整个背景还是100%*/ 
-30 #inside{
-31     margin:0 200px 0 180px;
-32     height:100px;
-33 }
-34 40 </style>
-41     </head>
-42     <body>
-43         <div id="center">
-44             <div id="inside">middle</div>
-45         </div>
-46         <div id="left">left</div>
-47         <div id="right">right</div>
-48     </body>
-49 </html>
+<div class="double-wing-container">
+    <div class="double-wing-middle">
+        <div class="double-wing-main">
+            Double wing main.
+        </div>
+    </div>
+    <div class="double-wing-left">
+        Double wing left.
+    </div>
+    <div class="double-wing-right">
+        Double wing right
+    </div>
+</div>
 ```
+
+```css
+.double-wing-container {
+    overflow: hidden;
+}
+.double-wing-container>div {
+    position: relative;
+    float: left;
+    height: 100%;
+}
+```
+
+这时执行与圣杯布局类似的步骤：
+
+　　① 置 middle 的 width: 100%，给 left 和 right 定宽度，这里假设都是 width: 200px;
+
+　　② 这时 left 被挤到下面去了，所以我们要把它拉回来，设置 margin-left: -100%;
+
+　　③ 还有一个 right 没有拉回来，同样，设置 margin-left: 200px;，这里的长度等于 right 自身的长度
+
+　　注意这里开始就有区别了：
+
+　　④ 使用 main 把内容区撑开，设置 margin: 0 200px 0 200px;，同时设置 overflow: hidden; 使其形成一个 BFC
+
+```css
+.double-wing-container {
+    overflow: hidden;
+}
+.double-wing-container>div {
+    position: relative;
+    float: left;
+    height: 100%;
+}
+.double-wing-middle {
+    width: 100%;
+    background-color: gray;
+}
+.double-wing-left {
+    width: 200px;
+    background-color: orange;
+    margin-left: -100%;
+}
+.double-wing-right {
+    width: 200px;
+    background-color: red;
+    margin-left: -200px;
+}
+.double-wing-main {
+    height: 100%;
+    margin: 0 200px;
+    background-color: pink;
+    overflow: hidden;
+}
+```
+
+
+
+##### Flex三栏布局
+
+```html
+<div class="flex-container">
+    <div class="flex-middle">
+        Flex main
+    </div>
+    <div class="flex-left">
+        Flex left
+    </div>
+    <div class="flex-right">
+        Flex right
+    </div>
+</div>
+```
+
+然后执行以下步骤：
+
+　　① 设置 container 布局方式 display: flex; 
+
+　　② 这时候设置 middle width: 100%; ，同时给两栏定宽，这里假设都是 width: 200px;
+
+　　③ 既然是两栏固定，那么就不让两栏收缩，给 left 和 right 设置 flex-shrink: 0;
+
+　　④ 由于 DOM 结构和我们实际的顺序不一样，这时我们来排个序 left order: 1;，middle order: 2;，right order: 3;
+
+```css
+.flex-container {
+    display: flex;
+}
+.flex-container>div {
+    height: 100%;
+}
+.flex-left {
+    width: 200px;
+    background-color: yellow;
+    order: 1;
+    flex-shrink: 0;
+}
+.flex-middle {
+    width: 100%;
+    background-color: gray;
+    order: 2;
+}
+.flex-right {
+    width: 200px;
+    background-color: red;
+    order: 3;
+    flex-shrink: 0;
+}
+```
+
+OK啦，现在拖动试一试。可以看出 flex 布局具有更强的适应性，在窗口宽度过小的时候不会造成页面布局混乱。通过设置内容的伸缩，可以实现任意栏的固定和自适应，同时也可以实现三栏自适应，通过设置 flex 内容的 flex-shrink 和 flex-grow 可以实现自定义的适应性布局。
 
 
 
@@ -1510,7 +1695,7 @@ PostCSS由哪些东西组成？
 
 **产生原因：**由于浮动元素会脱离文档流，所以导致不占据页面空间，所以会对父元素高度带来一定影响。如果一个元素中包含的元素全部是浮动元素，那么该元素高度将变成0（高度塌陷）
 
-解决方法：
+**解决方法（6种）：**
 **方案1：**直接设置父元素的高度 
 优势：极其简单 
 弊端：必须要知道父元素高度是多少
@@ -1549,12 +1734,11 @@ clear:both; 清除前面元素浮动带来的影响
 
 
 
-#### 响应式布局
+#### 响应式布局（4种）
 
 前端开发中，静态网页通常需要适应不同分辨率的设备，常用的自适应解决方案包括：
 
 ```
-px和视口
 媒体查询
 百分比
 自适应场景下的rem解决方案
@@ -1722,17 +1906,18 @@ width:50%;
 height:50%;
 }
 展示的效果为：
-[![2018-06-22 7 00 29](https://user-images.githubusercontent.com/17233651/41773411-91e22044-764e-11e8-8ad4-9066db87166f.png)](https://user-images.githubusercontent.com/17233651/41773411-91e22044-764e-11e8-8ad4-9066db87166f.png)
+
+![](前端图片/41773411-91e22044-764e-11e8-8ad4-9066db87166f.png)
 
 (2) top和bottom 、left和right
 
-子元素的top和bottom如果设置百分比，则相对于直接非static定位(默认定位)的父元素的高度，同样
+子元素的top和bottom如果设置百分比，则相对于直接非static定位(默认定位)的父元素的**高度**，
 
-子元素的left和right如果设置百分比，则相对于直接非static定位(默认定位的)父元素的宽度。
+同样子元素的left和right如果设置百分比，则相对于直接非static定位(默认定位的)父元素的**宽度**。
 
 展示的效果为：
 
-[![2018-06-22 7 42 14](https://user-images.githubusercontent.com/17233651/41774950-67423bfc-7654-11e8-9947-aa1621fe39f9.png)](https://user-images.githubusercontent.com/17233651/41774950-67423bfc-7654-11e8-9947-aa1621fe39f9.png)
+![](前端图片/41774950-67423bfc-7654-11e8-9947-aa1621fe39f9.png)
 
 （3）padding
 
@@ -1758,7 +1943,7 @@ height:50%;
 
 展示的效果为：
 
-[![2018-06-22 7 55 13](https://user-images.githubusercontent.com/17233651/41775365-36a0b0da-7656-11e8-8495-bd58f7ab0bf2.png)](https://user-images.githubusercontent.com/17233651/41775365-36a0b0da-7656-11e8-8495-bd58f7ab0bf2.png)
+![](前端图片/41775365-36a0b0da-7656-11e8-8495-bd58f7ab0bf2.png)
 
 子元素的初始宽高为0，通过padding可以将父元素撑大，上图的蓝色部分是一个正方形，且边长为100px,说明padding不论宽高，如果设置成百分比都相对于父元素的width。
 
@@ -1788,7 +1973,7 @@ border-radius不一样，如果设置border-radius为百分比，则是相对于
 
 展示效果为：
 
-[![2018-06-22 8 09 20](https://user-images.githubusercontent.com/17233651/41775919-6a41ae42-7658-11e8-8e54-43ad05c12d43.png)](https://user-images.githubusercontent.com/17233651/41775919-6a41ae42-7658-11e8-8e54-43ad05c12d43.png)
+![](前端图片/41775919-6a41ae42-7658-11e8-8e54-43ad05c12d43.png)
 
 除了border-radius外，还有比如translate、background-size等都是相对于自身的，这里就不一一举例。
 
@@ -1827,7 +2012,7 @@ border-radius不一样，如果设置border-radius为百分比，则是相对于
 
 **1. rem单位**
 
-首先来看，什么是rem单位。rem是一个灵活的、可扩展的单位，由浏览器转化像素并显示。与em单位不同，rem单位无论嵌套层级如何，都只相对于浏览器的根元素（HTML元素）的font-size。默认情况下，html元素的font-size为16px，所以：
+首先来看，什么是rem单位。rem是一个灵活的、可扩展的单位，由浏览器转化像素并显示。与em单位不同，rem单位无论嵌套层级如何，都只相对于浏览器的根元素（HTML元素）的font-size。**默认情况下，html元素的font-size为16px**，所以：
 
 ```
     1 rem = 16px
@@ -2122,17 +2307,82 @@ Animation 强调**流程与控制**，Duration ＋ TransformLib ＋ Control ＝ 
 
 #### base64
 
-**优点：**
-（1）base64格式的图片是文本格式，占用内存小，转换后的大小比例大概为1/3，降低了资源服务器的消耗；
-（2）网页中使用base64格式的图片时，不用再请求服务器调用图片资源，减少了服务器访问次数。
-（3）base64编码的字符串，更适合不同平台、不同语言的传输；
-（4）算法是编码, 不是压缩, 编码后只会增加字节数，但是算法简单, 几乎不会影响效率，算法可逆, 解码很方便, 不用于私密信息通信;
-（5）解码方便, 但毕竟编码了, 肉眼还是不能直接看出原始内容;
+所谓Base64，就是说选出64个字符----小写字母a-z、大写字母A-Z、数字0-9、符号"+"、"/"（再加上作为垫字的"="，实际上是65个字符）----作为一个基本字符集。然后，其他所有符号都转换成这个字符集中的字符。
 
-**缺点：**
-（1）base64格式的文本内容较多，存储在数据库中增大了数据库服务器的压力；
-（2）网页加载图片虽然不用访问服务器了，但因为base64格式的内容太多，所以加载网页的速度会降低，可能会影响用户的体验。
-（3）base64无法缓存，要缓存只能缓存包含base64的文件，比如js或者css，这比直接缓存图片要差很多，而且一般HTML改动比较频繁，所以等同于得不到缓存效益。
+Base64是一种可逆的编码方式，是一种用64个Ascii字符来表示任意二进制数据的方法。
+
+具体来说，转换方式可以分为四步。
+
+> 第一步，将每三个字节作为一组，一共是24个二进制位。
+>
+> 第二步，将这24个二进制位分为四组，每个组有6个二进制位。
+>
+> 第三步，在每组前面加两个00，扩展成32个二进制位，即四个字节。
+>
+> 第四步，根据下表，得到扩展后的每个字节的对应符号，这就是Base64的编码值。
+
+```
+0　A　　 17　R　　　34　i　　　51　z
+
+1　B　　 18　S　　　35　j　　　52　0
+
+2　C　　 19　T　　　36　k　　　53　1
+
+3　D　　 20　U　　　37　l　　　54　2
+
+4　E　　 21　V　　　38　m　　　55　3
+
+5　F　　 22　W　　　39　n　　　56　4
+
+6　G　　 23　X　　　40　o　　　57　5
+
+7　H　　 24　Y　　　41　p　　　58　6
+
+8　I　　 25　Z　　　42　q　　　59　7
+
+9　J　　 26　a　　　43　r　　　60　8
+
+10　K　　27　b　　　44　s　　　61　9
+
+11　L　　28　c　　　45　t　　　62　+
+
+12　M　　29　d　　　46　u　　　63　/
+
+13　N　　30　e　　　47　v
+
+14　O　　31　f　　　48　w　　　
+
+15　P　　32　g　　　49　x
+
+16　Q　　33　h　　　50　y
+```
+
+因为，Base64将三个字节转化成四个字节，因此Base64编码后的文本，**会比原文本大出三分之一左右**。
+
+举一个具体的实例，演示英语单词Man如何转成Base64编码。
+
+```
+第一步，"M"、"a"、"n"的ASCII值分别是77、97、110，对应的二进制值是01001101、01100001、01101110，将它们连成一个24位的二进制字符串010011010110000101101110。
+
+第二步，将这个24位的二进制字符串分成4组，每组6个二进制位：010011、010110、000101、101110。
+
+第三步，在每组前面加两个00，扩展成32个二进制位，即四个字节：00010011、00010110、00000101、00101110。它们的十进制值分别是19、22、5、46。
+
+第四步，根据上表，得到每个值对应Base64编码，即T、W、F、u。
+```
+
+如果字节数不足三，则这样处理：
+
+> a）二个字节的情况：将这二个字节的一共16个二进制位，按照上面的规则，转成三组，最后一组除了前面加两个0以外，后面也要加两个0。这样得到一个三位的Base64编码，再在末尾补上一个"="号。
+>
+> 比如，"Ma"这个字符串是两个字节，可以转化成三组00010011、00010110、00000100以后，对应Base64值分别为T、W、E，再补上一个"="号，因此"Ma"的Base64编码就是TWE=。
+
+> b）一个字节的情况：将这一个字节的8个二进制位，按照上面的规则转成二组，最后一组除了前面加二个0以外，后面再加4个0。这样得到一个二位的Base64编码，再在末尾补上两个"="号。
+>
+> 比如，"M"这个字母是一个字节，可以转化为二组00010011、00010000，对应的Base64值分别为T、Q，再补上二个"="号，因此"M"的Base64编码就是TQ==。
+
+**优点**:可以将二进制数据转化为可打印字符，方便传输数据，对数据进行简单的加密，肉眼安全，减少了HTTP请求。
+**缺点**：内容编码后体积变大，编码和解码需要额外工作量。
 
 
 
@@ -2175,6 +2425,30 @@ background-color设置的背景颜色会填充元素的content、padding、borde
 
 ------
 
+##### CSS画长宽等比矩形
+
+比如我们要实现一个固定长宽比的长方形，比如要实现一个长宽比为4:3的长方形,我们可以根据padding属性来实现，因为padding不管是垂直方向还是水平方向，百分比单位都相对于父元素的宽度，因此我们可以设置padding-top为百分比来实现，长宽自适应的长方形：
+
+```
+<div class="trangle"></div>
+```
+
+设置样式让其自适应：
+
+```
+.trangle{
+  height:0;
+  width:100%;
+  padding-top:75%;
+}
+```
+
+通过设通过设置padding-top：75%,相对比宽度的75%，因此这样就设置了一个长宽高恒定比例的长方形，具体效果展示如下：
+
+![jest](https://user-images.githubusercontent.com/17233651/41851698-52d2bd2c-78bb-11e8-97cb-26f985195809.gif)](
+
+------
+
 ##### 画一条0.5px的线
 
 1.采用meta viewport的方式
@@ -2197,7 +2471,7 @@ display为block
 
 ------
 
-##### 隐藏页面中某个元素的方法
+##### 隐藏页面中某个元素的方法（5种）
 
 display:none; 
 
