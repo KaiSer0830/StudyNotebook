@@ -124,6 +124,9 @@ print(chr(97))
 
 ```python
 List = ['wade','james','bosh','haslem']
+
+#将输入的单个字符列表全部转换为整数列表
+List = list(map(int, input().split()))
 ```
 
 与字符串的索引一样，列表索引从0开始。列表可以进行截取、组合等
@@ -323,8 +326,12 @@ dict['School'] = "菜鸟教程"  	# 添加信息
 dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
  
 del dict['Name'] # 删除键 'Name'
+dic.pop('Name')  # 删除键 'Name'
 dict.clear()     # 清空字典
 del dict         # 删除字典
+
+del dic[list(dic.keys())[0]]	# 删除第一个元素
+dic.pop(list(dic.keys())[0])	# 删除第一个元素
 ```
 
 **5.排序**

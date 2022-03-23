@@ -12,7 +12,16 @@
 
 ![](前端图片/1018967-20180718115535028-421997257.png)
 
+```js
+var x = "John";
+var y = new String("John");
+typeof x // 返回 String
+typeof y // 返回 Object
+```
 
+不要创建 String 对象。它会拖慢执行速度，并可能产生其他副作用。
+
+NaN 的数据类型是 number。
 
 
 
@@ -545,6 +554,62 @@ Promise.all = function (values) {
 
 ##### Promise替代方法
 
+**事件监听**
+
+首先，为f1绑定一个事件（这里采用的jQuery的[写法](https://api.jquery.com/on/)）。
+
+```
+f1.on('done', f2);
+```
+
+上面这行代码的意思是，当f1发生done事件，就执行f2。然后，对f1进行改写：
+
+```
+function f1(){
+    setTimeout(function () {
+        // f1的任务代码
+        f1.trigger('done');
+    }, 1000);
+}　
+```
+
+f1.trigger('done')表示，执行完成后，立即触发done事件，从而开始执行f2。
+
+这种方法的优点是比较容易理解，可以绑定多个事件，每个事件可以指定多个回调函数，而且可以["去耦合"](https://en.wikipedia.org/wiki/Decoupling)（Decoupling），有利于实现[模块化](https://www.ruanyifeng.com/blog/2012/10/javascript_module.html)。缺点是整个程序都要变成事件驱动型，运行流程会变得很不清晰。
+
+**事件发布/订阅模式**
+
+我们假定，存在一个"信号中心"，某个任务执行完成，就向信号中心"发布"（publish）一个信号，其他任务可以向信号中心"订阅"（subscribe）这个信号，从而知道什么时候自己可以开始执行。这就叫做["发布/订阅模式"](https://en.wikipedia.org/wiki/Publish-subscribe_pattern)（publish-subscribe pattern），又称["观察者模式"](https://en.wikipedia.org/wiki/Observer_pattern)（observer pattern）。
+
+这个模式有多种[实现](https://msdn.microsoft.com/en-us/magazine/hh201955.aspx)，下面采用的是Ben Alman的[Tiny Pub/Sub](https://gist.github.com/661855)，这是jQuery的一个插件。
+
+首先，f2向"信号中心"jQuery订阅"done"信号。
+
+```js
+jQuery.subscribe("done", f2);　　
+```
+
+然后，f1进行如下改写：
+
+```js
+function f1(){
+    setTimeout(function () {
+        // f1的任务代码
+        jQuery.publish("done");
+    }, 1000);
+}
+```
+
+jQuery.publish("done")的意思是，f1执行完成后，向"信号中心"jQuery发布"done"信号，从而引发f2的执行。
+
+此外，f2完成执行后，也可以取消订阅（unsubscribe）。
+
+```js
+jQuery.unsubscribe("done", f2);
+```
+
+这种方法的性质与"事件监听"类似，但是明显优于后者。因为我们可以通过查看"消息中心"，了解存在多少信号、每个信号有多少订阅者，从而监控程序的运行。
+
 **async与await**
 
 使用`async / await`明显节约了不少代码。我们不需要写`.then`，不需要写匿名函数处理`Promise`的`resolve`值，也不需要定义多余的data变量，还避免了嵌套代码。这些小的优点会迅速累计起来，这在之后的代码示例中会更加明显。
@@ -570,10 +635,6 @@ Promise.all = function (values) {
   }
 })();
 ```
-
-**事件发布/监听模式**
-
-一方面，监听某一事件，当事件发生时，进行相应回调操作；另一方面，当某些操作完成后，通过发布事件触发回调，这样就可以将原本捆绑在一起的代码解耦。
 
 **generator**
 
@@ -666,7 +727,7 @@ function deepClone2(obj) {
 
 ![](前端图片/903119-20200303224117804-1770050647.png)
 
-##### 数组深拷贝的几种方法（2种）
+##### 数组深拷贝的方法（2种）
 
 1.concat(arr1, arr2,....)
 
@@ -1320,6 +1381,49 @@ JSONP 是一种非正式传输协议，允许用户传递一个callback给服务
 **ajax的核心是通过xmlHttpRequest获取非本页内容**
 **jsonp的核心是动态添加script标签调用服务器提供的js脚本**
 **jsonp只支持get请求，ajax支持get和post请求**
+
+
+
+#### 变量提升
+
+JavaScript 中，函数及变量的声明都将被提升到函数的最顶部。
+
+JavaScript 中，变量可以在使用后声明，也就是变量可以先使用再声明。
+
+以下两个实例将获得相同的结果：
+
+```js
+x = 5; // 变量 x 设置为 5
+
+elem = document.getElementById("demo"); // 查找元素
+elem.innerHTML = x;                     // 在元素中显示 x
+
+var x; // 声明 x
+```
+
+```js
+var x; // 声明 x
+x = 5; // 变量 x 设置为 5
+
+elem = document.getElementById("demo"); // 查找元素
+elem.innerHTML = x;                     // 在元素中显示 x
+```
+
+变量提升：函数声明和变量声明总是会被解释器悄悄地被"提升"到方法体的最顶部。JavaScript 只有声明的变量会提升，初始化的不会。
+
+const 关键字定义的变量则不可以在使用后声明，也就是变量需要先声明再使用。
+
+JavaScript 严格模式(strict mode)不允许使用未声明的变量。
+
+**函数提升**
+
+```js
+myFunction(5);
+
+function myFunction(y) {
+    return y * y;
+}
+```
 
 
 
@@ -2912,3 +3016,79 @@ JavaScript 是一种[弱类型](https://en.wikipedia.org/wiki/Strong_and_weak_ty
 
 一直有人尝试，让 JavaScript 变成强类型语言。在[官方](http://wiki.ecmascript.org/doku.php?id=strawman:types)最终支持强类型之前，目前有三种可用的解决方案。TypeScript，Flowcheck和Flow。
 
+------
+
+##### JS常见事件
+
+onclick：单击事件
+
+ondblclick：双击事件
+
+onblur：失去焦点
+
+onfocus：元素获得焦点
+
+onload：一张页面或一幅图像完成加载
+
+onmousedown：鼠标按钮被按下
+
+onmouseup： 鼠标按键被松开
+
+onmousemove： 鼠标被移动
+
+onmouseover： 鼠标移到某元素之上
+
+onmouseout：鼠标从某元素移开
+
+onkeydown：某个键盘按键被按下
+
+onkeyup：某个键盘按键被松开
+
+onkeypress：某个键盘按键被按下并松开
+
+ onchange：域的内容被改变
+
+onselect：文本被选中
+
+onsubmit：确认按钮被点击
+
+onreset：重置按钮被点击
+
+------
+
+**function定义执行顺序**
+
+在Javascript中定义一个函数，有两种写法：
+
+```js
+function foo() { }　
+```
+
+和
+
+```js
+var foo = function () { }　　
+```
+
+两种写法完全等价。但是在解析的时候，前一种写法会被解析器自动提升到代码的头部，因此违背了函数应该先定义后使用的要求，所以建议定义函数时，全部采用后一种写法。
+
+------
+
+##### href="#"与href="javascript:void(0)"的区别
+
+**#** 包含了一个位置信息，默认的锚是**#top** 也就是网页的上端。
+
+而javascript:void(0), 仅仅表示一个死链接。
+
+在页面很长的时候会使用 **#** 来定位页面的具体位置，格式为：**# + id**。
+
+如果你要定义一个死链接请使用 javascript:void(0) 。
+
+```html
+<a href="javascript:void(0);">点我没有反应的!</a>
+<a href="#pos">点我定位到指定位置!</a>
+<br>
+...
+<br>
+<p id="pos">尾部定位点</p>
+```

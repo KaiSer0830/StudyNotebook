@@ -3,13 +3,11 @@
 #### vue-cli的安装
 
 ```
-vue-cli安装	npm install vue-cli -g
-vue-cli的版本查看	vue -V
-webpack安装	npm install -g webpack
-卸载vue-cli	npm uninstall vue-cli -g
+vue-cli安装    npm install vue-cli -g
+vue-cli的版本查看    vue -V
+webpack安装    npm install -g webpack
+卸载vue-cli    npm uninstall vue-cli -g
 ```
-
-
 
 #### vue目录框架结构
 
@@ -57,15 +55,11 @@ webpack安装	npm install -g webpack
       └── Hello.spec.js
 ```
 
-
-
 #### 在DOS窗口创建vue-cli项目
 
 ```
 vue init webpack
 ```
-
-
 
 #### vue生命周期
 
@@ -87,8 +81,6 @@ vue init webpack
 
 **destroyed**： 这个时候上所有的 data 和 methods ， 指令， 过滤器 ……都是处于不可用状态。组件已经被销毁了。
 
-
-
 #### vue优点
 
 **轻量级框架：**只关注视图层，是一个构建数据的视图集合，大小只有几十kb；
@@ -105,11 +97,9 @@ vue init webpack
 
 **运行速度更快:**相比较与react而言，同样是操作虚拟dom，就性能而言，vue存在很大的优势。
 
-
-
 #### vue的数据双向绑定原理
 
-vue数据双向绑定是通过数据劫持结合发布者-订阅者模式的方式来实现的。
+vue数据双向绑定是通过**数据劫持**结合**发布者-订阅者模式**的方式来实现的。
 
 ![](前端图片/938664-20170522225458132-1434604303.png)
 
@@ -140,7 +130,7 @@ function defineReactive(data, key, val) {
         }
     });
 }
- 
+
 function observe(data) {
     if (!data || typeof data !== 'object') {
         return;
@@ -149,7 +139,7 @@ function observe(data) {
         defineReactive(data, key, data[key]);
     });
 };
- 
+
 var library = {
     book1: {
         name: ''
@@ -186,7 +176,7 @@ function defineReactive(data, key, val) {
         }
     });
 }
- 
+
 function Dep () {
     this.subs = [];
 }
@@ -215,7 +205,7 @@ function Watcher(vm, exp, cb) {
     this.exp = exp;
     this.value = this.get();  // 将自己添加到订阅器的操作
 }
- 
+
 Watcher.prototype = {
     update: function() {
         this.run();
@@ -301,12 +291,12 @@ function SelfVue (data, el, exp) {
     var selfVue = new SelfVue({
         name: 'hello world'
     }, ele, 'name');
- 
+
     window.setTimeout(function () {
         console.log('name值改变了');
         selfVue.data.name = 'canfoo';
     }, 2000);
- 
+
 </script>
 ```
 
@@ -316,11 +306,11 @@ function SelfVue (data, el, exp) {
 function SelfVue (data, el, exp) {
     var self = this;
     this.data = data;
- 
+
     Object.keys(data).forEach(function(key) {
         self.proxyKeys(key);  // 绑定代理属性
     });
- 
+
     observe(data);
     el.innerHTML = this.data[exp];  // 初始化模板数据的值
     new Watcher(this, exp, function (value) {
@@ -328,7 +318,7 @@ function SelfVue (data, el, exp) {
     });
     return this;
 }
- 
+
 SelfVue.prototype = {
     proxyKeys: function (key) {
         var self = this;
@@ -380,11 +370,11 @@ function compileElement (el) {
     [].slice.call(childNodes).forEach(function(node) {
         var reg = /\{\{(.*)\}\}/;
         var text = node.textContent;
- 
+
         if (self.isTextNode(node) && reg.test(text)) {  // 判断是否是符合这种形式{{}}的指令
             self.compileText(node, reg.exec(text)[1]);
         }
- 
+
         if (node.childNodes && node.childNodes.length) {
             self.compileElement(node);  // 继续递归遍历子节点
         }
@@ -410,11 +400,11 @@ function SelfVue (options) {
     var self = this;
     this.vm = this;
     this.data = options;
- 
+
     Object.keys(this.data).forEach(function(key) {
         self.proxyKeys(key);
     });
- 
+
     observe(this.data);
     new Compile(options, this.vm);
     return this;
@@ -435,7 +425,7 @@ function SelfVue (options) {
 <script src="js/compile.js"></script>
 <script src="js/index.js"></script>
 <script type="text/javascript">
- 
+
     var selfVue = new SelfVue({
         el: '#app',
         data: {
@@ -443,15 +433,15 @@ function SelfVue (options) {
             name: ''
         }
     });
- 
+
     window.setTimeout(function () {
         selfVue.title = '你好';
     }, 2000);
- 
+
     window.setTimeout(function () {
         selfVue.name = 'canfoo';
     }, 2500);
- 
+
 </script>
 ```
 
@@ -488,11 +478,11 @@ function SelfVue (options) {
     var self = this;
     this.data = options.data;
     this.methods = options.methods;
- 
+
     Object.keys(this.data).forEach(function(key) {
         self.proxyKeys(key);
     });
- 
+
     observe(this.data);
     new Compile(options.el, this);
     options.mounted.call(this); // 所有事情处理好后执行mounted函数
@@ -515,7 +505,7 @@ function SelfVue (options) {
 <script src="js/compile.js"></script>
 <script src="js/index.js"></script>
 <script type="text/javascript">
- 
+
      new SelfVue({
         el: '#app',
         data: {
@@ -533,13 +523,11 @@ function SelfVue (options) {
             }, 1000);
         }
     });
- 
+
 </script>
 ```
 
 是不是看起来跟vue的使用方法一样，哈，真正的大功告成！
-
-
 
 #### Vue1.0和Vue2.0的区别
 
@@ -566,8 +554,6 @@ function SelfVue (options) {
    </div>
 </template>
 ```
-
-
 
 #### Vue2.0和Vue3.0的区别（5种）
 
@@ -601,8 +587,6 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 5.composition api
 提供了composition api，为更好的逻辑复用与代码组织。
 
-
-
 #### 数组key不建议用index
 
 ```
@@ -610,8 +594,6 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 （2）当以index为key值时，如果数组长度发生变化，会导致key的变化，比如删除其中某一项，那么index会相应变化。
 所以用index作为key和不加index没有什么区别，都不能提升性能。一般用每项数据的唯一值来作为key，就算数组长度变化，也不会影响到这个key
 ```
-
-
 
 #### 虚拟DOM
 
@@ -687,7 +669,7 @@ var Vnode = {
     <router-view v-bind:fData="data1" :fMessage="data2"></router-view>
   </div>
 </template>
- 
+
 <script>
 export default {
   data () {
@@ -714,13 +696,13 @@ props有default（参数默认值）、type（参数类型）、required（是�
     <p>第二个数据：{{fMessage}}</p>
   </div>
 </template>
-  
+
 <script>
 export default {
   props: ['fData', 'fMessage'],
   data () {
     return {
-  
+
     };
   }
 }
@@ -736,12 +718,12 @@ export default {
     <router-view @show="showFather"></router-view>
   </div>
 </template>
- 
+
 <script>
 export default {
   data () {
     return {
- 
+
     };
   },
   methods: {
@@ -760,12 +742,12 @@ export default {
     <Button type="primary" @click="sonClick">触发父组件方法</Button>
   </div>
 </template>
- 
+
 <script>
 export default {
   data () {
     return {
- 
+
     };
   },
   methods: {
@@ -786,7 +768,7 @@ export default {
     <router-view @show="showFather"></router-view>
   </div>
 </template>
- 
+
 <script>
 export default {
   data () {
@@ -813,7 +795,7 @@ export default {
     <Button type="primary" @click="sonClick">触发父组件方法</Button>
   </div>
 </template>
- 
+
 <script>
 export default {
   props: ['fData', 'fMessage'],
@@ -831,8 +813,6 @@ export default {
 }
 </script>
 ```
-
-
 
 #### vue页面传参（3种）
 
@@ -901,8 +881,6 @@ eventBus.$on('eventBusName', function(val) {console.log(val)})
 eventBus.$off('eventBusName');
 ```
 
-
-
 #### v-if与v-show
 
 答: 共同点：都能控制元素的显示和隐藏；
@@ -912,8 +890,6 @@ eventBus.$off('eventBusName');
 v-if是动态的向DOM树内添加或者删除DOM元素，若初始值为false，就不会编译了。而且v-if不停的销毁和创建比较消耗性能。
 
 总结：如果要频繁切换某节点，使用v-show(切换开销比较小，初始开销较大)。如果不需要频繁切换某节点使用v-if（初始渲染开销较小，切换开销比较大）。
-
-
 
 #### computed和watch区别
 
@@ -952,7 +928,7 @@ var var vm = new Vue({
     <p>{{ reversedMessage }}</p>
   </div>
 </template>
- 
+
 <script>
 export default {
   name: 'test1',
@@ -979,8 +955,11 @@ export default {
 1. 支持缓存，只有依赖数据发生改变，才会重新进行计算。
 
 2. 不支持异步，当computed内有异步操作时无效，无法监听数据的变化。
+
 3. computed 属性值会默认走缓存，计算属性是基于它们的响应式依赖进行缓存的，也就是基于data中声明过或者父组件传递的props中的数据通过计算得到的值。
+
 4. 如果一个属性是由其他属性计算而来的，这个属性依赖其他属性，是一个多对一或者一对一，一般用computed。
+
 5. 如果computed属性属性值是函数，那么默认会走get方法；函数的返回值就是属性的属性值；在computed中的，属性都有一个get和一个set方法，当数据变化时，调用set方法。
 
 **watch:**
@@ -1032,8 +1011,6 @@ var var vm = new Vue({
 - 如果一个数据需要经过复杂计算就用 computed
 - 如果一个数据需要被监听并且对数据做一些操作就用 watch
 
-
-
 #### **如何解决props层级过深的问题**
 
 ```
@@ -1042,8 +1019,6 @@ var var vm = new Vue({
 this.$attrs 接收属性
 this.$listeners 接收事件（不含被 .native 修饰符的事件）
 ```
-
-
 
 #### **vue如何优化首屏加载速度**
 
@@ -1064,8 +1039,6 @@ vue.config.js文件中配置：productionSourceMap: false,
 
 （4）加个好看的loading效果
 ```
-
-
 
 #### **vue怎么注册全局插件**
 
@@ -1092,7 +1065,6 @@ import loadingComponent from './components'
 
 Vue.use(loading)
 ```
-
 
 这时可以看到就像vue-resource一样，可以在项目中的任何地方使用自定义的组件了，比如在home.vue中使用
 
@@ -1153,18 +1125,12 @@ new Vue({
 
 第四步：在页面home.vue中直接运用组件，无需重新引入
 
-
-
 #### **依赖版本~和^**
 
 （1）~
 会**匹配最近的小版本依赖包**，比如~1.2.3会匹配所有1.2.x版本，但是不包括1.3.0
 （2）^
 会**匹配最新的大版本依赖包**，比如^1.2.3会匹配所有1.x.x的包，包括1.3.0，但是不包括2.0.0
-
-
-
-
 
 #### **router的meta有什么用**
 
@@ -1182,9 +1148,7 @@ new Vue({
 }
 ```
 
-
-
-####  **npm run dev** 
+#### **npm run dev**
 
 ```
 （1）npm run dev是执行配置在package.json中的脚本
@@ -1193,19 +1157,17 @@ new Vue({
 （4）main.js用到了一个html元素#app，引用路由等开始vue的模板编译
 ```
 
-
-
 #### **proxy代理**
 
 proxy是ES6中就存在的，用于修改某些操作的默认行为，可以理解成在目标对象前设一个拦截层，因此也叫“代理器”。
 
 ```js
 let obj = {
-	a : 1
+    a : 1
 }
 let proxyObj = new Proxy(obj,{
-	get : function (target,prop) {
-    	return prop in target ? target[prop] : 0
+    get : function (target,prop) {
+        return prop in target ? target[prop] : 0
     },
     set : function (target,prop,value) {
         target[prop] = 888;
@@ -1230,14 +1192,12 @@ proxyTable: {
         changeOrigin: true, // 跨域
         pathRewrite: {
             '^/api': '/api'
-    	}
+        }
     }
 }
 /*这里用‘/api’代替target里面的地址，组件中调用接口时直接用api代替,比如我要调用'http://xxx.com:8080/api/NEWS/getNews.json?page=1&pageSize=10
 '，直接写‘/api/NEWS/getNews.json?page=1&pageSize=10’即可*/
 ```
-
-
 
 #### **Vue.nextTick()**
 
@@ -1255,7 +1215,7 @@ proxyTable: {
     </div>
   </div>
 </template>
- 
+
 <script>
 export default {
   name: 'HelloWorld',
@@ -1296,7 +1256,7 @@ methods:{
 created(){
     let that=this;
     that.$nextTick(function(){  //不使用this.$nextTick()方法会报错
-    	that.$refs.aa.innerHTML="created中更改了按钮内容";  //写入到DOM元素
+        that.$refs.aa.innerHTML="created中更改了按钮内容";  //写入到DOM元素
     });
 },
 ```
@@ -1305,13 +1265,9 @@ created(){
 
 3、在使用某个第三方插件时 ，希望在vue生成的某些dom动态发生变化时重新应用该插件，也会用到该方法，这时候就需要在 $nextTick 的回调函数中执行重新应用插件的方法。
 
-
-
 **Vue.nextTick**(callback) 使用原理：
 原因是，Vue是异步执行dom更新的，一旦观察到数据变化，Vue就会开启一个队列，然后把在同一个事件循环 (event loop) 当中观察到数据变化的 watcher 推送进这个队列。如果这个watcher被触发多次，只会被推送到队列一次。这种缓冲行为可以有效的去掉重复数据造成的不必要的计算和dom操作。而在下一个事件循环时，Vue会清空队列，并进行必要的DOM更新。
 当你设置 vm.someData = 'new value'，DOM 并不会马上更新，而是在异步队列被清除，也就是下一个事件循环开始时执行更新时才会进行必要的DOM更新。如果此时你想要根据更新的 DOM 状态去做某些事情，就会出现问题。。为了在数据变化之后等待 Vue 完成更新 DOM ，可以在数据变化之后立即使用 Vue.nextTick(callback) 。这样回调函数在 DOM 更新完成后就会调用。
-
-
 
 #### **template 模板编译**
 
@@ -1374,12 +1330,9 @@ Vue.js通过编译将template 模板转换成渲染函数(render )
         }
     ]
 }
- 
 ```
 
 最终得到的 AST 通过一些特定的属性，能够比较清晰地描述出标签的属性以及依赖关系。
-
-
 
 #### **解决初始化页面闪动问题v-cloak**
 
@@ -1392,8 +1345,6 @@ Vue.js通过编译将template 模板转换成渲染函数(render )
 ```
 
 在简单项目中，使用  v-cloak 指令是解决屏幕闪动的好方法。但在大型、工程化的项目中（webpack、vue-router）只有一个空的 div 元素，元素中的内容是通过路由挂载来实现的，这时我们就不需要用到 v-cloak 指令咯。
-
-
 
 #### **vue中对象操作**
 
@@ -1450,8 +1401,6 @@ vm.userProfile = Object.assign({}, vm.userProfile, {
 });// 方案二，方案二是用两个对象的属性创建一个新的对象
 ```
 
-
-
 ```html
 <div class="test">
     Name: {{testObj.name }}
@@ -1461,7 +1410,7 @@ vm.userProfile = Object.assign({}, vm.userProfile, {
 
 ```js
 created () {
-	this.testObj.hobby = '篮球'
+    this.testObj.hobby = '篮球'
 }
 ```
 
@@ -1486,12 +1435,10 @@ created () {
 created () {
     this.$set(this.testObj, 'hobby', '自行车')
     setTimeout(() => {
-    	this.testObj.hobby = '排球'
+        this.testObj.hobby = '排球'
     }, 0)
 }
 ```
-
-
 
 #### **vue弹窗后如何禁止滚动条滚动**
 
@@ -1510,8 +1457,6 @@ move(){
     document.removeEventListener("touchmove",mo,false);
 }
 ```
-
-
 
 #### 请求拦截器
 
@@ -1596,8 +1541,6 @@ const errorHandle = (status, other) => {
 export default service
 ```
 
-
-
 #### **如何进行网站性能优化**（13种）
 
 **1.合并js和css文件**
@@ -1651,8 +1594,6 @@ HTTP 协议缓存请求，离线缓存 manifest，离线数据缓存localStorage
 **13.借助自动化工具来实现页面的优化**
 
 比如RadwareFastView
-
-
 
 #### **前端怎么做单元测试**
 
@@ -1767,8 +1708,6 @@ HTTP 协议缓存请求，离线缓存 manifest，离线数据缓存localStorage
 
 特点：逻辑就比较复杂，因为它要测的东西很多，可读性可维护性可能会比较差。
 
-
-
 #### 前端需要注意哪些SEO
 
 **什么是SEO？**
@@ -1806,7 +1745,7 @@ SEO具体是指通过网站结构调整、网站内容建设、网站代码优�
 
 ##### keep-alive标签的作用是什么
 
-keep-alive标签用于切换组件时保留隐藏组件的状态。例如当组件a变更了组件a的data，然后把组件a切换为组件b，再切回组件a：如果组件被keep-alive包裹，则组件a的data为变更后的状态；如果组件未被keep-alive包裹，则组件a的data为初始化状态。
+keep-alive标签用于切换组件时**保留隐藏组件的状态**。例如当组件a变更了组件a的data，然后把组件a切换为组件b，再切回组件a：如果组件被keep-alive包裹，则组件a的data为变更后的状态；如果组件未被keep-alive包裹，则组件a的data为初始化状态。
 
 ------
 
@@ -1849,7 +1788,7 @@ keep-alive标签用于切换组件时保留隐藏组件的状态。例如当组�
 解决方法：
 
 ```html
-<template v-for="(item, index) in list" :key="index">	
+<template v-for="(item, index) in list" :key="index">    
    <div v-if="item.isShow">{{item.title}}</div>
 </template>
 ```
@@ -1859,9 +1798,9 @@ keep-alive标签用于切换组件时保留隐藏组件的状态。例如当组�
 ```html
 <template>
  <div>
-	<div v-for="(user,index) in activeUsers" :key="user.index" >
-		{{ user.name }} 
-	</div>
+    <div v-for="(user,index) in activeUsers" :key="user.index" >
+        {{ user.name }} 
+    </div>
 </div>
 </template>
 <script>
@@ -1874,11 +1813,11 @@ export default {
     };
   },
   computed: {//通过计算属性过滤掉列表中不需要显示的项目
-	activeUsers: function () {
-	  return this.users.filter(function (user) {
-		return user.isShow;//返回isShow=true的项，添加到activeUsers数组
-	  })
-	}
+    activeUsers: function () {
+      return this.users.filter(function (user) {
+        return user.isShow;//返回isShow=true的项，添加到activeUsers数组
+      })
+    }
   }
 };
 </script>
