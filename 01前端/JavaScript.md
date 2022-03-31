@@ -13,6 +13,17 @@
 ![](前端图片/1018967-20180718115535028-421997257.png)
 
 ```js
+console.log(typeof 2);               // number
+console.log(typeof true);            // boolean
+console.log(typeof 'str');           // string
+console.log(typeof []);              // object    
+console.log(typeof function(){});    // function
+console.log(typeof {});              // object
+console.log(typeof undefined);       // undefined
+console.log(typeof null);            // object
+```
+
+```js
 var x = "John";
 var y = new String("John");
 typeof x // 返回 String
@@ -22,33 +33,6 @@ typeof y // 返回 Object
 不要创建 String 对象。它会拖慢执行速度，并可能产生其他副作用。
 
 NaN 的数据类型是 number。
-
-
-
-#### JS语言特性
-
-运行在客户端浏览器上；
-
-不用预编译，直接解析执行代码；
-
-是弱类型语言，较为灵活；
-
-与操作系统无关，跨平台的语言；
-
-脚本语言、解释性语言；
-
-
-
-#### JS部分代码规范
-
-```
-1、不要在同一行声明多个变量
-2、使用 === 和 !== 来比较
-3、不要使用全局函数
-4、变量在使用之前的位置声明（减少变量提升干扰）
-5、if用花括号包起来即使只有一行
-6、写注释
-```
 
 
 
@@ -85,35 +69,156 @@ NaN 的数据类型是 number。
 
 #### JS判断类型
 
-```html
-1、typeof检测不出null 和 数组，结果都为object，所以typeof常用于检测基本类型
-console.log(typeof true) // boolean
+- **typeof**
 
-2、instanceof不能检测出number、boolean、string、undefined、null、symbol类型，所以instancof常用于检测复杂类型以及级成关系
-console.log([1,2] instanceof Array) // true
+  typeof检测不出null 和 数组，结果都为object，所以typeof常用于检测基本类型
+  console.log(typeof true) // boolean
 
-3、constructor,null、undefined没有construstor方法，因此constructor不能判断undefined和null。但是contructor的指向是可以被改变，所以不安全
-console.log([1, 2].constructor === Array) // ture
+- **instanceof**
 
-4、Object.prototype.toString.call全类型都可以判断
-Object.prototype.toString.call([1, 2]) // [object Array]
+  instanceof**只能正确判断引用数据类型**，不能检测出number、boolean、string、undefined、null、symbol等基本数据类型，**其内部运行机制是判断在其原型链中能否找到该类型的原型**。所以instancof常用于检测复杂类型以及级成关系，`instanceof` 运算符可以用来测试一个对象在其原型链中是否存在一个构造函数的 `prototype` 属性。
+
+  ```js
+  console.log(2 instanceof Number);                    // false
+  console.log(true instanceof Boolean);                // false 
+  console.log('str' instanceof String);                // false 
+   
+  console.log([] instanceof Array);                    // true
+  console.log(function(){} instanceof Function);       // true
+  console.log({} instanceof Object);                   // true
+  ```
+
+- **constructor**
+
+  null、undefined没有construstor方法，因此constructor不能判断undefined和null。但是contructor的指向是可以被改变，所以不安全。
+
+  ```js
+  console.log((2).constructor === Number); // true
+  console.log((true).constructor === Boolean); // true
+  console.log(('str').constructor === String); // true
+  console.log(([]).constructor === Array); // true
+  console.log((function() {}).constructor === Function); // true
+  console.log(({}).constructor === Object); // true
+  ```
+
+  `constructor`有两个作用，一是判断数据的类型，二是对象实例通过 `constrcutor` 对象访问它的构造函数。需要注意，如果创建一个对象来改变它的原型，`constructor`就不能用来判断数据类型了：
+
+  ```javascript
+  function Fn(){};
+   
+  Fn.prototype = new Array();
+   
+  var f = new Fn();
+   
+  console.log(f.constructor===Fn);    // false
+  console.log(f.constructor===Array); // true
+  ```
+
+- **Object.prototype.toString.call**
+
+  Object.prototype.toString.call全类型都可以判断。
+
+  Object.prototype.toString.call([1, 2])	 // [object Array]
+
+  ```js
+  var a = Object.prototype.toString;
+   
+  console.log(a.call(2));
+  console.log(a.call(true));
+  console.log(a.call('str'));
+  console.log(a.call([]));
+  console.log(a.call(function(){}));
+  console.log(a.call({}));
+  console.log(a.call(undefined));
+  console.log(a.call(null));
+  ```
+
+  同样是检测对象obj调用toString方法，obj.toString()的结果和Object.prototype.toString.call(obj)的结果不一样，这是为什么？
+
+  这是因为toString是Object的原型方法，而Array、function等**类型作为Object的实例，都重写了toString方法**。不同的对象类型调用toString方法时，根据原
+
+  型链的知识，调用的是对应的重写之后的toString方法（function类型返回内容为函数体的字符串，Array类型返回元素组成的字符串…），而不会去调用
+
+  Object上原型toString方法（返回对象的具体类型），所以采用obj.toString()不能得到其对象类型，只能将obj转换为字符串类型；因此，在想要得到对象的具
+
+  体类型时，应该调用Object原型上的toString方法。
+
+------
+
+##### 判断数组方法
+
+- 通过Object.prototype.toString.call()做判断
+
+```javascript
+Object.prototype.toString.call(obj).slice(8,-1) === 'Array';
 ```
 
+- 通过原型链做判断
 
-
-#### **undefined 和 null 区别**
-
+```javascript
+obj.__proto__ === Array.prototype;
 ```
-1、null
-什么都没有，表示一个空对象引用（主动释放一个变量引用的兑现那个，表示一个变量不再指向任何引用地址）
-2、undefined
-没有设置值的变量，会自动赋值undefined
-3、区别
-typeof undefined             // undefined
-typeof null                  // object
-null === undefined           // false
-null == undefined            // true
+
+- 通过ES6的Array.isArray()做判断
+
+```javascript
+Array.isArrray(obj);
 ```
+
+- 通过instanceof做判断
+
+```javascript
+obj instanceof Array
+```
+
+- 通过Array.prototype.isPrototypeOf
+
+```javascript
+Array.prototype.isPrototypeOf(obj)
+```
+
+------
+
+##### undefined 和 null 区别
+
+- null
+  什么都没有，表示一个空对象引用（主动释放一个变量引用的兑现那个，表示一个变量不再指向任何引用地址）。
+
+- undefined
+  没有设置值的变量，会自动赋值undefined。undefined 在 JavaScript 中不是一个保留字，这意味着可以使用 undefined 来作为一个变量名，但是这样的做法是非常危险的，它会影响对 undefined 值的判断。我们可以通过一些方法获得安全的 undefined 值，比如说 void 0。
+
+- 区别
+
+  ```js
+  typeof undefined             // undefined
+  typeof null                  // object
+  null === undefined           // false
+  null == undefined            // true
+  ```
+
+------
+
+##### typeof null 的结果为什么是Object
+
+在 JavaScript 第一个版本中，所有值都存储在 32 位的单元中，每个单元包含一个小的 **类型标签(1-3 bits)** 以及当前要存储值的真实数据。类型标签存储在每个单元的低位中，共有五种数据类型：
+
+```javascript
+000: object   - 当前存储的数据指向一个对象。
+  1: int      - 当前存储的数据是一个 31 位的有符号整数。
+010: double   - 当前存储的数据指向一个双精度的浮点数。
+100: string   - 当前存储的数据指向一个字符串。
+110: boolean  - 当前存储的数据是布尔值。
+复制代码
+```
+
+如果最低位是 1，则类型标签标志位的长度只有一位；如果最低位是 0，则类型标签标志位的长度占三位，为存储其他四种数据类型提供了额外两个 bit 的长度。
+
+有两种特殊数据类型：
+
+- undefined的值是 (-2)30(一个超出整数范围的数字)；
+- null 的值是机器码 NULL 指针(null 指针的值全是 0)
+
+那也就是说null的类型标签也是000，和Object的类型标签一样，所以会被判定为Object。
 
 
 
@@ -130,28 +235,6 @@ null == undefined            // true
 箭头函数外层没有普通函数时，this指向window
 不能通过bind、call、apply改变this指向
 使用new调用箭头函数会报错，因为箭头函数没有constructor
-
-
-
-#### **document.write与innerHTML**
-
-document.write 将内容写入页面，清空替换掉原来的内容，会导致重绘。
-
-document.innerHTML 将内容写入某个Dom节点，不会重绘。
-
-
-
-#### **JS各种高度区别**
-
-clientHeight：表示的是可视区域的高度，不包含border和滚动条
-
-offsetHeight：表示可视区域的高度，包含了border和滚动条
-
-scrollHeight：表示了所有区域的高度，包含了因为滚动被隐藏的部分。
-
-clientTop：表示边框border的厚度，在未指定的情况下一般为0
-
-scrollTop：滚动后被隐藏的高度，获取对象相对于由offsetParent属性指定的父坐标(css定位的元素或body元素)距离顶端的高度。
 
 
 
@@ -954,6 +1037,101 @@ console.log(cat instanceof Cat); //true感谢 @bluedrink 提醒，该实现没�
 
 
 
+#### JS阻塞
+
+ JavaScript既会阻塞HTML的解析，也会阻塞CSS的解析。因此我们可以对JavaScript的加载方式进行改变，来进行优化：
+
+（1）尽量将JavaScript文件放在body的最后
+
+（2） body中间尽量不要写`<script>`标签
+
+（3）`<script>`标签的引入资源方式有三种，有一种就是我们常用的直接引入，还有两种就是使用 async 属性和 defer 属性来异步引入，两者都是去异步加载外部的JS文件，不会阻塞DOM的解析（尽量使用异步加载）。  三者的区别如下：
+
+**script** 立即停止页面渲染去加载资源文件，当资源加载完毕后立即执行js代码，js代码执行完毕后继续渲染页面；
+
+**async** 是在下载完成之后，立即异步加载，加载好后立即执行，多个带async属性的标签，不能保证加载的顺序；
+
+**defer** 是在下载完成之后，立即异步加载。加载好后，如果 DOM 树还没构建好，则先等 DOM 树解析好再执行；如果DOM树已经准备好，则立即执行。多个带defer属性的标签，按照顺序执行。
+
+
+
+#### 垃圾回收机制
+
+JavaScript 在定义变量时就完成了内存分配。当不在使用变量了就会被回收，因为其开销比较大，垃圾收集器会定期（周期性）找出那些不在继续使用的变量，然后释放其内存。
+
+##### **标记清除法**
+
+这是最常见的垃圾回收方式，当变量进入环境时，就标记这个变量为”进入环境“,从逻辑上讲，永远不能释放进入环境的变量所占的内存，永远不能释放进入环境变量所占用的内存，只要执行流程进入相应的环境，就可能用到他们。当离开环境时，就标记为离开环境。
+
+垃圾回收器在运行的时候会给存储在内存中的变量都加上标记（所有都加），然后去掉环境变量中的变量，以及被环境变量中的变量所引用的变量（条件性去除标记），删除所有被标记的变量，删除的变量无法在环境变量中被访问所以会被删除，最后垃圾回收器完成了内存的清除工作，并回收他们所占用的内存。
+
+
+
+##### **引用计数法**
+
+引用计数法的意思就是每个值引用的次数，当声明了一个变量，并用一个引用类型的值赋值给该变量，则这个值的引用次数为1,；相反的，如果包含了对这个值引用的变量又取得了另外一个值，则原先的引用值引用次数就减1，当这个值的引用次数为0的时候，说明没有办法再访问这个值了，因此就把所占的内存给回收进来，这样垃圾收集器再次运行的时候，就会释放引用次数为0的这些值。如果一个值不再需要了，引用数却不为`0`，垃圾回收机制无法释放这块内存，从而导致内存泄漏。
+
+```js
+const arr = [1, 2, 3, 4];
+```
+
+上面代码中，数组`[1, 2, 3, 4]`是一个值，会占用内存。变量`arr`是仅有的对这个值的引用，因此引用次数为`1`。尽管后面的代码没有用到`arr`，它还是会持续占用内存。
+
+如果增加一行代码，解除`arr`对`[1, 2, 3, 4]`引用，这块内存就可以被垃圾回收机制释放了。
+
+
+
+##### V8的垃圾回收机制
+
+**新生代算法**
+
+新生代中的对象一般存活时间较短，使用 Scavenge GC 算法。
+
+在新生代空间中，内存空间分为两部分，分别为 From 空间和 To 空间。在这两个空间中，必定有一个空间是使用的，另一个空间是空闲的。新分配的对象会被放入 From 空间中，当 From 空间被占满时，新生代 GC 就会启动了。算法会检查 From 空间中存活的对象并复制到 To 空间中，如果有失活的对象就会销毁。当复制完成后将 From 空间和 To 空间互换，这样 GC 就结束了。
+
+**老生代算法**
+
+老生代中的对象一般存活时间较长且数量也多，使用了两个算法，分别是标记清除算法和标记压缩算法。
+
+先来说下什么情况下对象会出现在老生代空间中：
+
+- 新生代中的对象是否已经经历过一次 Scavenge 算法，如果经历过的话，会将对象从新生代空间移到老生代空间中。
+- To 空间的对象占比大小超过 25 %。在这种情况下，为了不影响到内存分配，会将对象从新生代空间移到老生代空间中。
+
+老生代中的空间很复杂，有如下几个空间
+
+```javascript
+enum AllocationSpace {
+  // TODO(v8:7464): Actually map this space's memory as read-only.
+  RO_SPACE,    // 不变的对象空间
+  NEW_SPACE,   // 新生代用于 GC 复制算法的空间
+  OLD_SPACE,   // 老生代常驻对象空间
+  CODE_SPACE,  // 老生代代码对象空间
+  MAP_SPACE,   // 老生代 map 对象
+  LO_SPACE,    // 老生代大空间对象
+  NEW_LO_SPACE,  // 新生代大空间对象
+  FIRST_SPACE = RO_SPACE,
+  LAST_SPACE = NEW_LO_SPACE,
+  FIRST_GROWABLE_PAGED_SPACE = OLD_SPACE,
+  LAST_GROWABLE_PAGED_SPACE = MAP_SPACE
+};
+复制代码
+```
+
+在老生代中，以下情况会先启动标记清除算法：
+
+- 某一个空间没有分块的时候
+- 空间中被对象超过一定限制
+- 空间不能保证新生代中的对象移动到老生代中
+
+在这个阶段中，会遍历堆中所有的对象，然后标记活的对象，在标记完成后，销毁所有没有被标记的对象。在标记大型对内存时，可能需要几百毫秒才能完成一次标记。这就会导致一些性能上的问题。为了解决这个问题，2011 年，V8 从 stop-the-world 标记切换到**增量标志**。在增量标记期间，GC 将标记工作分解为更小的模块，可以让 JS 应用逻辑在模块间隙执行一会，从而不至于让应用出现停顿情况。但在 2018 年，GC 技术又有了一个重大突破，这项技术名为并发标记。该技术可以让 GC 扫描和标记对象时，同时允许 JS 运行。
+
+清除对象后会造成堆内存出现碎片的情况，当碎片超过一定限制后会启动压缩算法。在压缩过程中，将活的对象向一端移动，直到所有对象都移动完成然后清理不
+
+需要的内存。
+
+
+
 #### **JS内存泄露**（4种）
 
 内存泄漏是指一块被分配的内存既不能使用，也不能回收，直到浏览器进程结束。
@@ -1000,31 +1178,6 @@ dom元素赋值给变量，又通过removeChild移除dom元素。但是dom元素
 
 
 
-#### 垃圾回收机制方式及内存管理
-
-JavaScript 在定义变量时就完成了内存分配。当不在使用变量了就会被回收，因为其开销比较大，垃圾收集器会定期（周期性）找出那些不在继续使用的变量，然后释放其内存。
-（1）垃圾回收
-**标记清除法**
-这是最常见的垃圾回收方式，当变量进入环境时，就标记这个变量为”进入环境“,从逻辑上讲，永远不能释放进入环境的变量所占的内存，永远不能释放进入环境变量所占用的内存，只要执行流程进入相应的环境，就可能用到他们。当离开环境时，就标记为离开环境。
-
-垃圾回收器在运行的时候会给存储在内存中的变量都加上标记（所有都加），然后去掉环境变量中的变量，以及被环境变量中的变量所引用的变量（条件性去除标记），删除所有被标记的变量，删除的变量无法在环境变量中被访问所以会被删除，最后垃圾回收器完成了内存的清除工作，并回收他们所占用的内存。
-
-**引用计数法**
-引用计数法的意思就是每个值引用的次数，当声明了一个变量，并用一个引用类型的值赋值给该变量，则这个值的引用次数为1,；相反的，如果包含了对这个值引用的变量又取得了另外一个值，则原先的引用值引用次数就减1，当这个值的引用次数为0的时候，说明没有办法再访问这个值了，因此就把所占的内存给回收进来，这样垃圾收集器再次运行的时候，就会释放引用次数为0的这些值。如果一个值不再需要了，引用数却不为`0`，垃圾回收机制无法释放这块内存，从而导致内存泄漏。
-
-```js
-const arr = [1, 2, 3, 4];
-```
-
-上面代码中，数组`[1, 2, 3, 4]`是一个值，会占用内存。变量`arr`是仅有的对这个值的引用，因此引用次数为`1`。尽管后面的代码没有用到`arr`，它还是会持续占用内存。
-
-如果增加一行代码，解除`arr`对`[1, 2, 3, 4]`引用，这块内存就可以被垃圾回收机制释放了。
-
-（2）内存管理
-内存分配=》内存使用=》内存回收
-
-
-
 #### JS事件循环机制(Event Loop)
 
 event loop它最主要是分三部分：主线程、宏队列（macrotask）、微队列（microtask）。
@@ -1037,11 +1190,11 @@ js的任务队列分为同步任务和异步任务，所有的同步任务都是
 
 **宏队列**（macrotask）
 
-setTimeout、setInterval、setImmediate、I/O、UI rendering
+script 脚本的执行、setTimeout、setInterval、setImmediate、I/O、UI渲染
 
 **微队列**（microtask）
 
-promise.then、process.nextTick
+promise.then、process.nextTick、对 Dom 变化监听的 MutationObserver
 
 **执行顺序**
 
@@ -1060,6 +1213,8 @@ promise.then、process.nextTick
 7、执行微队列（microtask），执行完毕
 
 8、依次循环。。。
+
+![image-20220331160803629](前端图片/image-20220331160803629.png)
 
 ```js
 console.log(1)
@@ -1374,16 +1529,6 @@ var sum_curry =function(a){
 
 
 
-#### **JSONP与AJAX**区别
-
-JSONP 是一种非正式传输协议，允许用户传递一个callback给服务端，然后服务端返回数据时会将这个callback 参数作为函数名来包裹住 JSON 数据，这样客户端就可以随意定制自己的函数来自动处理返回数据了。当GET请求从后台页面返回时，可以返回一段JavaScript代码，这段代码会自动执行，可以用来负责调用后台页面中的一个callback函数。
-它们的实质不同
-**ajax的核心是通过xmlHttpRequest获取非本页内容**
-**jsonp的核心是动态添加script标签调用服务器提供的js脚本**
-**jsonp只支持get请求，ajax支持get和post请求**
-
-
-
 #### 变量提升
 
 JavaScript 中，函数及变量的声明都将被提升到函数的最顶部。
@@ -1427,15 +1572,38 @@ function myFunction(y) {
 
 
 
-#### 事件冒泡与事件代理
+#### 事件模型
 
-**事件冒泡**
+##### 事件模型
+
+事件是用户操作网页时发生的交互动作，比如 click/move， 事件除了用户触发的动作外，还可以是文档加载，窗口滚动和大小调整。事件被封装成一个 event 对象，包含了该事件发生时的所有相关信息（ event 的属性）以及可以对事件进行的操作（ event 的方法）。
+
+事件是用户操作网页时发生的交互动作或者网页本身的一些操作，现代浏览器一共有三种事件模型：
+
+**DOM0 级事件模型**，这种模型不会传播，所以没有事件流的概念，但是现在有的浏览器支持以冒泡的方式实现，它可以在网页中直接定义监听函数，也可以通过 js 属性来指定监听函数。所有浏览器都兼容这种方式。直接在dom对象上注册事件名称，就是DOM0写法。
+
+**IE 事件模型**，在该事件模型中，一次事件共有两个过程，事件处理阶段和事件冒泡阶段。事件处理阶段会首先执行目标元素绑定的监听事件。然后是事件冒泡阶段，冒泡指的是事件从目标元素冒泡到 document，依次检查经过的节点是否绑定了事件监听函数，如果有则执行。这种模型通过attachEvent 来添加监听函数，可以添加多个监听函数，会按顺序依次执行。
+
+**DOM2 级事件模型**，在该事件模型中，一次事件共有三个过程，第一个过程是事件捕获阶段。捕获指的是事件从 document 一直向下传播到目标元素，依次检查经过的节点是否绑定了事件监听函数，如果有则执行。后面两个阶段和 IE 事件模型的两个阶段相同。这种事件模型，事件绑定的函数是addEventListener，其中第三个参数可以指定事件是否在捕获阶段执行。
+
+
+
+
+##### **事件冒泡**
+
 当一个元素接收到事件的时候 会把他接收到的事件传给自己的父级，一直到window，过程就像冒泡泡 。如果在某一层想要中止冒泡，使用 event.stopPropagation() 。
 但是当大量标签有大量事件的时候不可能为每个元素都加上事件，（事件绑定占用事件，浏览器要跟踪每个事件，占用更多内存。而且并不是所有事件都会被用户使用到）。所以需要事件委托来解决这个问题。
 
-**事件代理**
+**如何阻止事件冒泡**
 
-事件代理又称事件委托。
+- 普通浏览器使用：event.stopPropagation()
+- IE浏览器使用：event.cancelBubble = true;
+
+
+
+##### **事件代理**
+
+事件代理又称**事件委托**。
 
 假设在html标签中，一个ul标签下面有3个li元素。假使我们需要对 3 个 li 元素添加点击事件，传统的方法是分别给每个 li 元素绑定 click 事件。假使 li 元素特别多呢? 可能你已经想到这样一个一个添加 click 事件是相当麻烦的, 那么是否有优化方法呢?
 
@@ -1455,27 +1623,23 @@ ul 元素如何知道是在哪个 li 元素上点击的呢?
 
 首先, 我们看到添加的事件处理程序减少, 可以只有一个事件处理程序，由于每个函数都是对象, 对象会占用内存, 内存的占用关系到性能因此第一个优点是:
 
-提高Javascript性能，减少了内存占用, 性能更好;
+提高Javascript性能，**减少了内存占用**, 性能更好;
 
-在访问 DOM 方面, 也使得 DOM 访问次数减少，试想一下, 如果要为许多的 DOM 元素绑定事件, 自然需要多次访问 DOM 元素, 设置事件处理程序所需时间更长, 整个页面就绪需要的时间越多因此第二个优点是:
+在访问 DOM 方面, 也使得 **DOM 访问次数减少**，试想一下, 如果要为许多的 DOM 元素绑定事件, 自然需要多次访问 DOM 元素, 设置事件处理程序所需时间更长, 整个页面就绪需要的时间越多因此第二个优点是:
 
-设置事件处理程序所需时间更少, 加快了整个页面的交互就绪时间。
+**设置事件处理程序所需时间更少**, 加快了整个页面的交互就绪时间。
 
-假使我们将事件处理程序绑定到 document 对象上, 只要可单击的元素呈现在页面上, 就可以立即具备适当的功能，即还会有一个额外的优点:
-
-document 很快就可以访问, 而且可以在页面生命周期的任何时点添加事件处理程序, 而不用等待其他事件完成如 DOM Content Loadedload 事件。
+假使我们将事件处理程序绑定到 document 对象上, 只要可单击的元素呈现在页面上, 就可以立即具备适当的功能，即还会有一个额外的优点:document 很快就可以访问, 而且可以在页面生命周期的任何时点添加事件处理程序, 而不用等待其他事件完成如 DOM Content Loadedload 事件。
 
 **事件代理的缺点：**
 
-事件委托基于冒泡 , 对于不冒泡的事件不支持；
+事件委托基于冒泡 , 对于不冒泡的事件不支持；比如 focus、blur 之类的事件没有事件冒泡机制，所以无法实现事件委托；mousemove、mouseout 这样的事件，虽然有事件冒泡，但是只能不断通过位置去计算定位，对性能消耗高，因此也是不适合于事件委托的。
 
 层级过多,冒泡过程中,可能会被某层阻止掉；
 
 事件代理的常用应用应该仅限于上述需求，如果把所有事件都用事件代理，可能会出现事件误判。即本不该被触发的事件被绑定上了事件。
 
-
-
-#### 浏览器事件流
+------
 
 HTML中与javascript交互是通过事件驱动来实现的，例如鼠标点击事件onclick、页面的滚动事件onscroll等等，可以向文档或者文档中的元素添加事件侦听器来预订事件。想要知道这些事件是在什么时候进行调用的，就需要了解一下“事件流”的概念。
 
@@ -1499,38 +1663,78 @@ addEventListener：addEventListener 是DOM2 级事件新增的指定事件处理
 
 在DOM标准事件模型中，是先捕获后冒泡。但是如果要实现先冒泡后捕获的效果，对于同一个事件，监听捕获和冒泡，分别对应相应的处理函数，监听到捕获事件，先暂缓执行，直到冒泡事件被捕获后再执行捕获事件。
 
+addEventListener() 方法可以指定 "useCapture" 参数来设置传递类型：
 
+```js
+addEventListener(event, function, useCapture);
+```
 
-#### **JS延迟加载**
+默认值为 false, 即冒泡传递，当值为 true 时, 事件使用捕获传递。
 
-**（1）defer属性**
+**实例**
 
-<script src="test.js" defer="defer"></script>
-立即下载，但是会等到整个页面都解析完成之后再执行.
-
-**（2）async属性**
-
-<script src="test.js" async></script>
-不让页面等待脚本下载和执行（异步下载），但是无法控制加载的顺序。
-
-async属性仅适用于外部脚本，并且如果在IE中同时存在defer和async，那么defer的优先级比较高，脚本将在页面完成时执行。
-
-**（3）动态创建script标签**
-
-**（4）使用定时器延迟**
-
-**（5）让js最后加载**
+```js
+document.getElementById("myDiv").addEventListener("click", myFunction, true);
+```
 
 
 
-#### 懒加载和预加载
+##### 事件触发过程
 
-**预加载：**提前加载图片，当用户需要查看时可直接从本地缓存中渲染。
+事件触发有三个阶段：
 
-**懒加载：**懒加载的主要目的是作为服务器前端的优化，减少请求数或延迟请求数。
+- `window` 往事件触发处传播，遇到注册的捕获事件会触发
+- 传播到事件触发处时触发注册的事件
+- 从事件触发处往 `window` 传播，遇到注册的冒泡事件会触发
 
-两种技术的本质：两者的行为是相反的，一个是提前加载，一个是迟缓甚至不加载。
-懒加载对服务器前端有一定的缓解压力作用，预加载则会增加服务器前端压力。
+事件触发一般来说会按照上面的顺序进行，但是也有特例，**如果给一个 `body`中的子节点同时注册冒泡和捕获事件，事件触发会按照注册的顺序执行。**
+
+```javascript
+// 以下会先打印冒泡然后是捕获
+node.addEventListener(
+  'click',
+  event => {
+    console.log('冒泡')
+  },
+  false
+)
+node.addEventListener(
+  'click',
+  event => {
+    console.log('捕获 ')
+  },
+  true
+)
+```
+
+通常使用 `addEventListener` 注册事件，该函数的第三个参数可以是布尔值，也可以是对象。对于布尔值 `useCapture` 参数来说，该参数默认值为 `false` ，`useCapture` 决定了注册的事件是捕获事件还是冒泡事件。对于对象参数来说，可以使用以下几个属性：
+
+- `capture`：布尔值，和 `useCapture` 作用一样
+- `once`：布尔值，值为 `true` 表示该回调只会调用一次，调用后会移除监听
+- `passive`：布尔值，表示永远不会调用 `preventDefault`
+
+一般来说，如果只希望事件只触发在目标上，这时候可以使用 `stopPropagation` 来阻止事件的进一步传播。通常认为 `stopPropagation` 是用来阻止事件冒泡的，其实该函数也可以阻止捕获事件。
+
+`stopImmediatePropagation` 同样也能实现阻止事件，但是还能阻止该事件目标执行别的注册事件。
+
+```javascript
+node.addEventListener(
+  'click',
+  event => {
+    event.stopImmediatePropagation()
+    console.log('冒泡')
+  },
+  false
+)
+// 点击 node 只会执行上面的函数，该函数不会执行
+node.addEventListener(
+  'click',
+  event => {
+    console.log('捕获 ')
+  },
+  true
+)
+```
 
 
 
@@ -1558,55 +1762,69 @@ async属性仅适用于外部脚本，并且如果在IE中同时存在defer和as
 
 
 
-#### **两个对象如何比较**
+#### 懒加载和预加载
 
-有思路即可，步骤：
-（1）判断两个类型是否对象
-（2）判断两个对象key的长度是否一致
-（3）判断属性value值的数据类型，根据不同数据类型做比较
-    a、是对象，重复这个步骤
-    b、是数组，转字符串比较
-    c、是基本类型，直接判断
+**预加载：**提前加载图片，当用户需要查看时可直接从本地缓存中渲染。
 
+**懒加载：**懒加载也叫做延迟加载、按需加载，指的是在长网页中延迟加载图片数据，是一种较好的网页性能优化的方式。在比较长的网页或应用中，如果图片很
 
+多，所有的图片都被加载出来，而用户只能看到可视窗口的那一部分图片数据，这样就浪费了性能。
 
-#### **XML和JSON的区别**
+如果使用图片的懒加载就可以解决以上问题。在滚动屏幕之前，可视化区域之外的图片不会进行加载，在滚动屏幕时才加载。这样使得网页的加载速度更快，减少
 
+了服务器的负载。懒加载适用于图片较多，页面列表较长（长列表）的场景中。
+
+**懒加载的实现原理**
+
+图片的加载是由`src`引起的，当对`src`赋值时，浏览器就会请求图片资源。根据这个原理，我们使用HTML5 的`data-xxx`属性来储存图片的路径，在需要加载图片的时候，将`data-xxx`中图片的路径赋值给`src`，这样就实现了图片的按需加载，即懒加载。
+
+注意：`data-xxx` 中的`xxx`可以自定义，这里我们使用`data-src`来定义。
+
+懒加载的实现重点在于确定用户需要加载哪张图片，在浏览器中，可视区域内的资源就是用户需要的资源。所以当图片出现在可视区域时，获取图片的真实地址并赋值给图片即可。
+
+**知识点**
+
+（1）`window.innerHeight` 是浏览器可视区的高度
+
+（2）`document.body.scrollTop || document.documentElement.scrollTop` 是浏览器滚动的过的距离
+
+（3）`imgs.offsetTop` 是元素顶部距离文档顶部的高度（包括滚动条的距离）
+
+（4）图片加载条件：`img.offsetTop < window.innerHeight + document.body.scrollTop;`
+
+![](前端图片/image-20220331195507463.png)
+
+```js
+<div class="container">
+     <img src="loading.gif"  data-src="pic.png">
+     <img src="loading.gif"  data-src="pic.png">
+     <img src="loading.gif"  data-src="pic.png">
+     <img src="loading.gif"  data-src="pic.png">
+     <img src="loading.gif"  data-src="pic.png">
+     <img src="loading.gif"  data-src="pic.png">
+</div>
+<script>
+var imgs = document.querySelectorAll('img');
+function lozyLoad(){
+		var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+		var winHeight= window.innerHeight;
+		for(var i=0;i < imgs.length;i++){
+			if(imgs[i].offsetTop < scrollTop + winHeight ){
+				imgs[i].src = imgs[i].getAttribute('data-src');
+			}
+		}
+	}
+  window.onscroll = lozyLoad();
+</script>
 ```
-1，xml是重量级的，json是轻量级的。
-2，xml在传输过程中比较占带宽，json占带宽少，易于压缩。
-3，xml和json都用在项目交互下，xml多用于做配置文件，json用于数据交互。
-```
 
+本质：两者的行为是相反的，一个是提前加载，一个是迟缓甚至不加载。
 
+懒加载对服务器前端有一定的缓解压力作用，预加载则会增加服务器前端压力。
 
-#### **["1", "2", "3"].map(parseInt)** 
+**懒加载也叫延迟加载，指的是在长网页中延迟加载图片的时机，当用户需要访问时，再去加载**，这样可以提高网站的首屏加载速度，提升用户的体验，并且可以减少服务器的压力。它适用于图片很多，页面很长的电商网站的场景。懒加载的实现原理是，将页面上的图片的 src 属性设置为空字符串，将图片的真实路径保存在一个自定义属性中，当页面滚动的时候，进行判断，如果图片进入页面可视区域内，则从自定义属性中取出真实路径赋值给图片的 src 属性，以此来实现图片的延迟加载。
 
-[1, 2, 3].map(parseInt) 等价于 [parseInt(1, 0), parseInt(2, 1), parseInt(3, 2)]
-
-```
-（1）map用法：
-arr.map(function(el, index, arr) {
-    return el
-})
-
-map方法接收一个函数参数，并且这个函数可以接收三个参数
-el：遍历过程中的当前项，
-index：遍历过程中的当前下标
-arr: 原数组
-
-（2）parseInt用法：
-parseInt(str, num) 
-根据num解析str，并返回一个整数。
-str: 要解析的字符串，如果字符第一个数不能被转换，返回NaN。
-num: 进制基数，介于 2 ~ 36 之间，如果传0，则默认用10计算。num不在区间内，返回NaN
-
-（3）所以这道题，关键点就在num
-el和index 相当于 str 和 num 带入一下
-parseInt('1', 0) //'1' 用基数10算 为1
-parseInt('2', 1) //radix值在2-36，无法解析，返回NaN
-parseInt('3', 2) //基数为2，2进制数表示的数中，最大值小于3，无法解析，返回NaN
-```
+**预加载指的是将所需的资源提前请求加载到本地，这样后面在需要用到时就直接从缓存取资源。** 通过预加载能够减少用户的等待时间，提高用户的体验。我了解的预加载的最常用的方式是使用 js 中的 image 对象，通过为 image 对象来设置 scr 属性，来实现图片的预加载。
 
 
 
@@ -1679,24 +1897,6 @@ HTML5为history对象添加了两个新方法，`history.pushState()`和`history
 navigator.userAgent -- 返回用户代理头的字符串表示(就是包括浏览器版本信息等的字符串)
 
 navigator.cookieEnabled -- 返回浏览器是否支持(启用)cookie
-
-
-
-#### Drag Api
-
-dragstart：事件主体是被拖放元素，在开始拖放被拖放元素时触发，。
-
-darg：事件主体是被拖放元素，在正在拖放被拖放元素时触发。
-
-dragenter：事件主体是目标元素，在被拖放元素进入某元素时触发。
-
-dragover：事件主体是目标元素，在被拖放在某元素内移动时触发。
-
-dragleave：事件主体是目标元素，在被拖放元素移出目标元素是触发。
-
-drop：事件主体是目标元素，在目标元素完全接受被拖放元素时触发。
-
-dragend：事件主体是被拖放元素，在整个拖放操作结束时触发
 
 
 
@@ -1903,681 +2103,6 @@ xmlhttp.onreadystatechange = function (ev2) {
 //发送请求
 xmlhttp.send();
 ```
-
-
-
-#### 跨域
-
-##### CORS
-
-**同源策略**[same origin policy]是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读写对方资源。 同源策略是浏览器安全的基石。**源**[origin]就是协议、域名和端口号。
-
-**哪些操作不受同源策略限制**
-
-1. 页面中的链接，重定向以及表单提交是不会受到同源策略限制的；
-2. 跨域资源的引入是可以的。但是`JS`不能读写加载的内容。如嵌入到页面中的`<script src="..."></script>`，`<img>`，`<link>`，`<iframe>`等。
-
-**如何跨域**
-
-- **降域**
-
-  可以通过设置 `document.damain='a.com'`，浏览器就会认为它们都是同一个源。想要实现以上任意两个页面之间的通信，两个页面必须都设置`documen.damain='a.com' `。
-
-- **`JSONP`跨域**
-
-- `CORS` 跨域
-
-CORS：全称"跨域资源共享"（Cross-origin resource sharing）。
-
-CORS 做到了如下两点：
-
-- 不破坏即有规则
-- 服务器实现了 `CORS` 接口，就可以跨源通信
-
-CORS需要浏览器和服务器同时支持，才可以实现跨域请求，目前几乎所有浏览器都支持CORS，IE则不能低于IE10。CORS的整个过程都由浏览器自动完成，前端无需做任何设置，跟平时发送ajax请求并无差异。so，实现CORS的关键在于服务器，只要服务器实现CORS接口，就可以实现跨域通信。
-
-CORS分为**简单请求**和**非简单请求**(需预检请求)两类
-
-**简单请求:**
-
-请求方式使用下列方法之一：
-
-```js
-请求方式使用下列方法之一：
-GET
-HEAD
-POST
- 
-Content-Type 的值仅限于下列三者之一：
-text/plain
-multipart/form-data
-application/x-www-form-urlencoded
-```
-
-对于简单请求，`CORS`的策略是请求时在请求头中增加一个`Origin`字段，服务器收到请求后，根据该字段判断是否允许该请求访问。
-
-1. 如果允许，则在 HTTP 响应头信息中添加 `Access-Control-Allow-Origin ` 字段，并返回正确的结果 ；
-2. 如果不允许，则不在 HTTP响应 头信息中添加 `Access-Control-Allow-Origin ` 字段
-
-除了上面提到的 `Access-Control-Allow-Origin `，还有几个字段用于描述 `CORS` 返回结果 ：
-
-1. `Access-Control-Allow-Credentials`： 可选，用户是否可以发送、处理 `cookie`；
-2. `Access-Control-Expose-Headers`：可选，可以让用户拿到的字段。有几个字段无论设置与否都可以拿到的，包括：`Cache-Control`、`Content-Language`、`Content-Type`、`Expires`、`Last-Modified`、`Pragma` 
-
-具体如下：
-![](C:\Users\asus\Desktop\学习笔记\01前端\前端图片\20180914181520131.png)
-
-在这里，http://localhost:3001为我们当前发送请求的源，如果服务器发现请求在指定的源范围内，则会返回响应的请求结果， 否则会在控制台报错，在这里需要注意的是，尽管请求失败，但返回的状态码依然可能为200。所以在做处理时需要格外注意。
-
-**非简单请求(预检请求):**
-
-```js
-使用了下面任一 HTTP 方法：
-PUT
-DELETE
-CONNECT
-OPTIONS
-TRACE
-PATCH
- 
-Content-Type 的值不属于下列之一:
-application/x-www-form-urlencoded
-multipart/form-data
-text/plain
-```
-
-当发生符合非简单请求（预检请求）的条件时，**浏览器会在真实请求发出前**，增加一次`OPTION`请求，称为预检请求(`preflight request`)。如果发现服务器支持该请求，则会将真正的请求发送到后端，反之，如果浏览器发现服务端并不支持该请求，则会在控制台抛出错误，如下：
-
-```
-Fail to load http://localhost:3000/cor2: Method PUT is not allowed by Access-Control-Allow-Methods in preflight response.
-```
-
-  例如一个`DELETE`请求：
-
-```xml
-OPTIONS /test HTTP/1.1
-Origin: http://www.examples.com
-Access-Control-Request-Method: DELETE
-Access-Control-Request-Headers: X-Custom-Header
-Host: www.examples.com
-```
-
-与 `CORS` 相关的字段有：
-
-1. 请求使用的 `HTTP` 方法 `Access-Control-Request-Method `；
-2. 请求中包含的自定义头字段 `Access-Control-Request-Headers `。
-
-服务器收到请求时，需要分别对 `Origin`、`Access-Control-Request-Method`、`Access-Control-Request-Headers` 进行验证，验证通过后，会在返回 `HTTP `头信息中添加 ：
-
-```js
-Access-Control-Allow-Origin: http://localhost:3001  //该字段表明可供哪个源跨域
-Access-Control-Allow-Methods: GET, POST, PUT        // 该字段表明服务端支持的请求方法
-Access-Control-Allow-Headers: X-Custom-Header       // 实际请求将携带的自定义请求首部字段
-Access-Control-Allow-Credentials: true
-Access-Control-Max-Age: 1728000
-```
-
-**CORS字段介绍：**
-（1）Access-Control-Allow-Methods
-
-该字段必需，它的值是逗号分隔的一个字符串，表明服务器支持的所有跨域请求的方法。注意，返回的是所有支持的方法，而不单是浏览器请求的那个方法。这是为了避免多次"预检"请求。
-
-（2）Access-Control-Allow-Headers
-
-如果浏览器请求包括Access-Control-Request-Headers字段，则Access-Control-Allow-Headers字段是必需的。它也是一个逗号分隔的字符串，表明服务器支持的所有头信息字段，不限于浏览器在"预检"中请求的字段。
-
-（3）Access-Control-Allow-Credentials
-
-该字段与简单请求时的含义相同。
-
-（4）Access-Control-Max-Age
-
-该字段可选，用来指定本次预检请求的有效期，单位为秒。上面结果中，有效期是20天（1728000秒），即允许缓存该条回应1728000秒（即20天），在此期间，不用发出另一条预检请求。
-
-总的来说，使用CORS简单请求，非常容易，对于前端来说无需做任何配置，与发送普通ajax请求无异。唯一需要注意的是，需要携带cookie信息时，需要将withCredentials设置为true即可。CORS的配置，完全在后端设置，配置起来也比较容易，目前对于大部分浏览器兼容性也比较好。CORS优势也比较明显，可以实现任何类型的请求，相较于JSONP跨域只能使用get请求来说，也更加的便于我们使用。关于jsonp跨域请求的实现，可以参照我另外一篇文章jsonp跨域原理。
-
-
-
-##### Spring Boot 配置 CORS
-
-**1、使用`@CrossOrigin` 注解实现**
-
-`如果想要对某一接口配置 `CORS`，可以在方法上添加 `@CrossOrigin` 注解 ：
-
-```JAVA
-@CrossOrigin(origins = {"http://localhost:9000", "null"})
-@RequestMapping(value = "/test", method = RequestMethod.GET)
-public String greetings() {
-    return "{\"project\":\"just a test\"}";
-}
-```
-
-如果想对一系列接口添加 CORS 配置，可以在类上添加注解，对该类声明所有接口都有效：
-
-```JAVA
-@CrossOrigin(origins = {"http://localhost:9000", "null"})
-@RestController
-@SpringBootApplication
-public class SpringBootCorsTestApplication {
-    
-}
-```
-
-如果想添加全局配置，则需要添加一个配置类 ：
-
-```java
-@Configuration
-public class WebMvcConfig extends WebMvcConfigurerAdapter {
-
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
-                .maxAge(3600)
-                .allowCredentials(true);
-    }
-}
-```
-
-另外，还可以通过添加 Filter 的方式，配置 CORS 规则，并手动指定对哪些接口有效。
-
-```java
-@Bean
-public FilterRegistrationBean corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration config = new CorsConfiguration();
-    config.setAllowCredentials(true);	config.addAllowedOrigin("http://localhost:9000");
-    config.addAllowedOrigin("null");
-    config.addAllowedHeader("*");
-    config.addAllowedMethod("*");
-    source.registerCorsConfiguration("/**", config); // CORS 配置对所有接口都有效
-    FilterRegistrationBean bean = newFilterRegistrationBean(new CorsFilter(source));
-    bean.setOrder(0);
-    return bean;
-}
-```
-
-**2、原理剖析**
-
-无论是通过哪种方式配置 `CORS`，其实都是在构造 `CorsConfiguration`。 一个 `CORS` 配置用一个 `CorsConfiguration`类来表示，它的定义如下：
-
-```java
-public class CorsConfiguration {
-    private List<String> allowedOrigins;
-    private List<String> allowedMethods;
-    private List<String> allowedHeaders;
-    private List<String> exposedHeaders;
-    private Boolean allowCredentials;
-    private Long maxAge;
-}
-```
-
-`Spring` 中对 `CORS` 规则的校验，都是通过委托给 `DefaultCorsProcessor `实现的。
-
-`DefaultCorsProcessor` 处理过程如下：
-
-1. 判断依据是 `Header `中是否包含 `Origin`。如果包含则说明为 `CORS`请求，转到 2；否则，说明不是 `CORS` 请求，不作任何处理。
-2. 判断 `response` 的 `Header` 是否已经包含 `Access-Control-Allow-Origin`，如果包含，证明已经被处理过了, 转到 3，否则不再处理。
-3. 判断是否同源，如果是则转交给负责该请求的类处理
-4. 是否配置了 `CORS` 规则，如果没有配置，且是预检请求，则拒绝该请求，如果没有配置，且不是预检请求，则交给负责该请求的类处理。如果配置了，则对该请求进行校验。
-
-校验就是根据 `CorsConfiguration` 这个类的配置进行判断：
-
-1. 判断 `origin` 是否合法
-2. 判断 `method` 是否合法
-3. 判断 `header`是否合法
-4. 如果全部合法，则在 `response header`中添加响应的字段，并交给负责该请求的类处理，如果不合法，则拒绝该请求。
-
-
-
-##### **Ajax如何处理跨域**
-
-**跨域问题怎么解决**？
-
-1、响应头添加Header允许访问
-
-2、jsonp 只支持get请求不支持post请求
-
-3、httpClient内部转发
-
-4、使用接口网关——nginx、springcloud zuul   (互联网公司常规解决方案)
-
-**解决方式1：响应头添加Header允许访问**
-
-跨域资源共享（CORS）Cross-Origin Resource Sharing
-
-这个跨域访问的解决方案的安全基础是基于"JavaScript无法控制该HTTP头"
-
-它需要通过目标域返回的HTTP头来授权是否允许跨域访问。
-
-```js
-response.addHeader(‘Access-Control-Allow-Origin:*’);//允许所有来源访问 
-response.addHeader(‘Access-Control-Allow-Method:POST,GET’);//允许访问的方式
-```
-
-**解决方式2：jsonp 只支持get请求不支持post请求**
-
-用法：①dataType改为jsonp     ②jsonp : "jsonpCallback"————发送到后端实际为http://a.a.com/a/FromServlet?userName=644064&jsonpCallback=jQueryxxx     ③后端获取get请求中的jsonpCallback    ④构造回调结构
-
-```js
-$.ajax({
-    type : "GET",
-    async : false,
-    url : "http://a.a.com/a/FromServlet?userName=644064",
-    dataType : "jsonp",//数据类型为jsonp  
-    jsonp : "jsonpCallback",//服务端用于接收callback调用的function名的参数
-    success : function(data) {
-   		alert(data["userName"]);
-    },
-    error : function() {
-    	alert('fail');
-    }
-});
-```
-
-```java
-//后端
-String jsonpCallback = request.getParameter("jsonpCallback");
-//构造回调函数格式jsonpCallback(数据)
-resp.getWriter().println(jsonpCallback+"("+jsonObject.toJSONString()+")");
-```
-
-JSONP实现原理
-
-在同源策略下，在某个服务器下的页面是无法获取到该服务器以外的数据的，即一般的ajax是不能进行跨域请求的。但 img、iframe 、script等标签是个例外，这些标签可以通过src属性请求到其他服务器上的数据。利用<script>标签的开放策略，我们可以实现跨域请求数据，当然这需要服务器端的配合。 Jquery中ajax的核心是通过 XmlHttpRequest获取非本页内容，而jsonp的核心则是动态添加<script>标签来调用服务器提供的 js脚本。
-
-当我们正常地请求一个JSON数据的时候，服务端返回的是一串JSON类型的数据，而我们使用 JSONP模式来请求数据的时候服务端返回的是一段可执行的JavaScript代码。因为jsonp 跨域的原理就是用的动态加载<script>的src ，所以我们只能把参数通过url的方式传递,所以jsonp的 type类型只能是get ！
-
-示例：
-
-```js
-$.ajax({
-    url: 'http://192.168.10.46/demo/test.jsp',        //不同的域
-    type: 'GET',                                      // jsonp模式只有GET 是合法的
-    data: {
-        'action': 'aaron'
-    },
-    dataType: 'jsonp',                     // 数据类型
-    jsonp: 'jsonpCallback',                // 指定回调函数名，与服务器端接收的一致，并回传回来
-})
-```
-
-其实jquery 内部会转化成下列代码，然后动态加载。
-
-```js
-<script type="text/javascript" src="http://192.168.10.46/demo/test.jsp?jsonpCallback= jQuery202003573935762227615_1402643146875&action=aaron"></script>
-```
-
-然后后端就会执行jsonpCallback(传递参数 )，把数据通过实参的形式发送出去。
-
-使用JSONP 模式来请求数据的整个流程：客户端发送一个请求，规定一个可执行的函数名（这里就是 jQuery做了封装的处理，自动帮你生成回调函数并把数据取出来供success属性方法来调用,而不是传递的一个回调句柄），服务器端接受了这个 jsonpCallback函数名，然后把数据通过实参的形式发送出去 。
-
-（在jquery 源码中， jsonp的实现方式是动态添加<script>标签来调用服务器提供的 js脚本。jquery 会在window对象中加载一个全局的函数，当 <script>代码插入时函数执行，执行完毕后就 <script>会被移除。同时jquery还对非跨域的请求进行了优化，如果这个请求是在同一个域名下那么他就会像正常的 Ajax请求一样工作。）
-
-**解决方式3：httpClient内部转发**
-
-实现原理很简单，若想在B站点中通过Ajax访问A站点获取结果，固然有ajax跨域问题，但在B站点中访问B站点获取结果，不存在跨域问题，这种方式实际上是在B站点中ajax请求访问B站点的HttpClient，再通过HttpClient转发请求获取A站点的数据结果。但这种方式产生了两次请求，效率低，但内部请求，抓包工具无法分析，安全。
-
-```js
-$.ajax({
-    type : "GET",
-    async : false,
-    url : "http://b.b.com:8080/B/FromAjaxservlet?userName=644064",
-    dataType : "json",
-    success : function(data) {
-   		alert(data["userName"]);
-    },
-    error : function() {
-    	alert('fail');
-    }
-});
-```
-
-```java
-@WebServlet("/FromAjaxservlet")
-public class FromAjaxservlet extends HttpServlet{
-	
-	
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		try {
-			//创建默认连接
-			CloseableHttpClient httpClient = HttpClients.createDefault();
-			//创建HttpGet对象,处理get请求,转发到A站点
-			HttpGet httpGet = new HttpGet("http://a.a.com:8080/A/FromServlet?userName="+req.getParameter("userName")); 
-                        //执行
-			CloseableHttpResponse response = httpClient.execute(httpGet);
-			int code = response.getStatusLine().getStatusCode();
-			//获取状态
-			System.out.println("http请求结果为:"+code);
-			if(code == 200){
-                                //获取A站点返回的结果
-				String result = EntityUtils.toString(response.getEntity());
-				System.out.println(result);
-                                //把结果返回给B站点
-				resp.getWriter().print(result);
-			}
-			response.close();
-			httpClient.close();
-		} catch (Exception e) {
-		}
-	}
-}
-```
-
-**解决方式4：使用nginx搭建企业级接口网关方式**
-
-www.a.a.com不能直接请求www.b.b.com的内容，可以通过nginx，根据同域名，但项目名不同进行区分。什么意思呢？这么说可能有点抽象。假设我们公司域名叫www.nginxtest.com
-
-当我们需要访问www.a.a.com时通过www.nginxtest.com/A访问，并通过nginx转发到www.a.a.com
-
-当我们需要访问www.b.b.com时通过www.nginxtest.com/B访问，并通过nginx转发到www.a.a.com
-
-我们访问公司的域名时，是"同源"的，只是项目名不同，此时项目名的作用只是为了区分，方便转发。如果你还不理解的话，先看看我是怎么进行配置的：
-
-```js
-server {
-    listen  80;
-    server_name  www.nginxtest.com;
-    location /A {
-        proxy_pass  http://a.a.com:81;
-        index  index.html index.htm;
-    }
-    location /B {
-        proxy_pass  http://b.b.com:81;
-        index  index.html index.htm;
-	}
-}
-```
-
-我们访问以www.nginxtest.com开头且端口为80的网址，nginx将会进行拦截匹配，若项目名为A，则分发到a.a.com:81。实际上就是通过"同源"的域名，不同的项目名进行区分，通过nginx拦截匹配，转发到对应的网址。整个过程，两次请求，第一次请求nginx服务器，第二次nginx服务器通过拦截匹配分发到对应的网址。
-
-**解决方式5：使用Spring Cloud zuul接口网关**
-
-
-
-##### JSONP
-
-**JSONP的优点**
-
-它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制；它的**兼容性更好**，在更加古老的浏览器中都 可以运行，不需要XMLHttpRequest或ActiveX的支持；并且在请求完毕后可以通过调用callback的方式回传结果。
-
-**JSONP的缺点**
-
-它只支持GET请求而不支持POST等其它类型的HTTP请求；它只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间如何进行JavaScript调用的问题。
-
-**JSONP原理**
-
-JSONP的最基本的原理是：动态添加一个<script>标签，而script标签的src属性是没有跨域的限制的。这样说来，这种跨域方式其实与ajax XmlHttpRequest协议无关了。
-
-这样其实"jQuery AJAX跨域问题"就成了个伪命题，jquery $.ajax方法名有误导人之嫌。
-
-如果设为dataType: 'jsonp'，这个$.ajax方法就和ajax XmlHttpRequest没什么关系了，取而代之的则是JSONP协议。JSONP是一个非官方的协议，它允许在服务器端集成Script tags返回至客户端，通过javascript callback的形式实现跨域访问。
-
-JSONP即JSON with Padding。由于同源策略的限制，XmlHttpRequest只允许请求当前源（域名、协议、端口）的资源。如果要进行跨域请求， 我们可以通过使用html的script标记来进行跨域请求，并在响应中返回要执行的script代码，其中可以直接使用JSON传递javascript对象。 这种跨域的通讯方式称为JSONP。
-
-jsonCallback 函数jsonp1236827957501(....)：是浏览器客户端注册的，获取跨域服务器上的json数据后回调的函数。
-
-**Jsonp的执行过程**
-
-首先在客户端注册一个callback (如:'jsoncallback'), 然后把callback的名字(如:jsonp1236827957501)传给服务器。注意：服务端得到callback的数值后，要用jsonp1236827957501(......)把将要输出的json内容包括起来，此时，服务器生成 json 数据才能被客户端正确接收。
-
-然后以 javascript 语法的方式，生成一个function， function 名字就是传递上来的参数 'jsoncallback'的值 jsonp1236827957501 .
-
-最后将 json 数据直接以入参的方式，放置到 function 中，这样就生成了一段 js 语法的文档，返回给客户端。
-
-客户端浏览器，解析script标签，并执行返回的 javascript 文档，此时javascript文档数据，作为参数， 传入到了客户端预先定义好的 callback 函数(如上例中jquery $.ajax()方法封装的的success: function (json))里。
-
-可以说jsonp的方式原理上和<script src="http://跨域/...xx.js"></script>是一致的(qq空间就是大量采用这种方式来实现跨域数据交换的)。JSONP是一种脚本注入(Script Injection)行为，所以有一定的安全隐患。
-
-**实战代码：**
-
-先看下准备环境：两个端口不一样，构成跨域请求的条件。
-
-获取数据：获取数据的端口为9090
-
-![](前端图片/856154-20170108230430987-1289440231.png)
-
-请求数据：请求数据的端口为8080
-
-1.先看下直接发起ajax请求会怎么样，下面是发起请求端的代码：
-
-```html
-<%@ page pageEncoding="utf-8" contentType="text/html;charset=UTF-8"  language="java" %>
-  <html>
-  <head>
-  	<title>跨域测试</title>
-    <script src="js/jquery-1.7.2.js"></script>
-    <script>
-          $(document).ready(function () {              
-             $("#btn").click(function () {
-                 $.ajax({
-                     url: 'http://localhost:9090/student',
-                     type: 'GET',
-                     success: function (data) {
-                         $(text).val(data);
-                     }
-                 });
-             });          
-         });
-     </script>
-  </head>
-  <body>
-     <input id="btn" type="button" value="跨域获取数据" />
-     <textarea id="text" style="width: 400px; height: 100px;"></textarea>
-  </body>
- </html>
-```
-
-请求的结果因为跨域请求，被浏览器的同源策略拦截了。
-
-2.接下来看如何发起跨域请求。解决跨域请求的方式有很多，这里只说一下jquery的jsop方式及其原理。
-
-首先我们需要明白，在页面上直接发起一个跨域的ajax请求是不可以的，但是，在页面上引入不同域上的js脚本却是可以的，就像你可以在自己的页面上使用<img src=""> 标签来随意显示某个域上的图片一样。
-
-比如我在8080端口的页面上请求一个9090端口的图片：可以看到直接通过src跨域请求是可以的。
-
-3.那么看下如何使用<script src="">来完成一个跨域请求：
-
-当点击"跨域获取数据"的按钮时，添加一个<script>标签，用于发起跨域请求；注意看请求地址后面带了一个callback=showData的参数；
-
-showData即是回调函数名称，传到后台，用于包裹数据。数据返回到前端后，就是showData(result)的形式，因为是script脚本，所以自动调用showData函数，而result就是showData的参数。
-
-至此，我们算是跨域把数据请求回来了，但是比较麻烦，需要自己写脚本发起请求，然后写个回调函数处理数据，不是很方便。
-
-```html
-<%@ page pageEncoding="utf-8" contentType="text/html;charset=UTF-8"  language="java" %>
-  <html>
-  <head>
-      <title>跨域测试</title>
-      <script src="js/jquery-1.7.2.js"></script>
-      <script>
-          //回调函数
-          function showData (result) {
-              var data = JSON.stringify(result); //json对象转成字符串
-             $("#text").val(data);
-         }
-         $(document).ready(function () {
-             $("#btn").click(function () {
-                 //向头部输入一个脚本，该脚本发起一个跨域请求
-                 $("head").append("<script src='http://localhost:9090/student?callback=showData'><\/script>");
-             }); 
-         });
-     </script>
-  </head>
-  <body>
-     <input id="btn" type="button" value="跨域获取数据" />
-     <textarea id="text" style="width: 400px; height: 100px;"></textarea>
- </body>
- </html>
-```
-
-服务端：
-
-```java
-protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-     response.setCharacterEncoding("UTF-8");
-     response.setContentType("text/html;charset=UTF-8");
-  
-     //数据
-     List<Student> studentList = getStudentList();
-  
-     JSONArray jsonArray = JSONArray.fromObject(studentList);
-     String result = jsonArray.toString();
- 
-     //前端传过来的回调函数名称
-     String callback = request.getParameter("callback");
-     //用回调函数名称包裹返回数据，这样，返回数据就作为回调函数的参数传回去了
-     result = callback + "(" + result + ")";
- 
-     response.getWriter().write(result);
-}
-```
-
-测试结果：
-
-![](前端图片/856154-20170109001005441-128129104.png)
-
-4.再来看jquery的jsonp方式跨域请求：
-
-服务端代码不变，js代码如下：最简单的方式，只需配置一个dataType:'jsonp'，就可以发起一个跨域请求。jsonp指定服务器返回的数据类型为jsonp格式，可以看发起的请求路径，自动带了一个callback=xxx，xxx是jquery随机生成的一个回调函数名称。
-
-这里的success就跟上面的showData一样，如果有success函数则默认success()作为回调函数。
-
-```html
-<%@ page pageEncoding="utf-8" contentType="text/html;charset=UTF-8"  language="java" %>
-  <html>
-  <head>
-      <title>跨域测试</title>
-      <script src="js/jquery-1.7.2.js"></script>
-      <script>
-          $(document).ready(function () { 
-             $("#btn").click(function () {
-                 $.ajax({
-                     url: "http://localhost:9090/student",
-                     type: "GET",
-                     dataType: "jsonp", //指定服务器返回的数据类型
-                     success: function (data) {
-                         var result = JSON.stringify(data); //json对象转成字符串
-                         $("#text").val(result);
-                     }
-                 });
-             }); 
-         });
-     </script>
-  </head>
-  <body>
-     <input id="btn" type="button" value="跨域获取数据" />
-     <textarea id="text" style="width: 400px; height: 100px;"></textarea>
-  </body>
- </html>
-```
-
-再看看如何指定特定的回调函数：第6行代码
-
-回调函数你可以写到<script>下(默认属于window对象)，或者指明写到window对象里，看jquery源码，可以看到jsonp调用回调函数时，是调用的window.callback。
-
-然后看调用结果，发现请求时带的参数是：callback=showData；**调用回调函数的时候，先调用了指定的showData，然后再调用了success。所以，success是返回成功后必定会调用的函数，就看你怎么写了。**
-
-```js
-$("#btn").click(function () {
-     $.ajax({
-         url: "http://localhost:9090/student",
-         type: "GET",
-         dataType: "jsonp",  //指定服务器返回的数据类型
-         jsonpCallback: "showData",  //指定回调函数名称
-         success: function (data) {
-         	console.info("调用success");
-     	}
-     });
- });
-```
-
-再看看如何改变callback这个名称：第6行代码
-
-指定callback这个名称后，后台也需要跟着更改。
-
-```js
-$("#btn").click(function () {
-     $.ajax({
-         url: "http://localhost:9090/student",
-         type: "GET",
-         dataType: "jsonp",  //指定服务器返回的数据类型
-         jsonp: "theFunction",   //指定参数名称
-         jsonpCallback: "showData",  //指定回调函数名称
-         success: function (data) {
-         	console.info("调用success");
-         }
-     });
- });
-```
-
-后台代码：
-
-```java
-protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    response.setCharacterEncoding("UTF-8");
-    response.setContentType("text/html;charset=UTF-8");
-    
-    //数据
-    List<Student> studentList = getStudentList();
-    
-    JSONArray jsonArray = JSONArray.fromObject(studentList);
-    String result = jsonArray.toString();
-
-    //前端传过来的回调函数名称
-    String callback = request.getParameter("theFunction");
-    //用回调函数名称包裹返回数据，这样，返回数据就作为回调函数的参数传回去了
-    result = callback + "(" + result + ")";
-    response.getWriter().write(result);
-}
-```
-
-效果图：
-
-![](前端图片/856154-20170109010836775-1636228338.png)
-
-最后看看jsonp是否支持POST方式：ajax请求指定POST方式
-
-可以看到，jsonp方式不支持POST方式跨域请求，就算指定成POST方式，会自动转为GET方式；而后端如果设置成POST方式了，那就请求不了了。
-
-jsonp的实现方式其实就是<script>脚本请求地址的方式一样，只是ajax的jsonp对其做了封装，所以可想而知，jsonp是不支持POST方式的。
-
-
-
-再补充一点，如果浏览器报错：CORS头缺少“Access-Control-Allow-Origin”。
-
-有时候你会发现其它都没问题，出现这个错误：这个错误代表服务端拒绝跨域访问。如果出现这个错误，就需要在服务端设置允许跨域请求。
-
-response.setHeader("Access-Control-Allow-Origin", "*"); 设置允许任何域名跨域访问
-
-设置可以跨域访问：第6行代码或第8行代码，设置其中一个即可。
-
-```java
-protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    response.setCharacterEncoding("UTF-8");
-    response.setContentType("text/html;charset=UTF-8");
-
-    // * 表示允许任何域名跨域访问
-    response.setHeader("Access-Control-Allow-Origin", "*");
-    // 指定特定域名可以访问
-    response.setHeader("Access-Control-Allow-Origin", "http:localhost:8080/");
-
-    //数据
-    List<Student> studentList = getStudentList();
-
-    JSONArray jsonArray = JSONArray.fromObject(studentList);
-    String result = jsonArray.toString();
-
-    //前端传过来的回调函数名称
-    String callback = request.getParameter("callback");
-    //用回调函数名称包裹返回数据，这样，返回数据就作为回调函数的参数传回去了
-    result = callback + "(" + result + ")";
-    response.getWriter().write(result);
-}
-```
-
-
 
 
 
@@ -3092,3 +2617,170 @@ var foo = function () { }　　
 <br>
 <p id="pos">尾部定位点</p>
 ```
+
+------
+
+##### **document.write与innerHTML**
+
+document.write 将内容写入页面，清空替换掉原来的内容，会导致重绘。
+
+document.innerHTML 将内容写入某个Dom节点，不会重绘。
+
+------
+
+##### **JSONP与AJAX**区别
+
+JSONP 是一种非正式传输协议，允许用户传递一个callback给服务端，然后服务端返回数据时会将这个callback 参数作为函数名来包裹住 JSON 数据，这样客户端就可以随意定制自己的函数来自动处理返回数据了。当GET请求从后台页面返回时，可以返回一段JavaScript代码，这段代码会自动执行，可以用来负责调用后台页面中的一个callback函数。
+它们的实质不同
+**ajax的核心是通过xmlHttpRequest获取非本页内容**
+**jsonp的核心是动态添加script标签调用服务器提供的js脚本**
+**jsonp只支持get请求，ajax支持get和post请求**
+
+------
+
+##### 两个对象如何比较
+
+有思路即可，步骤：
+（1）判断两个类型是否对象
+（2）判断两个对象key的长度是否一致
+（3）判断属性value值的数据类型，根据不同数据类型做比较
+    a、是对象，重复这个步骤
+    b、是数组，转字符串比较
+    c、是基本类型，直接判断
+
+------
+
+##### **["1", "2", "3"].map(parseInt)** 
+
+[1, 2, 3].map(parseInt) 等价于 [parseInt(1, 0), parseInt(2, 1), parseInt(3, 2)]
+
+```
+（1）map用法：
+arr.map(function(el, index, arr) {
+    return el
+})
+
+map方法接收一个函数参数，并且这个函数可以接收三个参数
+el：遍历过程中的当前项，
+index：遍历过程中的当前下标
+arr: 原数组
+
+（2）parseInt用法：
+parseInt(str, num) 
+根据num解析str，并返回一个整数。
+str: 要解析的字符串，如果字符第一个数不能被转换，返回NaN。
+num: 进制基数，介于 2 ~ 36 之间，如果传0，则默认用10计算。num不在区间内，返回NaN
+
+（3）所以这道题，关键点就在num
+el和index 相当于 str 和 num 带入一下
+parseInt('1', 0) //'1' 用基数10算 为1
+parseInt('2', 1) //radix值在2-36，无法解析，返回NaN
+parseInt('3', 2) //基数为2，2进制数表示的数中，最大值小于3，无法解析，返回NaN
+```
+
+------
+
+##### **XML和JSON的区别**
+
+- xml是重量级的，json是轻量级的。
+- xml在传输过程中比较占带宽，json占带宽少，易于压缩。
+- xml和json都用在项目交互下，xml多用于做配置文件，json用于数据交互。
+
+------
+
+##### Drag Api
+
+dragstart：事件主体是被拖放元素，在开始拖放被拖放元素时触发，。
+
+darg：事件主体是被拖放元素，在正在拖放被拖放元素时触发。
+
+dragenter：事件主体是目标元素，在被拖放元素进入某元素时触发。
+
+dragover：事件主体是目标元素，在被拖放在某元素内移动时触发。
+
+dragleave：事件主体是目标元素，在被拖放元素移出目标元素是触发。
+
+drop：事件主体是目标元素，在目标元素完全接受被拖放元素时触发。
+
+dragend：事件主体是被拖放元素，在整个拖放操作结束时触发
+
+------
+
+##### 0.1+0.2 !== 0.3
+
+在开发过程中遇到类似这样的问题：
+
+```javascript
+let n1 = 0.1, n2 = 0.2
+console.log(n1 + n2)  // 0.30000000000000004
+复制代码
+```
+
+这里得到的不是想要的结果，要想等于0.3，就要把它进行转化：
+
+```javascript
+(n1 + n2).toFixed(2) // 注意，toFixed为四舍五入
+复制代码
+```
+
+`toFixed(num)` 方法可把 Number 四舍五入为指定小数位数的数字。那为什么会出现这样的结果呢？
+
+计算机是通过二进制的方式存储数据的，所以计算机计算0.1+0.2的时候，实际上是计算的两个数的二进制的和。0.1的二进制是`0.0001100110011001100...`（1100循环），0.2的二进制是：`0.00110011001100...`（1100循环），这两个数的二进制都是无限循环的数。那JavaScript是如何处理无限循环的二进制小数呢？
+
+一般我们认为数字包括整数和小数，但是在 JavaScript 中只有一种数字类型：Number，它的实现遵循IEEE 754标准，使用64位固定长度来表示，也就是标准的double双精度浮点数。在二进制科学表示法中，双精度浮点数的小数部分最多只能保留52位，再加上前面的1，其实就是保留53位有效数字，剩余的需要舍去，遵从“0舍1入”的原则。
+
+根据这个原则，0.1和0.2的二进制数相加，再转化为十进制数就是：`0.30000000000000004`。
+
+下面看一下**双精度数是如何保存**的：
+
+![image-20220331215225304](前端图片/image-20220331215225304.png)
+
+- 第一部分（蓝色）：用来存储符号位（sign），用来区分正负数，0表示正数，占用1位
+- 第二部分（绿色）：用来存储指数（exponent），占用11位
+- 第三部分（红色）：用来存储小数（fraction），占用52位
+
+对于0.1，它的二进制为：
+
+```javascript
+0.00011001100110011001100110011001100110011001100110011001 10011...
+```
+
+转为科学计数法（科学计数法的结果就是浮点数）：
+
+```javascript
+1.1001100110011001100110011001100110011001100110011001*2^-4
+```
+
+可以看出0.1的符号位为0，指数位为-4，小数位为：
+
+```javascript
+1001100110011001100110011001100110011001100110011001
+```
+
+那么问题又来了，**指数位是负数，该如何保存**呢？
+
+IEEE标准规定了一个偏移量，对于指数部分，每次都加这个偏移量进行保存，这样即使指数是负数，那么加上这个偏移量也就是正数了。由于JavaScript的数字是双精度数，这里就以双精度数为例，它的指数部分为11位，能表示的范围就是0~2047，IEEE固定**双精度数的偏移量为1023**。
+
+- 当指数位不全是0也不全是1时(规格化的数值)，IEEE规定，阶码计算公式为 e-Bias。 此时e最小值是1，则1-1023= -1022，e最大值是2046，则2046-1023=1023，可以看到，这种情况下取值范围是`-1022~1013`。
+- 当指数位全部是0的时候(非规格化的数值)，IEEE规定，阶码的计算公式为1-Bias，即1-1023= -1022。
+- 当指数位全部是1的时候(特殊值)，IEEE规定这个浮点数可用来表示3个特殊值，分别是正无穷，负无穷，NaN。 具体的，小数位不为0的时候表示NaN；小数位为0时，当符号位s=0时表示正无穷，s=1时候表示负无穷。
+
+对于上面的0.1的指数位为-4，-4+1023 = 1019 转化为二进制就是：`1111111011`.
+
+所以，0.1表示为：
+
+```javascript
+0 1111111011 1001100110011001100110011001100110011001100110011001
+```
+
+说了这么多，是时候该最开始的问题了，如何实现0.1+0.2=0.3呢？
+
+对于这个问题，一个直接的解决方法就是设置一个误差范围，通常称为“机器精度”。对JavaScript来说，这个值通常为2-52，在ES6中，提供了`Number.EPSILON`属性，而它的值就是2-52，只要判断`0.1+0.2-0.3`是否小于`Number.EPSILON`，如果小于，就可以判断为0.1+0.2 ===0.3
+
+```javascript
+function numberepsilon(arg1,arg2){                   
+  return Math.abs(arg1 - arg2) < Number.EPSILON;        
+}        
+console.log(numberepsilon(0.1 + 0.2, 0.3)); // true
+```
+

@@ -66,12 +66,32 @@
 
 我们应尽量使用 **<link>** 标签导入外部 CSS 文件，避免或者少用使用其他三种方式。
 
+
+
 #### link标签与import标签区别
 
 - link 属于 HTML，通过 **<link>** 标签中的 href 属性来引入外部文件，而 **@import** 属于 CSS，所以导入语句应写在 CSS 中，要注意的是**导入语句应写在样式表的开头**，否则无法正确导入外部文件；
+
 - 页面被加载时，link会同时被加载，而@import引用的css会等到页面加载结束后加载。
+
 - link是html标签，因此没有兼容性，而@import只有IE5以上才能识别。
+
 - link方式样式的权重高于@import的。
+
+- link支持使用Javascript控制DOM去改变样式；而@import不支持。
+
+
+------
+
+- **link**：浏览器会派发一个新等线程(HTTP线程)去加载资源文件，与此同时GUI渲染线程会继续向下渲染代码
+- **@import**：GUI渲染线程会暂时停止渲染，去服务器加载资源文件，资源文件没有返回之前不会继续渲染(阻碍浏览器渲染)
+- **style**：GUI直接渲染
+
+外部样式如果长时间没有加载完毕，浏览器为了用户体验，会使用浏览器会默认样式，确保首次渲染的速度。所以CSS一般写在headr中，让浏览器尽快发送请求去获取css样式。
+
+所以，在开发过程中，导入外部样式**使用link，而不用@import**。如果css少，尽可能采用内嵌样式，直接写在style标签中。
+
+
 
 #### CSS3新属性
 
@@ -92,6 +112,8 @@ CSS3 2D，3D转换如transform等；
 媒体查讯
 
 CSS3动画如animation等。
+
+
 
 #### css语义化命名及常用命名规则
 
@@ -123,65 +145,24 @@ CSS的命名方式：
 打印：print.css
 ```
 
-#### CSS的继承性
 
-CSS 的继承特性指的是应用在一个标签上的那些 CSS 属性被传到其子标签上。看下面的 HTML 结构：
 
-```html
-<div>
-    <p></p>
-</div>
-```
+#### CSS样式优先级
 
-如果 **<div>** 有个属性 **color: red**，则这个属性将被 **<p>** 继承，即 **<p>** 也拥有属性 **color: red**。
+| **选择器**     | **格式**      | **优先级权重** |
+| -------------- | ------------- | -------------- |
+| id选择器       | #id           | 100            |
+| 类选择器       | .classname    | 10             |
+| 属性选择器     | a[ref=“eee”]  | 10             |
+| 伪类选择器     | li:last-child | 10             |
+| 标签选择器     | div           | 1              |
+| 伪元素选择器   | li:after      | 1              |
+| 相邻兄弟选择器 | h1+p          | 0              |
+| 子选择器       | ul>li         | 0              |
+| 后代选择器     | li a          | 0              |
+| 通配符选择器   | *             | 0              |
 
-由上可见，当网页比较复杂， HTML 结构嵌套较深时，一个标签的样式将深受其祖先标签样式的影响。影响的规则是：
-
-**CSS 优先规则1：** 最近的祖先样式比其他祖先样式优先级高。
-
-例1：
-
-```html
-<!-- 类名为 son 的 div 的 color 为 blue -->
-<div style="color: red">
-    <div style="color: blue">
-        <div class="son"></div>
-    </div>
-</div>
-```
-
-如果我们把一个标签从祖先那里继承来的而自身没有的属性叫做"祖先样式"，那么"直接样式"就是一个标签直接拥有的属性。又有如下规则：
-
-**CSS 优先规则2：**"直接样式"比"祖先样式"优先级高。
-
-例2：
-
-```html
-<!-- 类名为 son 的 div 的 color 为 blue -->
-<div style="color: red">
-    <div class="son" style="color: blue"></div>
-</div>
-```
-
-#### CSS样式优先级（5种）
-
-CSS 7 种基础的选择器：
-
-- ID 选择器， 如 #id{}
-
-- 类选择器， 如 .class{}
-
-- 属性选择器， 如 a[href="segmentfault.com"]{}
-
-- 伪类选择器， 如 :hover{}
-
-- 伪元素选择器， 如 ::before{}
-
-- 标签选择器， 如 span{}
-
-- 通配选择器， 如 *{}
-  
-  **优先级关系：内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器**
+**优先级关系：内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器**
 
 1.优先级最高的-!important
 
@@ -230,6 +211,8 @@ div p span {
 当一个标签同时被多个选择符选中，我们便需要确定这些选择符的优先级。我们有如下规则：
 
 计算选择符中 ID 选择器的个数（a），计算选择符中类选择器、属性选择器以及伪类选择器的个数之和（b），计算选择符中标签选择器和伪元素选择器的个数之和（c）。按 a、b、c 的顺序依次比较大小，大的则优先级高，相等则比较下一个。若最后两个的选择符中 a、b、c 都相等，则按照"就近原则"来判断。
+
+
 
 #### css初始化
 
@@ -684,6 +667,110 @@ ul,ol,li{
 }
 ```
 
+
+
+#### CSS继承性
+
+CSS 的继承特性指的是应用在一个标签上的那些 CSS 属性被传到其子标签上。看下面的 HTML 结构：
+
+```html
+<div>
+    <p></p>
+</div>
+```
+
+如果 **<div>** 有个属性 **color: red**，则这个属性将被 **<p>** 继承，即 **<p>** 也拥有属性 **color: red**。
+
+由上可见，当网页比较复杂， HTML 结构嵌套较深时，一个标签的样式将深受其祖先标签样式的影响。影响的规则是：
+
+**CSS 优先规则1：** 最近的祖先样式比其他祖先样式优先级高。
+
+例1：
+
+```html
+<!-- 类名为 son 的 div 的 color 为 blue -->
+<div style="color: red">
+    <div style="color: blue">
+        <div class="son"></div>
+    </div>
+</div>
+```
+
+如果我们把一个标签从祖先那里继承来的而自身没有的属性叫做"祖先样式"，那么"直接样式"就是一个标签直接拥有的属性。又有如下规则：
+
+**CSS 优先规则2：**"直接样式"比"祖先样式"优先级高。
+
+例2：
+
+```html
+<!-- 类名为 son 的 div 的 color 为 blue -->
+<div style="color: red">
+    <div class="son" style="color: blue"></div>
+</div>
+```
+
+------
+
+##### 无继承性的属性
+
+1. **display**：规定元素应该生成的框的类型
+2. **文本属性**：
+
+- vertical-align：垂直文本对齐
+- text-decoration：规定添加到文本的装饰
+- text-shadow：文本阴影效果
+- white-space：空白符的处理
+- unicode-bidi：设置文本的方向
+
+**盒子模型的属性**：width、height、margin、border、padding
+
+**背景属性**：background、background-color、background-image、background-repeat、background-position、background-attachment
+
+**定位属性**：float、clear、position、top、right、bottom、left、min-width、min-height、max-width、max-height、overflow、clip、z-index
+
+**生成内容属性**：content、counter-reset、counter-increment
+
+**轮廓样式属性**：outline-style、outline-width、outline-color、outline
+
+**页面样式属性**：size、page-break-before、page-break-after
+
+**声音样式属性**：pause-before、pause-after、pause、cue-before、cue-after、cue、play-during
+
+------
+
+##### 有继承性的属性
+
+**字体系列属性**
+
+- font-family：字体系列
+- font-weight：字体的粗细
+- font-size：字体的大小
+- font-style：字体的风格
+
+**文本系列属性**
+
+- text-indent：文本缩进
+- text-align：文本水平对齐
+- line-height：行高
+- word-spacing：单词之间的间距
+- letter-spacing：中文或者字母之间的间距
+- text-transform：控制文本大小写（就是uppercase、lowercase、capitalize这三个）
+- color：文本颜色
+
+**元素可见性**
+
+- visibility：控制元素显示隐藏
+
+**列表布局属性**
+
+- list-style：列表风格，包括list-style-type、list-style-image等
+
+**光标属性**
+
+- cursor：光标显示为何种形态
+
+
+
 #### inline-block、inline和block
 
 1）行内元素（display:inline;），又称内联元素
@@ -703,6 +790,8 @@ ul,ol,li{
 方法二：**行内元素设置float属性后，此元素的display会赋值为block**，且拥有浮动特性，原留白也会消失。
 方法三：行内元素设置position属性值为absolute或fixed后，此元素的display也会赋值为block。
 注意：方法二和方法三转换为块级元素后，这两种方法不会拥有块级元素的特性之一：未继承父元素的宽度。
+
+
 
 #### vertical-align
 
@@ -767,6 +856,8 @@ ul,ol,li{
 </body>
 ```
 
+
+
 #### 浮动
 
 ##### 浮动特性
@@ -826,33 +917,7 @@ ul,ol,li{
 </body>
 ```
 
-#### 通过属性设置css格式
 
-```html
-<head>
-    <meta charset="UTF-8">
-    <title>创建css选择器</title>
-    <style type="text/css">
-        [href]{                //将有href属性的标签设置为以下样式，如果需要精确则将[href=地址]添加上
-            font-size:40px;
-            background-color:#000000;
-        }
-        a:hover{            //鼠标经过时改为以下的格式
-            font-size:80px;
-            background-color:#000232;
-            transition-delay:150ms;                //变化的延迟时间
-            transition-duration:1000ms;            //平滑变化的速度时间
-            transition-property:background-color;        //需要平滑变化的属性
-        }
-    </style>
-</head>
-
-<!-- id是唯一标识，只能应用于一个标签上，class可以应用在多个标签上 -->
-<body>
-    <a href="xxx.html">靠谱学院</a>
-    <a>靠谱学院</a>
-</body>
-```
 
 #### 设置文本样式
 
@@ -892,6 +957,8 @@ ul,ol,li{
 </body>
 ```
 
+
+
 #### 盒子模型
 
 简介：就是用来装页面上的元素的矩形区域。CSS中的盒子模型包括IE盒子模型和标准的W3C盒子模型。
@@ -915,6 +982,8 @@ IE盒子模型的盒子宽度：width
 
 最后，前面我们还提到了，box-sizing:padding-box,这个属性值的宽度包含了左右padding+width
 
+
+
 #### **display:none与visibility:hidden**
 
 ```css
@@ -925,53 +994,79 @@ display: none;
 visibility: hidden;
 ```
 
+
+
 #### **重绘和回流**
 
-**重绘：**不会影响页面布局的操作，比如更改颜色
-如果只是改变某个元素的背景色、文字颜色、边框颜色等等不影响它周围或内部布局的属性，将只会引起浏览器repaint（重绘）。repaint的速度明显快于reflow。
+**重绘：**不会影响页面布局的操作，比如更改颜色。如果只是改变某个元素的背景色、文字颜色、边框颜色等等不影响它周围或内部布局的属性，将只会引起浏览器repaint（重绘）。repaint的速度明显快于reflow。下面这些操作会导致回流：
 
-**回流：**布局的改变导致需要重新构建
-说到页面为什么会慢？那是因为浏览器要花时间、花精力去渲染，尤其是当它发现某个部分发生了点变化影响了布局，需要倒回去重新渲染， 该过程称为reflow（回流）。
-reflow几乎是无法避免的。现在界面上流行的一些效果，比如树状目录的折叠、展开（实质上是元素的显 示与隐藏）等，都将引起浏览器的reflow。鼠标滑过、点击……只要这些行为引起了页面上某些元素的占位面积、定位方式、边距等属性的变化，都会引起它内部、周围甚至整个页面的重新渲 染。通常我们都无法预估浏览器到底会reflow哪一部分的代码，它们都彼此相互影响着。
+- color、background 相关属性：background-color、background-image 等
+- outline 相关属性：outline-color、outline-width 、text-decoration
+- border-radius、visibility、box-shadow
+
+**回流：**布局的改变导致需要重新构建，下面这些操作会导致回流：
+
+- 页面的首次渲染
+- 浏览器的窗口大小发生变化
+- 元素的内容发生变化
+- 元素的尺寸或者位置发生变化
+- 元素的字体大小发生变化
+- 激活CSS伪类
+- 查询某些属性或者调用某些方法
+- 添加或者删除可见的DOM元素
+
+说到页面为什么会慢？那是因为浏览器要花时间、花精力去渲染，尤其是当它发现某个部分发生了点变化影响了布局，需要倒回去重新渲染， 该过程称为
+
+reflow（回流）。
+
+reflow几乎是无法避免的。现在界面上流行的一些效果，比如树状目录的折叠、展开（实质上是元素的显 示与隐藏）等，都将引起浏览器的reflow。鼠标滑过、点
+
+击……只要这些行为引起了页面上某些元素的占位面积、定位方式、边距等属性的变化，都会引起它内部、周围甚至整个页面的重新渲 染。通常我们都无法预估浏
+
+览器到底会reflow哪一部分的代码，它们都彼此相互影响着。
 
 **回流必将引起重绘，重绘不一定会引起回流**
 
 如何避免reflow(回流)？
+
 reflow是不可避免的，只能将reflow对性能的影响减到最小。
 
-1.尽可能限制reflow的影响范围。需要改变元素的样式，不要通过父级元素影响子元素。最好直接加在子元素上。
+- 尽可能限制reflow的影响范围。需要改变元素的样式，不要通过父级元素影响子元素。最好直接加在子元素上。
+- 通过设置style属性改变结点样式的话，每设置一次都会导致一次reflow。所以最好通过设置class的方式。
+- 减少不必要的DOM层级（DOM depth）。改变DOM树中的一级会导致所有层级的改变，上至根部，下至被改变节点的子节点。这导致大量时间耗费在执行reflow上面。操作DOM时，尽量在低层级的DOM节点进行操作。
+- 避免不必要的复杂的CSS选择器，尤其是后代选择器（descendant selectors），因为为了匹配选择器将耗费更多的CPU。
+- 对于多次重排的元素，比如说动画。使用绝对定位脱离文档流，使其不影响其他元素。
+- 不要使用`table`布局， 一个小的改动可能会使整个`table`进行重新布局。
+- 使用absolute或者fixed，使元素脱离文档流，这样他们发生变化就不会影响其他元素。
+- 不要频繁操作元素的样式，对于静态页面，可以修改类名，而不是样式。
+- 避免频繁操作DOM，可以创建一个文档片段`documentFragment`，在它上面应用所有DOM操作，最后再把它添加到文档中。
 
-2.通过设置style属性改变结点样式的话，每设置一次都会导致一次reflow。所以最好通过设置class的方式。
+- 将元素先设置`display: none`，操作结束后再把它显示出来。因为在display属性为none的元素上进行的DOM操作不会引发回流和重绘。
+- 将DOM的多个读操作（或者写操作）放在一起，而不是读写操作穿插着写。这得益于**浏览器的渲染队列机制**。
 
-3.减少不必要的DOM层级（DOM depth）。改变DOM树中的一级会导致所有层级的改变，上至根部，下至被改变节点的子节点。这导致大量时间耗费在执行reflow上面。
+浏览器针对页面的回流与重绘，进行了自身的优化——**渲染队列**
 
-4.避免不必要的复杂的CSS选择器，尤其是后代选择器（descendant selectors），因为为了匹配选择器将耗费更多的CPU。
+**浏览器会将所有的回流、重绘的操作放在一个队列中，当队列中的操作到了一定的数量或者到了一定的时间间隔，浏览器就会对队列进行批处理。这样就会让多次的回流、重绘变成一次回流重绘。**
 
-5.对于多次重排的元素，比如说动画。使用绝对定位脱离文档流，使其不影响其他元素。
+将多个读操作（或者写操作）放在一起，就会等所有的读操作进入队列之后执行，这样，原本应该是触发多次回流，变成了只触发一次回流。
 
-#### **CSS性能优化**
 
-JS在执行会出现DOM树解析和渲染阻塞。
 
-我们设置3G这样加载CSS慢了。
+##### 如何优化动画
 
-得出的结果是先解析了等加载完CSS才渲染。其实我觉得，这可能也是浏览器的一种优化机制。因为你加载css的时候，可能会修改下面DOM节点的样式，如果css加载不阻塞DOM树渲染的话，那么当css加载完之后，DOM树可能又得重新重绘或者回流了，这就造成了一些没有必要的损耗。所以我干脆就先把DOM树的结构先解析完，把可以做的工作做完，然后等你css加载完之后，在根据最终的样式来渲染DOM树，这种做法性能方面确实会比较好一点。
-由上所述，我们可以得出以下结论:
+对于如何优化动画，我们知道，一般情况下，动画需要频繁的操作DOM，就就会导致页面的性能问题，我们可以将动画的`position`属性设置为`absolute`或者`fixed`，将动画脱离文档流，这样他的回流就不会影响到页面了。
 
-**css加载不会阻塞DOM树的解析**
 
-**css加载会阻塞DOM树的渲染**
 
-css加载会阻塞后面js语句的执行
-因此，为了避免让用户看到长时间的白屏时间，我们应该尽可能的提高css加载速度，比如可以使用以下几种方法:
+##### documentFragment 
 
-1、使用CDN(因为CDN会根据你的网络状况，替你挑选最近的一个具有缓存内容的节点为你提供资源，因此可以减少加载时间)
+MDN中对`documentFragment`的解释：
 
-2、对css进行压缩(可以用很多打包工具，比如webpack,gulp等，也可以通过开启gzip压缩)
+> DocumentFragment，文档片段接口，一个没有父对象的最小文档对象。它被作为一个轻量版的 Document使用，就像标准的document一样，存储由节点（nodes）组成的文档结构。与document相比，最大的区别是DocumentFragment不是真实 DOM 树的一部分，它的变化不会触发 DOM 树的重新渲染，且不会导致性能等问题。
 
-3、合理的使用缓存(设置cache-control,expires,以及E-tag都是不错的，不过要注意一个问题，就是文件更新后，你要避免缓存而带来的影响。其中一个解决防范是在文件名字后面加一个版本号)
+当我们把一个 DocumentFragment 节点插入文档树时，插入的不是 DocumentFragment 自身，而是它的所有子孙节点。在频繁的DOM操作时，我们就可以将DOM元素插入DocumentFragment，之后一次性的将所有的子孙节点插入文档中。和直接操作DOM相比，将DocumentFragment 节点插入DOM树时，不会触发页面的重绘，这样就大大提高了页面的性能。
 
-4、减少http请求数，将多个css文件合并，或者是干脆直接写成内联样式(内联样式的一个缺点就是不能缓存)
+
 
 #### position（定位）
 
@@ -987,6 +1082,8 @@ Position属性把元素放置在一个静态的，相对的，绝对的，固定
 
 **inherit：**规定应该从父元素继承position 属性的值。
 
+
+
 #### CSS内容溢出处理
 
 **text-overflow属性**：
@@ -997,15 +1094,34 @@ ellipsis为显示省略符号来表被修剪的文本；
 
 string为使用给定的字符串来代表被修剪的文本。
 
+
+
 #### 双边距重叠问题（外边距折叠）
 
-多个相邻（兄弟或者父子关系）普通流的块元素垂直方向marigin会重叠
+多个相邻（兄弟或者父子关系）普通流的块元素垂直方向marigin会重叠。需要注意的是，**浮动的元素和绝对定位**这种脱离文档流的元素的外边距不会折叠。重叠只会出现在**垂直方向**。
 
 折叠的结果为：
 
 两个相邻的外边距都是正数时，折叠结果是它们两者之间较大的值。
 两个相邻的外边距都是负数时，折叠结果是两者绝对值的较大值。
 两个外边距一正一负时，折叠结果是两者的相加的和。
+
+**解决办法：** 对于折叠的情况，主要有两种：**兄弟之间重叠**和**父子之间重叠** 
+
+（1）兄弟之间重叠
+
+- 底部元素变为行内盒子：`display: inline-block`
+- 底部元素设置浮动：`float`
+- 底部元素的position的值为`absolute/fixed`
+
+（2）父子之间重叠
+
+- 父元素加入：`overflow: hidden`
+- 父元素添加透明边框：`border:1px solid transparent`
+- 子元素变为行内盒子：`display: inline-block`
+- 子元素加入浮动属性或定位
+
+
 
 #### Flex布局
 
@@ -1039,6 +1155,8 @@ flex属性是flex-grow, flex-shrink 和 flex-basis的简写，默认值为0 1 au
 
 **align-self**属性允许单个项目有与其他项目不一样的对齐方式，可覆盖align-items属性。默认值为auto，表示继承父元素的align-items属性，如果没有父元素，则等同于stretch。
 
+
+
 #### 边框渐变
 
 第一种：border-image设置边框颜色渐变示例
@@ -1071,17 +1189,33 @@ border-color属性为我们提供了同一条边框设置多种颜色，但是�
  }
 ```
 
+
+
 #### 垂直水平居中
 
 有一个width 200，height 200，怎么实现在屏幕上垂直水平居中？
 
-1、采用绝对定位，原理是子绝父相，父元素设置position：relative，子元素设置position：absolute，然后通过transform或margin组合使用达到垂直居中效果，设置top：50%，left：50%，transform：translate（-50%，-50%）。
+1、采用绝对定位，原理是子绝父相，父元素设置position：relative，子元素设置position：absolute，然后通过transform或margin组合使用达到垂直居中效果，设置top：50%，left：50%，transform：translate（-50%，-50%）。该方法需要**考虑浏览器兼容问题。**
 
-2、绝对居中，原理是当top,bottom为0时，margin-top&bottom设置auto的话会无限延伸沾满空间并平分，当left，right为0时,margin-left&right设置auto会无限延伸占满空间并平分。
+```
+.parent {    
+	position: relative;
+} 
+.child {    
+	position: absolute;    
+	left: 50%;    
+	top: 50%;    
+	transform: translate(-50%, -50%);
+}
+```
+
+2、绝对居中，原理是当top,bottom为0时，margin-top&bottom设置auto的话会无限延伸沾满空间并平分，当left，right为0时,margin-left&right设置auto会无限延伸占满空间并平分。该方法适用于**盒子有宽高**的情况。
 
 ```css
-.center {
-    background: red;
+.parent {    
+	position: relative;
+} 
+.child {
     width: 100px;
     height: 100px;
     position: absolute;
@@ -1093,7 +1227,7 @@ border-color属性为我们提供了同一条边框设置多种颜色，但是�
   } 
 ```
 
-3、flex布局
+3、flex布局，该方法要**考虑兼容的问题**，该方法在移动端用的较多。
 
 ```css
 .container {        /*父样式*/
@@ -1166,6 +1300,8 @@ border-color属性为我们提供了同一条边框设置多种颜色，但是�
     text-align: center;
 }
 ```
+
+
 
 #### BFC/IFC/GFC/FFC
 
@@ -1333,38 +1469,7 @@ FFC(Flex Formatting Contexts)直译为"自适应格式化上下文"，display值
 Flex Box 由伸缩容器和伸缩项目组成。通过设置元素的 display 属性为 flex 或 inline-flex 可以得到一个伸缩容器。设置为 flex 的容器被渲染为一个块级元素，而设置为 inline-flex 的容器则渲染为一个行内元素。
 伸缩容器中的每一个子元素都是一个伸缩项目。伸缩项目可以是任意数量的。伸缩容器外和伸缩项目内的一切元素都不受影响。简单地说，Flexbox 定义了伸缩容器内伸缩项目该如何布局。
 
-#### display:inline-block 显示间隙问题
 
-**产生原因：**元素被当成行内元素排版的时候，元素之间的空白符（空格、回车换行等）都会被浏览器处理，根据white-space的处理方式（默认是normal，合并多余空白），原来HTML代码中的回车换行被转成一个空白符，在字体不为0的情况下，空白符占据一定宽度，所以inline-block的元素之间就出现了空隙。这些元素之间的间距会随着字体的大小而变化，当行内元素font-size:16px时，间距为8px。
-
-**解决方法：**
-
-1.移除空格
-2.使用margin负值
-3.使用font-size:0
-4.letter-spacing——设置对象中的单词之间插入的空格数
-5.word-spacing——设置对象中的文字之间的间隔.每一个中文文字以及英文字母之间
-
-#### 字体奇偶性
-
-```css
-一般来说，使用偶数字体多于奇数字体
-1.比例关系
-相对来说偶数字号比较容易和页面中其他部分的字号构成一个比例关系。如我使用14px的字体作为正文字号，那么其他部分的字体（如标题）就可以使用14×1.5 =21px的字体，或者在一些地方使用到了14×0.5=7px的padding或者margin，如果你是在用sass或者less编写css，这时候用处就凸显出来了。
-
-2.UI设计师的缘故
-大多数设计师用的软件如ps提供的字号是偶数，自然到了 前端那边也是用的是偶数。
-
-3.浏览器缘故
-其一是低版本的浏览器ie6会把奇数字体强制转化为偶数，即13px渲染为14px。
-
-其二是为了平分字体。偶数宽的汉字，如12px的汉字，去掉1像素的字体间距，填充了的字体像素宽度其实就是11px，这样的汉字中竖线左右是平分的，如“中”子，左右就是5px了。
-
-4.系统差别
-Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14、16 px 这三个大小的点阵，而 13、15、17 px 时用的是小一号的点阵（即每个字占的空间大了 1 px，但点阵没变），于是略显稀疏。
-
-但是也可以使用奇数字体。目前来说12，13，14，15，16px都是比较常用而且不错的字号，通过审查元素可以看到知乎的正文字号和豆瓣部分栏目（豆瓣电影）也是用了13px字号，效果都很不错。使用奇数号字体不好的地方是，文本段落无法对齐。
-```
 
 #### 伪元素与伪类
 
@@ -1386,6 +1491,105 @@ Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14
 伪元素/伪对象：不存在在DOM文档中，是虚拟的元素，是创建新元素。代表某个元素的子元素，这个子元素虽然在逻辑上存在，但却并不实际存在于文档树中。
 
 伪类：存在DOM文档中，逻辑上存在但在文档树中却无须标识的“幽灵”分类。
+
+
+
+#### 二栏布局
+
+一般两栏布局指的是**左边一栏宽度固定，右边一栏宽度自适应**，两栏布局的具体实现：
+
+- 利用浮动，将左边元素宽度设置为200px，并且设置向左浮动。将右边元素的margin-left设置为200px，宽度设置为auto（默认为auto，撑满整个父元素）。
+
+```css
+.outer {
+  height: 100px;
+}
+.left {
+  float: left;
+  width: 200px;
+  background: tomato;
+}
+.right {
+  margin-left: 200px;
+  width: auto;
+  background: gold;
+}
+```
+
+- 利用浮动，左侧元素设置固定大小，并左浮动，右侧元素设置overflow: hidden; 这样右边就触发了BFC，BFC的区域不会与浮动元素发生重叠，所以两侧就不会发生重叠。
+
+```css
+.left{
+     width: 100px;
+     height: 200px;
+     background: red;
+     float: left;
+ }
+ .right{
+     height: 300px;
+     background: blue;
+     overflow: hidden;
+ }
+```
+
+- 利用flex布局，将左边元素设置为固定宽度200px，将右边的元素设置为flex:1。
+
+```css
+.outer {
+  display: flex;
+  height: 100px;
+}
+.left {
+  width: 200px;
+  background: tomato;
+}
+.right {
+  flex: 1;
+  background: gold;
+}
+```
+
+- 利用绝对定位，将父级元素设置为相对定位。左边元素设置为absolute定位，并且宽度设置为200px。将右边元素的margin-left的值设置为200px。
+
+```css
+.outer {
+  position: relative;
+  height: 100px;
+}
+.left {
+  position: absolute;
+  width: 200px;
+  height: 100px;
+  background: tomato;
+}
+.right {
+  margin-left: 200px;
+  background: gold;
+}
+```
+
+- 利用绝对定位，将父级元素设置为相对定位。左边元素宽度设置为200px，右边元素设置为绝对定位，左边定位为200px，其余方向定位为0。
+
+```css
+.outer {
+  position: relative;
+  height: 100px;
+}
+.left {
+  width: 200px;
+  background: tomato;
+}
+.right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 200px;
+  background: gold;
+}
+```
+
+
 
 #### 三栏布局
 
@@ -1609,6 +1813,8 @@ Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14
 
 OK啦，现在拖动试一试。可以看出 flex 布局具有更强的适应性，在窗口宽度过小的时候不会造成页面布局混乱。通过设置内容的伸缩，可以实现任意栏的固定和自适应，同时也可以实现三栏自适应，通过设置 flex 内容的 flex-shrink 和 flex-grow 可以实现自定义的适应性布局。
 
+
+
 #### PostCSS
 
 ```
@@ -1626,6 +1832,8 @@ PostCSS由哪些东西组成？
 3. source map 生成器
 4. 生成节点树串
 ```
+
+
 
 #### 高度塌陷
 
@@ -1665,6 +1873,8 @@ clear:both; 清除前面元素浮动带来的影响
 相对于空标签闭合浮动的方法 
 优势：不破坏文档结构，没有副作用 
 弊端：代码量多
+
+
 
 #### 响应式布局（4种）
 
@@ -2115,6 +2325,8 @@ var defaults = {
 
 从上图我们发现，绝大多数的浏览器支持vw单位，但是ie9-11不支持vmin和vmax，考虑到vmin和vmax单位不常用，vw单位在绝大部分高版本浏览器内的支持性很好，但是opera浏览器整体不支持vw单位，如果需要兼容opera浏览器的布局，不推荐使用vw。
 
+
+
 #### CSS动画
 
 ```html
@@ -2164,7 +2376,9 @@ var defaults = {
 </head>
 ```
 
-#### Js动画与CSS动画的区别
+------
+
+##### Js动画与CSS动画的区别
 
 Chromium项目里，渲染线程分为main thread和compositor thread。
 
@@ -2203,7 +2417,9 @@ CSS动画比JS流畅的前提：
 
 5.CSS3有兼容性问题，而JS大多时候没有兼容性问题
 
-#### transition和animation的区别
+------
+
+##### transition和animation的区别
 
 ​        animation 可以用 name 设置动画的名称，用 duration 设置动画完成的周期，用 timing-function 设置动画的速度曲线，delay 设置动画什么时候开始，iteration-count 设置动画播放的次数，direction 规定下一个周期是否逆向的播放，play-state 动画是否正在进行或者暂停，fill-mode 设置动画停了之后位置什么状态
 
@@ -2228,6 +2444,33 @@ Transition 强调**过渡**，Transition ＋ Transform ＝ 两个关键帧的Ani
 Animation 强调**流程与控制**，Duration ＋ TransformLib ＋ Control ＝ 多个关键帧的Animation
 
 如果只有两个关键帧我会选择Transition ＋ Transform
+
+------
+
+##### requestAnimationframe
+
+实现动画效果的方法比较多，Javascript 中可以通过定时器 setTimeout 来实现，CSS3 中可以使用 transition 和 animation 来实现，HTML5 中的 canvas 也可以实现。除此之外，HTML5 提供一个专门用于请求动画的API，那就是 requestAnimationFrame，顾名思义就是**请求动画帧**。
+
+MDN对该方法的描述：
+
+> window.requestAnimationFrame() 告诉浏览器——你希望执行一个动画，并且要求浏览器在下次重绘之前调用指定的回调函数更新动画。该方法需要传入一个回调函数作为参数，该回调函数会在浏览器下一次重绘之前执行。
+
+**语法：** `window.requestAnimationFrame(callback);`  其中，callback是**下一次重绘之前更新动画帧所调用的函数**(即上面所说的回调函数)。该回调函数会被传入DOMHighResTimeStamp参数，它表示requestAnimationFrame() 开始去执行回调函数的时刻。该方法属于**宏任务**，所以会在执行完微任务之后再去执行。
+
+**取消动画：** 使用cancelAnimationFrame()来取消执行动画，该方法接收一个参数——requestAnimationFrame默认返回的id，只需要传入这个id就可以取消动画了。
+
+**优势：**
+
+- **CPU节能**：使用SetTinterval 实现的动画，当页面被隐藏或最小化时，SetTinterval 仍然在后台执行动画任务，由于此时页面处于不可见或不可用状态，刷新动画是没有意义的，完全是浪费CPU资源。而RequestAnimationFrame则完全不同，当页面处理未激活的状态下，该页面的屏幕刷新任务也会被系统暂停，因此跟着系统走的RequestAnimationFrame也会停止渲染，当页面被激活时，动画就从上次停留的地方继续执行，有效节省了CPU开销。
+- **函数节流**：在高频率事件( resize, scroll 等)中，为了防止在一个刷新间隔内发生多次函数执行，RequestAnimationFrame可保证每个刷新间隔内，函数只被执行一次，这样既能保证流畅性，也能更好的节省函数执行的开销，一个刷新间隔内函数执行多次时没有意义的，因为多数显示器每16.7ms刷新一次，多次绘制并不会在屏幕上体现出来。
+- **减少DOM操作**：requestAnimationFrame 会把每一帧中的所有DOM操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+
+**setTimeout执行动画的缺点**：它通过设定间隔时间来不断改变图像位置，达到动画效果。但是容易出现卡顿、抖动的现象；原因是：
+
+- settimeout任务被放入异步队列，只有当主线程任务执行完后才会执行队列中的任务，因此实际执行时间总是比设定时间要晚；
+- settimeout的固定时间间隔不一定与屏幕刷新间隔时间相同，会引起丢帧。
+
+
 
 #### base64
 
@@ -2308,6 +2551,192 @@ Base64是一种可逆的编码方式，是一种用64个Ascii字符来表示任�
 **优点**:可以将二进制数据转化为可打印字符，方便传输数据，对数据进行简单的加密，肉眼安全，减少了HTTP请求。
 **缺点**：内容编码后体积变大，编码和解码需要额外工作量。
 
+
+
+#### **CSS性能优化**
+
+##### CSS阻塞
+
+JS在执行会出现DOM树解析和渲染阻塞。
+
+我们设置3G这样加载CSS慢了。
+
+得出的结果是先解析了等加载完CSS才渲染。其实我觉得，这可能也是浏览器的一种优化机制。因为你加载css的时候，可能会修改下面DOM节点的样式，如果css加载不阻塞DOM树渲染的话，那么当css加载完之后，DOM树可能又得重新重绘或者回流了，这就造成了一些没有必要的损耗。所以我干脆就先把DOM树的结构先解析完，把可以做的工作做完，然后等你css加载完之后，在根据最终的样式来渲染DOM树，这种做法性能方面确实会比较好一点。
+由上所述，我们可以得出以下结论:
+
+**css加载不会阻塞DOM树的解析**
+
+**css加载会阻塞DOM树的渲染**
+
+css加载会阻塞后面js语句的执行
+因此，为了避免让用户看到长时间的白屏时间，我们应该尽可能的提高css加载速度，比如可以使用以下几种方法:
+
+1、使用CDN(因为CDN会根据你的网络状况，替你挑选最近的一个具有缓存内容的节点为你提供资源，因此可以减少加载时间)
+
+2、对css进行压缩(可以用很多打包工具，比如webpack,gulp等，也可以通过开启gzip压缩)
+
+3、合理的使用缓存(设置cache-control,expires,以及E-tag都是不错的，不过要注意一个问题，就是文件更新后，你要避免缓存而带来的影响。其中一个解决防范是在文件名字后面加一个版本号)
+
+4、减少http请求数，将多个css文件合并，或者是干脆直接写成内联样式(内联样式的一个缺点就是不能缓存)
+
+**加载性能：**
+
+（1）css压缩：将写好的css进行打包压缩，可以减小文件体积。
+
+（2）css单一样式：当需要下边距和左边距的时候，很多时候会选择使用 margin:top 0 bottom 0；但margin-bottom:bottom;margin-left:left;执行效率会更高。
+
+（3）减少使用@import，建议使用link，因为后者在页面加载时一起加载，前者是等待页面加载完成之后再进行加载。
+
+------
+
+##### 参数设置性能
+
+**选择器性能：**
+
+（1）关键选择器（key selector）。选择器的最后面的部分为关键选择器（即用来匹配目标元素的部分）。CSS选择符是从右到左进行匹配的。当使用后代选择器的时候，浏览器会遍历所有子元素来确定是否是指定的元素等等；
+
+（2）如果规则拥有ID选择器作为其关键选择器，则不要为规则增加标签。过滤掉无关的规则（这样样式系统就不会浪费时间去匹配它们了）。
+
+（3）避免使用通配规则，如*{}计算次数惊人，只对需要用到的元素进行选择。
+
+（4）尽量少的去对标签进行选择，而是用class。
+
+（5）尽量少的去使用后代选择器，降低选择器的权重值。后代选择器的开销是最高的，尽量将选择器的深度降到最低，最高不要超过三层，更多的使用类来关联每一个标签元素。
+
+（6）了解哪些属性是可以通过继承而来的，然后避免对这些属性重复指定规则。
+
+**渲染性能**
+
+（1）慎重使用高性能属性：浮动、定位。
+
+（2）尽量减少页面重排、重绘。
+
+（3）去除空规则：｛｝。空规则的产生原因一般来说是为了预留样式。去除这些空规则无疑能减少css文档体积。
+
+（4）属性值为0时，不加单位。
+
+（5）属性值为浮动小数0.*，可以省略小数点之前的0。
+
+（6）标准化各种浏览器前缀：带浏览器前缀的在前。标准属性在后。
+
+（7）不使用@import前缀，它会影响css的加载速度。
+
+（8）选择器优化嵌套，尽量避免层级过深。
+
+（9）css雪碧图，同一页面相近部分的小图标，方便使用，减少页面的请求次数，但是同时图片本身会变大，使用时，优劣考虑清楚，再使用。
+
+（10）正确使用display的属性，由于display的作用，某些样式组合会无效，徒增样式体积的同时也影响解析性能。
+
+（11）不滥用web字体。对于中文网站来说WebFonts可能很陌生，国外却很流行。web fonts通常体积庞大，而且一些浏览器在下载web fonts时会阻塞页面渲染损伤性能。
+
+**可维护性、健壮性：**
+
+（1）将具有相同属性的样式抽离出来，整合并通过class在页面中进行使用，提高css的可维护性。
+
+（2）样式与内容分离：将css代码定义到外部css中。
+
+------
+
+##### 图片优化
+
+1.不用图片。很多时候会使用到很多修饰类图片，其实这类修饰图片完全可以用 CSS 去代替。
+
+2.对于移动端来说，屏幕宽度就那么点，完全没有必要去加载原图浪费带宽。一般图片都用 CDN 加载，可以计算出适配屏幕的宽度，然后去请求相应裁剪好的图片。
+
+3.小图使用 base64 格式。
+
+4.将多个图标文件整合到一张图片中（雪碧图）。
+
+5.选择正确的图片格式：
+
+- 对于能够显示 WebP 格式的浏览器尽量使用 WebP 格式。因为 WebP 格式具有更好的图像数据压缩算法，能带来更小的图片体积，而且拥有肉眼识别无差异的图像质量，缺点就是兼容性并不好。
+- 小图使用 PNG，其实对于大部分图标这类图片，完全可以使用 SVG 代替。
+- 照片使用 JPEG。
+
+
+
+#### CSS工程化
+
+CSS 工程化是为了解决以下问题：
+
+1. **宏观设计**：CSS 代码如何组织、如何拆分、模块结构怎样设计？
+2. **编码优化**：怎样写出更好的 CSS？
+3. **构建**：如何处理我的 CSS，才能让它的打包结果最优？
+4. **可维护性**：代码写完了，如何最小化它后续的变更成本？如何确保任何一个同事都能轻松接手？
+
+以下三个方向都是时下比较流行的、普适性非常好的 CSS 工程化实践：
+
+- 预处理器：Less、 Sass 等；
+- 重要的工程化插件： PostCss；
+- Webpack loader 等 。
+
+基于这三个方向，可以衍生出一些具有典型意义的子问题，这里我们逐个来看：
+
+**（1）预处理器：为什么要用预处理器？它的出现是为了解决什么问题？**
+
+预处理器，其实就是 CSS 世界的“轮子”。预处理器支持我们写一种类似 CSS、但实际并不是 CSS 的语言，然后把它编译成 CSS 代码： ![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/3d58c5313e884e38b1545a5896613250~tplv-k3u1fbpfcp-zoom-in-crop-mark:1304:0:0:0.awebp) 那为什么写 CSS 代码写得好好的，偏偏要转去写“类 CSS”呢？这就和本来用 JS 也可以实现所有功能，但最后却写 React 的 jsx 或者 Vue 的模板语法一样——为了爽！要想知道有了预处理器有多爽，首先要知道的是传统 CSS 有多不爽。随着前端业务复杂度的提高，前端工程中对 CSS 提出了以下的诉求：
+
+1. 宏观设计上：我们希望能优化 CSS 文件的目录结构，对现有的 CSS 文件实现复用；
+2. 编码优化上：我们希望能写出结构清晰、简明易懂的 CSS，需要它具有一目了然的嵌套层级关系，而不是无差别的一铺到底写法；我们希望它具有变量特征、计算能力、循环能力等等更强的可编程性，这样我们可以少写一些无用的代码；
+3. 可维护性上：更强的可编程性意味着更优质的代码结构，实现复用意味着更简单的目录结构和更强的拓展能力，这两点如果能做到，自然会带来更强的可维护性。
+
+这三点是传统 CSS 所做不到的，也正是预处理器所解决掉的问题。预处理器普遍会具备这样的特性：
+
+- 嵌套代码的能力，通过嵌套来反映不同 css 属性之间的层级关系 ；
+- 支持定义 css 变量；
+- 提供计算函数；
+- 允许对代码片段进行 extend 和 mixin；
+- 支持循环语句的使用；
+- 支持将 CSS 文件模块化，实现复用。
+
+**（2）PostCss：PostCss 是如何工作的？我们在什么场景下会使用 PostCss？**
+
+![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2911f98bbacf4b1cbffbb9e1527a4977~tplv-k3u1fbpfcp-zoom-in-crop-mark:1304:0:0:0.awebp) 它和预处理器的不同就在于，预处理器处理的是 类CSS，而 PostCss 处理的就是 CSS 本身。Babel 可以将高版本的 JS 代码转换为低版本的 JS 代码。PostCss 做的是类似的事情：它可以编译尚未被浏览器广泛支持的先进的 CSS 语法，还可以自动为一些需要额外兼容的语法增加前缀。更强的是，由于 PostCss 有着强大的插件机制，支持各种各样的扩展，极大地强化了 CSS 的能力。
+
+PostCss 在业务中的使用场景非常多：
+
+- 提高 CSS 代码的可读性：PostCss 其实可以做类似预处理器能做的工作；
+- 当我们的 CSS 代码需要适配低版本浏览器时，PostCss 的 [Autoprefixer](https://link.juejin.cn?target=https%3A%2F%2Fgithub.com%2Fpostcss%2Fautoprefixer) 插件可以帮助我们自动增加浏览器前缀；
+- 允许我们编写面向未来的 CSS：PostCss 能够帮助我们编译 CSS next 代码；
+
+**（3）Webpack 能处理 CSS 吗？如何实现？** Webpack 能处理 CSS 吗：
+
+- **Webpack 在裸奔的状态下，是不能处理 CSS 的**，Webpack 本身是一个面向 JavaScript 且只能处理 JavaScript 代码的模块化打包工具；
+- Webpack 在 loader 的辅助下，是可以处理 CSS 的。
+
+如何用 Webpack 实现对 CSS 的处理：
+
+- Webpack 中操作 CSS 需要使用的两个关键的 loader：css-loader 和 style-loader
+- 注意，答出“用什么”有时候可能还不够，面试官会怀疑你是不是在背答案，所以你还需要了解每个 loader 都做了什么事情：
+  - css-loader：导入 CSS 模块，对 CSS 代码进行编译处理；
+  - style-loader：创建style标签，把 CSS 内容写入标签。
+
+在实际使用中，**css-loader 的执行顺序一定要安排在 style-loader 的前面**。因为只有完成了编译过程，才可以对 css 代码进行插入；若提前插入了未编译的代码，那么 webpack 是无法理解这坨东西的，它会无情报错。
+
+
+
+#### 常见图片格式
+
+（1）**BMP**，是无损的、既支持索引色也支持直接色的点阵图。这种图片格式几乎没有对数据进行压缩，所以BMP格式的图片通常是较大的文件。
+
+（2）**GIF**是无损的、采用索引色的点阵图。采用LZW压缩算法进行编码。文件小，是GIF格式的优点，同时，GIF格式还具有支持动画以及透明的优点。但是GIF格式仅支持8bit的索引色，所以GIF格式适用于对色彩要求不高同时需要文件体积较小的场景。
+
+（3）**JPEG**是有损的、采用直接色的点阵图。JPEG的图片的优点是采用了直接色，得益于更丰富的色彩，JPEG非常适合用来存储照片，与GIF相比，JPEG不适合用来存储企业Logo、线框类的图。因为有损压缩会导致图片模糊，而直接色的选用，又会导致图片文件较GIF更大。
+
+（4）**PNG-8**是无损的、使用索引色的点阵图。PNG是一种比较新的图片格式，PNG-8是非常好的GIF格式替代者，在可能的情况下，应该尽可能的使用PNG-8而不是GIF，因为在相同的图片效果下，PNG-8具有更小的文件体积。除此之外，PNG-8还支持透明度的调节，而GIF并不支持。除非需要动画的支持，否则没有理由使用GIF而不是PNG-8。
+
+（5）**PNG-24**是无损的、使用直接色的点阵图。PNG-24的优点在于它压缩了图片的数据，使得同样效果的图片，PNG-24格式的文件大小要比BMP小得多。当然，PNG24的图片还是要比JPEG、GIF、PNG-8大得多。
+
+（6）**SVG**是无损的矢量图。SVG是矢量图意味着SVG图片由直线和曲线以及绘制它们的方法组成。当放大SVG图片时，看到的还是线和曲线，而不会出现像素点。SVG图片在放大时，不会失真，所以它适合用来绘制Logo、Icon等。
+
+（7）**WebP**是谷歌开发的一种新图片格式，WebP是同时支持有损和无损压缩的、使用直接色的点阵图。从名字就可以看出来它是为Web而生的，什么叫为Web而生呢？就是说相同质量的图片，WebP具有更小的文件体积。现在网站上充满了大量的图片，如果能够降低每一个图片的文件大小，那么将大大减少浏览器和服务器之间的数据传输量，进而降低访问延迟，提升访问体验。目前只有Chrome浏览器和Opera浏览器支持WebP格式，兼容性不太好。
+
+- 在无损压缩的情况下，相同质量的WebP图片，文件大小要比PNG小26%；
+- 在有损压缩的情况下，具有相同图片精度的WebP图片，文件大小要比JPEG小25%~34%；
+- WebP图片格式支持图片透明度，一个无损压缩的WebP图片，如果要支持透明度只需要22%的格外文件大小。
+
+
+
 #### 单个问题汇总
 
 ------
@@ -2316,11 +2745,17 @@ Base64是一种可逆的编码方式，是一种用64个Ascii字符来表示任�
 
 灵活但是兼容性方面不强。
 
+注意，设为Flex布局以后，**子元素的float、clear和vertical-align属性将失效**。
+
 ------
 
 ##### line-height和height的区别
 
-line-height一般是指布局里面一段文字上下行之间的高度，是针对字体来设置的，height一般是指容器的整体高度。
+- line-height 指一行文本的高度，包含了字间距，实际上是下一行基线到上一行基线距离；
+
+- 如果一个标签没有定义 height 属性，那么其最终表现的高度由 line-height 决定；
+- 一个容器没有设置高度，那么撑开容器高度的是 line-height，而不是容器内的文本内容；
+- 把 line-height 值设置为 height 一样大小的值可以实现单行文字的垂直居中；
 
 ------
 
@@ -2343,7 +2778,48 @@ background-color设置的背景颜色会填充元素的content、padding、borde
     border-bottom:10px solid transparent;
     border-left:10px solid transparent;
 }
+
+或者
+
+div {    
+    width: 0;    
+    height: 0;    
+    border-top: 50px solid red;    
+    border-right: 50px solid transparent;    
+    border-left: 50px solid transparent;
+}
 ```
+
+![image-20220326182231434](前端图片/image-20220326182231434.png)
+
+```css
+div {
+    width: 0;
+    height: 0;
+    border-top: 100px solid red;
+    border-right: 100px solid transparent;
+}
+```
+
+![image-20220326182314869](前端图片/image-20220326182314869.png)
+
+------
+
+##### CSS画扇形
+
+用CSS实现扇形的思路和三角形基本一致，就是多了一个圆角的样式，实现一个90°的扇形。
+
+```css
+div{
+    border: 100px solid transparent;
+    width: 0;
+    heigt: 0;
+    border-radius: 100px;
+    border-top-color: red;
+}
+```
+
+![image-20220326182515724](前端图片/image-20220326182515724.png)
 
 ------
 
@@ -2352,13 +2828,13 @@ background-color设置的背景颜色会填充元素的content、padding、borde
 比如我们要实现一个固定长宽比的长方形，比如要实现一个长宽比为4:3的长方形,我们可以根据padding属性来实现，因为padding不管是垂直方向还是水平方向，百分比单位都相对于父元素的宽度，因此我们可以设置padding-top为百分比来实现，长宽自适应的长方形：
 
 ```
-<div class="trangle"></div>
+<div class="square"></div>
 ```
 
 设置样式让其自适应：
 
 ```
-.trangle{
+.square {
   height:0;
   width:100%;
   padding-top:75%;
@@ -2367,7 +2843,17 @@ background-color设置的背景颜色会填充元素的content、padding、borde
 
 通过设通过设置padding-top：75%,相对比宽度的75%，因此这样就设置了一个长宽高恒定比例的长方形，具体效果展示如下：
 
-![jest](https://user-images.githubusercontent.com/17233651/41851698-52d2bd2c-78bb-11e8-97cb-26f985195809.gif)](
+![jest](前端图片/41851698-52d2bd2c-78bb-11e8-97cb-26f985195809.gif)
+
+- 利用vw来实现：
+
+```css
+.square {
+  width: 10%;
+  height: 10vw;
+  background: tomato;
+}
+```
 
 ------
 
@@ -2393,7 +2879,7 @@ display为block
 
 ------
 
-##### 隐藏页面中某个元素的方法（5种）
+##### 隐藏页面中某个元素的方法
 
 display:none; 
 
@@ -2403,7 +2889,11 @@ opacity: 0;
 
 position移到外部；
 
-z-index涂层遮盖等等
+z-index设置负值遮盖元素;
+
+clip/clip-path：使用元素裁剪的方法来实现元素的隐藏，这种方法下，元素仍在页面中占据位置，但是不会响应绑定的监听事件。
+
+transform: scale(0,0)：将元素缩放为 0，来实现元素的隐藏。这种方法下，元素仍在页面中占据位置，但是不会响应绑定的监听事件。
 
 ---
 
@@ -2428,3 +2918,236 @@ inputElement.style["background-color"] = 'red'; 	// 这也是可以的
 
 ------
 
+##### li 与 li 之间有看不见的空白间隔
+
+浏览器会把inline内联元素间的空白字符（空格、换行、Tab等）渲染成一个空格。为了美观，通常是一个`<li>`放在一行，这导致`<li>`换行后产生换行字符，它变成一个空格，占用了一个字符的宽度。
+
+**解决办法：**
+
+（1）为`<li>`设置float:left。不足：有些容器是不能设置浮动，如左右切换的焦点图等。
+
+（2）将所有`<li>`写在同一行。不足：代码不美观。
+
+（3）将`<ul>`内的字符尺寸直接设为0，即font-size:0。不足：`<ul>`中的其他字符尺寸也被设为0，需要额外重新设定其他字符尺寸，且在Safari浏览器依然会出现空白间隔。
+
+（4）消除`<ul>`的字符间隔letter-spacing:-8px，不足：这也设置了`<li>`内的字符间隔，因此需要将`<li>`内的字符间隔设为默认letter-spacing:normal。
+
+------
+
+##### 元素的可视区域
+
+clientHeight：表示的是可视区域的高度，不包含border和滚动条
+
+offsetHeight：表示可视区域的高度，包含了border和滚动条
+
+scrollHeight：表示了所有区域的高度，包含了因为滚动被隐藏的部分。
+
+clientTop：表示边框border的厚度，在未指定的情况下一般为0
+
+scrollTop：滚动后被隐藏的高度，获取对象相对于由offsetParent属性指定的父坐标(css定位的元素或body元素)距离顶端的高度。
+
+以图片显示为例：
+
+- `window.innerHeight` 是浏览器可视区的高度；
+- `document.body.scrollTop || document.documentElement.scrollTop` 是浏览器滚动的过的距离；
+- `imgs.offsetTop` 是元素顶部距离文档顶部的高度（包括滚动条的距离）；
+- 内容达到显示区域的：`img.offsetTop < window.innerHeight + document.body.scrollTop;`
+
+![](前端图片/微信图片_20220326175022.png)
+
+------
+
+##### z-index失效
+
+通常 z-index 的使用是在有两个重叠的标签，在一定的情况下控制其中一个在另一个的上方或者下方出现。z-index值越大就越是在上层。z-index元素的position属性需要是relative，absolute或是fixed。
+
+z-index属性在下列情况下会失效：
+
+- 父元素position为relative时，子元素的z-index失效。解决：父元素position改为absolute或static；
+- 元素没有设置position属性为非static属性。解决：设置该元素的position属性为relative，absolute或是fixed中的一种；
+- 元素在设置z-index的同时还设置了float浮动。解决：float去除，改为display：inline-block；
+
+------
+
+#####  clear 属性清除浮动的原理
+
+使用clear属性清除浮动，其语法如下：
+
+```css
+clear:none|left|right|both
+```
+
+如果单看字面意思，clear: left 是“清除左浮动”，clear: right 是“清除右浮动”，实际上，这种解释是有问题的，因为浮动一直还在，并没有清除。
+
+官方对clear属性解释：“**元素盒子的边不能和前面的浮动元素相邻**”，对元素设置clear属性是为了避免浮动元素对该元素的影响，而不是清除掉浮动。
+
+还需要注意 clear 属性指的是元素盒子的边不能和前面的浮动元素相邻，注意这里“**前面的**”3个字，也就是clear属性对“后面的”浮动元素是不闻不问的。考虑到float属性要么是left，要么是right，不可能同时存在，同时由于clear属性对“后面的”浮动元素不闻不问，因此，当clear: left有效的时候，clear: right必定无效，也就是此时clear: left等同于设置clear: both；同样地，clear: right如果有效也是等同于设置clear: both。由此可见，clear: left和clear: right这两个声明就没有任何使用的价值，至少在CSS世界中是如此，直接使用clear: both吧。
+
+------
+
+#####  **display、float、position的关系**
+
+（1）首先判断display属性是否为none，如果为none，则position和float属性的值不影响元素最后的表现。
+
+（2）然后判断position的值是否为absolute或者fixed，如果是，则float属性失效，并且display的值应该被设置为table或者block，具体转换需要看初始转换值。
+
+（3）如果position的值不为absolute或者fixed，则判断float属性的值是否为none，如果不是，则display的值则按上面的规则转换。注意，如果position的值为relative并且float属性的值存在，则relative相对于浮动后的最终位置定位。
+
+（4）如果float的值为none，则判断元素是否为根元素，如果是根元素则display属性按照上面的规则转换，如果不是，则保持指定的display属性值不变。
+
+总的来说，可以把它看作是一个类似优先级的机制，"position:absolute"和"position:fixed"优先级最高，有它存在的时候，浮动不起作用，'display'的值也需要调整；其次，元素的'float'特性的值不是"none"的时候或者它是根元素的时候，调整'display'的值；最后，非根元素，并且非浮动元素，并且非绝对定位的元素，'display'特性值同设置值。
+
+------
+
+##### absolute与fixed共同点与不同点
+
+**共同点：**
+
+- 改变行内元素的呈现方式，将display置为inline-block 
+- 使元素脱离普通文档流，不再占据文档物理空间
+- 覆盖非定位文档元素
+
+**不同点：**
+
+- absolute与fixed的根元素不同，absolute的根元素可以设置，fixed根元素是浏览器。
+- 在有滚动条的页面中，absolute会跟着父元素进行移动，fixed固定在页面的具体位置。
+
+------
+
+##### 设置小于12px的字体
+
+在谷歌下CSS设置字体大小为12px及以下时，显示都是一样大小，都是默认12px。
+
+**解决办法：**
+
+- 使用Webkit的内核的-webkit-text-size-adjust的私有CSS属性来解决，只要加了-webkit-text-size-adjust:none;字体大小就不受限制了。但是chrome更新到27版本之后就不可以用了。所以高版本chrome谷歌浏览器已经不再支持-webkit-text-size-adjust样式，所以要使用时候慎用。
+- 使用css3的transform缩放属性-webkit-transform:scale(0.5); 注意-webkit-transform:scale(0.75);收缩的是整个元素的大小，这时候，如果是内联元素，必须要将内联元素转换成块元素，可以使用display：block/inline-block/...；
+- 使用图片：如果是内容固定不变情况下，使用将小于12px文字内容切出做图片，这样不影响兼容也不影响美观。
+
+------
+
+##### 如何解决 1px 问题
+
+1px 问题指的是：在一些 `Retina屏幕` 的机型上，移动端页面的 1px 会变得很粗，呈现出不止 1px 的效果。原因很简单——CSS 中的 1px 并不能和移动设备上的 1px 划等号。它们之间的比例关系有一个专门的属性来描述：
+
+```html
+window.devicePixelRatio = 设备的物理像素 / CSS像素。
+```
+
+打开 Chrome 浏览器，启动移动端调试模式，在控制台去输出这个 `devicePixelRatio` 的值。这里选中 iPhone6/7/8 这系列的机型，输出的结果就是2：
+
+![image-20220326183258355](前端图片/image-20220326183258355.png)
+
+这就意味着设置的 1px CSS 像素，在这个设备上实际会用 2 个物理像素单元来进行渲染，所以实际看到的一定会比 1px 粗一些。 **解决1px 问题的三种思路：**
+
+**思路一：直接写 0.5px**
+
+如果之前 1px 的样式这样写：
+
+```css
+border:1px solid #333
+```
+
+可以先在 JS 中拿到 window.devicePixelRatio 的值，然后把这个值通过 JSX 或者模板语法给到 CSS 的 data 里，达到这样的效果（这里用 JSX 语法做示范）：
+
+```javascript
+<div id="container" data-device={{window.devicePixelRatio}}></div>
+```
+
+然后就可以在 CSS 中用属性选择器来命中 devicePixelRatio 为某一值的情况，比如说这里尝试命中 devicePixelRatio 为2的情况：
+
+```css
+#container[data-device="2"] {
+  border:0.5px solid #333
+}
+```
+
+直接把 1px 改成 1/devicePixelRatio 后的值，这是目前为止最简单的一种方法。这种方法的缺陷在于兼容性不行，IOS 系统需要8及以上的版本，安卓系统则直接不兼容。
+
+**思路二：伪元素先放大后缩小**
+
+这个方法的可行性会更高，兼容性也更好。唯一的缺点是代码会变多。
+
+思路是**先放大、后缩小：在目标元素的后面追加一个 ::after 伪元素，让这个元素布局为 absolute 之后、整个伸展开铺在目标元素上，然后把它的宽和高都设置为目标元素的两倍，border值设为 1px。接着借助 CSS 动画特效中的放缩能力，把整个伪元素缩小为原来的 50%。此时，伪元素的宽高刚好可以和原有的目标元素对齐，而 border 也缩小为了 1px 的二分之一，间接地实现了 0.5px 的效果。**
+
+代码如下：
+
+```css
+#container[data-device="2"] {
+    position: relative;
+}
+#container[data-device="2"]::after{
+      position:absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      content:"";
+      transform: scale(0.5);
+      transform-origin: left top;
+      box-sizing: border-box;
+      border: 1px solid #333;
+    }
+}
+```
+
+**思路三：viewport 缩放来解决**
+
+这个思路就是对 meta 标签里几个关键属性下手：
+
+```html
+<meta name="viewport" content="initial-scale=0.5, maximum-scale=0.5, minimum-scale=0.5, user-scalable=no">
+```
+
+这里针对像素比为2的页面，把整个页面缩放为了原来的1/2大小。这样，本来占用2个物理像素的 1px 样式，现在占用的就是标准的一个物理像素。根据像素比的不同，这个缩放比例可以被计算为不同的值，用 js 代码实现如下：
+
+```javascript
+const scale = 1 / window.devicePixelRatio;
+// 这里 metaEl 指的是 meta 标签对应的 Dom
+metaEl.setAttribute('content', `width=device-width,user-scalable=no,initial-scale=${scale},maximum-scale=${scale},minimum-scale=${scale}`);
+```
+
+这样解决了，但这样做的副作用也很大，整个页面被缩放了。这时 1px 已经被处理成物理像素大小，这样的大小在手机上显示边框很合适。但是，一些原本不需要被缩小的内容，比如文字、图片等，也被无差别缩小掉了。
+
+------
+
+##### display: inline-block 显示间隙问题
+
+**产生原因：**元素被当成行内元素排版的时候，元素之间的空白符（空格、回车换行等）都会被浏览器处理，根据white-space的处理方式（默认是normal，合并多余空白），原来HTML代码中的回车换行被转成一个空白符，在字体不为0的情况下，空白符占据一定宽度，所以inline-block的元素之间就出现了空隙。这些元素之间的间距会随着字体的大小而变化，当行内元素font-size:16px时，间距为8px。
+
+**解决方法：**
+
+1.移除空格
+2.使用margin负值
+3.使用font-size:0
+4.letter-spacing——设置对象中的单词之间插入的空格数
+5.word-spacing——设置对象中的文字之间的间隔.每一个中文文字以及英文字母之间
+
+------
+
+##### 字体奇偶性
+
+```css
+一般来说，使用偶数字体多于奇数字体
+1.比例关系
+相对来说偶数字号比较容易和页面中其他部分的字号构成一个比例关系。如我使用14px的字体作为正文字号，那么其他部分的字体（如标题）就可以使用14×1.5 =21px的字体，或者在一些地方使用到了14×0.5=7px的padding或者margin，如果你是在用sass或者less编写css，这时候用处就凸显出来了。
+
+2.UI设计师的缘故
+大多数设计师用的软件如ps提供的字号是偶数，自然到了 前端那边也是用的是偶数。
+
+3.浏览器缘故
+其一是低版本的浏览器ie6会把奇数字体强制转化为偶数，即13px渲染为14px。
+
+其二是为了平分字体。偶数宽的汉字，如12px的汉字，去掉1像素的字体间距，填充了的字体像素宽度其实就是11px，这样的汉字中竖线左右是平分的，如“中”子，左右就是5px了。
+
+4.系统差别
+Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14、16 px 这三个大小的点阵，而 13、15、17 px 时用的是小一号的点阵（即每个字占的空间大了 1 px，但点阵没变），于是略显稀疏。
+
+但是也可以使用奇数字体。目前来说12，13，14，15，16px都是比较常用而且不错的字号，通过审查元素可以看到知乎的正文字号和豆瓣部分栏目（豆瓣电影）也是用了13px字号，效果都很不错。使用奇数号字体不好的地方是，文本段落无法对齐。
+```
+
+------
+
+##### CSS 如何阻塞文档解析
+
+理论上，既然样式表不改变 DOM 树，也就没有必要停下文档的解析等待它们。然而，存在一个问题，JavaScript 脚本执行时可能在文档的解析过程中请求样式信息，如果样式还没有加载和解析，脚本将得到错误的值，显然这将会导致很多问题。所以如果浏览器尚未完成 CSSOM 的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟 JavaScript 脚本执行和文档的解析，直至其完成 CSSOM 的下载和构建。也就是说，在这种情况下，浏览器会先下载和构建 CSSOM，然后再执行 JavaScript，最后再继续文档的解析。
