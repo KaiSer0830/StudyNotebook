@@ -65,9 +65,9 @@ webpack安装    npm install -g webpack
 
 和methods中的数据都还没有初始化。不能在这个阶段使用data中的数据和methods中的方法。
 
-**created**：data 和 methods都已经被初始化好了，如果要调用 methods 中的方法，或者操作 data 中的数据，最早可以在这个阶段中操作。
+**created**：data 和 methods都已经被初始化好了，如果要调用 methods 中的方法，或者操作 data 中的数据，最早可以在这个阶段中操作。但是此时渲染得节点还未挂载到 DOM，所以不能访问到 `$el` 属性。
 
-**beforeMount**：执行到这个钩子的时候，在内存中已经编译好了模板了，但是还没有挂载到页面中，此时，页面还是旧的。
+**beforeMount**：执行到这个钩子的时候，相关的render函数首次被调用。实例已完成以下的配置：编译模板，把data里面的数据和模板生成html。但是还没有挂载到页面中，此时，页面还是旧的。
 
 **mounted**：执行到这个钩子的时候，就表示Vue实例已经初始化完成了。此时组件脱离了创建阶段，进入到了运行阶段。 如果我们想要通过插件操作页面上的DOM节点，最早可以在和这个阶段中进行。
 
@@ -78,6 +78,50 @@ webpack安装    npm install -g webpack
 **beforeDestroy**：Vue实例从运行阶段进入到了销毁阶段，这个时候上所有的 data 和 methods ， 指令， 过滤器 ……都是处于可用状态。还没有真正被销毁。
 
 **destroyed**： 这个时候上所有的 data 和 methods ， 指令， 过滤器 ……都是处于不可用状态。组件已经被销毁了。
+
+另外还有 `keep-alive` 独有的生命周期，分别为 `activated` 和 `deactivated` 。用 `keep-alive` 包裹的组件在切换时不会进行销毁，beforeDestroy 和 destroyed 就不会再被触发，而是缓存到内存中并执行 `deactivated` 钩子函数，命中缓存渲染后会执行 `activated` 钩子函数。
+
+即当组件被换掉时，会被缓存到内存中、触发 deactivated 生命周期；当组件被切回来时，再去缓存里找这个组件、触发 activated钩子函数。
+
+------
+
+##### Vue 子组件和父组件执行顺序
+
+**加载渲染过程：**
+
+1. 父组件 beforeCreate
+2. 父组件 created
+3. 父组件 beforeMount
+4. 子组件 beforeCreate
+5. 子组件 created
+6. 子组件 beforeMount
+7. 子组件 mounted
+8. 父组件 mounted
+
+**更新过程：**
+
+1. 父组件 beforeUpdate
+2. 子组件 beforeUpdate
+3. 子组件 updated
+4. 父组件 updated
+
+**销毁过程：**
+
+1. 父组件 beforeDestroy
+2. 子组件 beforeDestroy
+3. 子组件 destroyed
+4. 父组件 destoryed
+
+------
+
+##### 一般在哪个生命周期请求异步数据
+
+我们可以在钩子函数 created、beforeMount、mounted 中进行调用，因为在这三个钩子函数中，data 已经创建，可以将服务端端返回的数据进行赋值。 
+
+推荐在 created 钩子函数中调用异步请求，因为在 created 钩子函数中调用异步请求有以下优点：
+
+- 能更快获取到服务端数据，减少页面加载时间，用户体验更好；
+- SSR不支持 beforeMount 、mounted 钩子函数，放在 created 中有助于一致性。
 
 
 
@@ -101,11 +145,34 @@ webpack安装    npm install -g webpack
 
 #### vue的数据双向绑定原理
 
+Vue.js 是采用**数据劫持**结合**发布者-订阅者模式**的方式，通过Object.defineProperty()（vue3.0使用proxy ）来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。主要分为以下几个步骤：
+
+1. 需要observe的数据对象进行递归遍历，包括子属性对象的属性，都加上setter和getter这样的话，给这个对象的某个值赋值，就会触发setter，那么就能监听到了数据变化
+2. compile解析模板指令，将模板中的变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，更新视图
+3. Watcher订阅者是Observer和Compile之间通信的桥梁，主要做的事情是: ①在自身实例化时往属性订阅器(dep)里面添加自己 ②自身必须有一个update()方法 ③待属性变动dep.notice()通知时，能调用自身的update()方法，并触发Compile中绑定的回调，则功成身退。
+4. MVVM作为数据绑定的入口，整合Observer、Compile和Watcher三者，通过Observer来监听自己的model数据变化，通过Compile来解析编译模板指令，最终利用Watcher搭起Observer和Compile之间的通信桥梁，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据model变更的双向绑定效果。
+
+------
+
 vue数据双向绑定是通过**数据劫持**结合**发布者-订阅者模式**的方式来实现的。
 
 ![](前端图片/938664-20170522225458132-1434604303.png)
 
-实现数据的双向绑定，首先要对数据进行劫持监听，所以我们需要设置一个监听器Observer，用来监听所有属性。如果属性发上变化了，就需要告诉订阅者Watcher看是否需要更新。因为订阅者是有很多个，所以我们需要有一个消息订阅器Dep来专门收集这些订阅者，然后在监听器Observer和订阅者Watcher之间进行统一管理的。接着，我们还需要有一个指令解析器Compile，对每个节点元素进行扫描和解析，将相关指令对应初始化成一个订阅者Watcher，并替换模板数据或者绑定相应的函数，此时当订阅者Watcher接收到相应属性的变化，就会执行对应的更新函数，从而更新视图。因此接下去我们执行以下3个步骤，实现数据的双向绑定：
+实现数据的双向绑定，首先要对数据进行劫持监听，所以我们需要设置一个监听器Observer，用来监听所有属性。如果属性发上变化了，就需要告诉订阅者Watcher看是否需要更新。因为订阅者是有很多个，所以我们需要有一个消息订阅器Dep来专门收集这些订阅者，然后在监听器Observer和订阅者Watcher之间进行统一管理的。接着，我们还需要有一个指令解析器Compile，对每个节点元素进行扫描和解析，将相关指令对应初始化成一个订阅者Watcher，并替换模板数据或者绑定相应的函数，此时当订阅者Watcher接收到相应属性的变化，就会执行对应的更新函数，从而更新视图。
+
+Dep 是一个 class ，其中有一个关 键的静态属性 static，它指向了一个全局唯一 Watcher，保证了同一时间全局只有一个 watcher 被计算，另一个属性 subs 则是一个 Watcher 的数组，所以 Dep 实际上就是对 Watcher 的管理，再看看 Watcher 的相关代码∶
+
+------
+
+##### Object.defineProperty() 缺点
+
+在对一些属性进行操作时，使用这种方法无法拦截，比如通过下标方式修改数组数据或者给对象新增属性，这都不能触发组件的重新渲染，因为 Object.defineProperty 不能拦截到这些操作。更精确的来说，对于数组而言，大部分操作都是拦截不到的，只是 Vue 内部通过重写函数的方式解决了这个问题。
+
+在 Vue3.0 中已经不使用这种方式了，而是通过使用 Proxy 对对象进行代理，从而实现数据劫持。使用Proxy 的好处是它可以完美的监听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为 Proxy 是 ES6 的语法。
+
+------
+
+##### 函数实现
 
 1.实现一个监听器Observer，用来劫持并监听所有属性，如果有变动的，就通知订阅者。
 
@@ -595,6 +662,171 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 
 
 
+#### 数组内部变化监测
+
+在Vue中，对响应式处理利用的是Object.defineProperty对数据进行拦截，而这个方法并不能监听到数组内部变化，数组长度变化，数组的截取变化等，所以需要对这些操作进行hack，让Vue能监听到其中的变化。
+
+![image-20220406184123904](前端图片/image-20220406184123904.png)
+
+```javascript
+// 缓存数组原型
+const arrayProto = Array.prototype;
+// 实现 arrayMethods.__proto__ === Array.prototype
+export const arrayMethods = Object.create(arrayProto);
+// 需要进行功能拓展的方法
+const methodsToPatch = [
+  "push",
+  "pop",
+  "shift",
+  "unshift",
+  "splice",
+  "sort",
+  "reverse"
+];
+
+/**
+ * Intercept mutating methods and emit events
+ */
+methodsToPatch.forEach(function(method) {
+  // 缓存原生数组方法
+  const original = arrayProto[method];
+  def(arrayMethods, method, function mutator(...args) {
+    // 执行并缓存原生数组功能
+    const result = original.apply(this, args);
+    // 响应式处理
+    const ob = this.__ob__;
+    let inserted;
+    switch (method) {
+    // push、unshift会新增索引，所以要手动observer
+      case "push":
+      case "unshift":
+        inserted = args;
+        break;
+      // splice方法，如果传入了第三个参数，也会有索引加入，也要手动observer。
+      case "splice":
+        inserted = args.slice(2);
+        break;
+    }
+    // 
+    if (inserted) ob.observeArray(inserted);// 获取插入的值，并设置响应式监听
+    // notify change
+    ob.dep.notify();// 通知依赖更新
+    // 返回原生数组方法的执行结果
+    return result;
+  });
+});
+```
+
+简单来说就是，重写了数组中的那些原生方法，首先获取到这个数组的`__ob__`，也就是它的Observer对象，如果有新的值，就调用observeArray继续对新的值观察变化（也就是通过`target__proto__ == arrayMethods`来改变了数组实例的型），然后手动调用notify，通知渲染watcher，执行update。
+
+
+
+#### vue模版编译
+
+vue的模版编译过程主要如下：**template -> ast -> render函数**
+
+vue 在模版编译版本的码中会执行 compileToFunctions 将template转化为render函数：
+
+```javascript
+// 将模板编译为render函数const { render, staticRenderFns } = compileToFunctions(template,options//省略}, this)
+```
+
+CompileToFunctions中的主要逻辑如下∶ **（1）调用parse方法将template转化为ast（抽象语法树）**
+
+```javascript
+constast = parse(template.trim(), options)
+```
+
+- **parse的目标**：把tamplate转换为AST树，它是一种用 JavaScript对象的形式来描述整个模板。
+- **解析过程**：利用正则表达式顺序解析模板，当解析到开始标签、闭合标签、文本的时候都会分别执行对应的 回调函数，来达到构造AST树的目的。
+
+AST元素节点总共三种类型：type为1表示普通元素、2为表达式、3为纯文本
+
+**（2）对静态节点做优化**
+
+```javascript
+optimize(ast,options)
+```
+
+这个过程主要分析出哪些是静态节点，给其打一个标记，为后续更新渲染可以直接跳过静态节点做优化
+
+深度遍历AST，查看每个子树的节点元素是否为静态节点或者静态节点根。如果为静态节点，他们生成的DOM永远不会改变，这对运行时模板更新起到了极大的优化作用。
+
+**（3）生成代码**
+
+```javascript
+const code = generate(ast, options)
+```
+
+generate将ast抽象语法树编译成 render字符串并将静态部分放到 staticRenderFns 中，最后通过 new Function(render)生成render函数。
+
+------
+
+Vue.js通过编译将template 模板转换成渲染函数(render ) 
+
+`compile` 编译可以分成 `parse`、`optimize` 与 `generate` 三个阶段，最终需要得到render函数。
+
+```
+<div :class="c" class="demo" v-if="isShow">
+    <span v-for="item in sz">{{item}}</span>
+</div>
+```
+
+首先是 `parse`，`parse` 会用正则等方式将 template 模板中进行字符串解析，得到指令、class、style等数据，形成 AST（在计算机科学中，抽象语法树（abstract syntax tree或者缩写为AST），或者语法树（syntax tree），是源代码的抽象语法结构的树状表现形式，这里特指编程语言的源代码。）。
+
+这个过程比较复杂，会涉及到比较多的正则进行字符串解析，我们来看一下得到的 AST 的样子。
+
+```js
+{
+    /* 标签属性的map，记录了标签上属性 */
+    'attrsMap': {
+        ':class': 'c',
+        'class': 'demo',
+        'v-if': 'isShow'
+    },
+    /* 解析得到的:class */
+    'classBinding': 'c',
+    /* 标签属性v-if */
+    'if': 'isShow',
+    /* v-if的条件 */
+    'ifConditions': [
+        {
+            'exp': 'isShow'
+        }
+    ],
+    /* 标签属性class */
+    'staticClass': 'demo',
+    /* 标签的tag */
+    'tag': 'div',
+    /* 子标签数组 */
+    'children': [
+        {
+            'attrsMap': {
+                'v-for': "item in sz"
+            },
+            /* for循环的参数 */
+            'alias': "item",
+            /* for循环的对象 */
+            'for': 'sz',
+            /* for循环是否已经被处理的标记位 */
+            'forProcessed': true,
+            'tag': 'span',
+            'children': [
+                {
+                    /* 表达式，_s是一个转字符串的函数 */
+                    'expression': '_s(item)',
+                    'text': '{{item}}'
+                }
+            ]
+        }
+    ]
+}
+```
+
+最终得到的 AST 通过一些特定的属性，能够比较清晰地描述出标签的属性以及依赖关系。
+
+
+
 #### 虚拟DOM
 
 模板转换成视图的过程整个过程（如下图）：
@@ -663,22 +895,29 @@ var Vnode = {
 ##### 父组件向子组件传值
 
 ```html
+// 父组件
 <template>
-  <div>
-    <h1>父组件</h1>
-    <router-view v-bind:fData="data1" :fMessage="data2"></router-view>
-  </div>
+    <div id="father">
+        <son :msg="msgData" :fn="myFunction"></son>
+    </div>
 </template>
 
 <script>
+import son from "./son.vue";
 export default {
-  data () {
-    return {
-      data1: '父组件数据data1',
-      data2: '父组件数据data2',
-    };
-  }
-}
+    name: father,
+    data() {
+        msgData: "父组件数据";
+    },
+    methods: {
+        myFunction() {
+            console.log("vue");
+        }
+    },
+    components: {
+        son
+    }
+};
 </script>
 ```
 
@@ -688,80 +927,22 @@ export default {
 props有default（参数默认值）、type（参数类型）、required（是否必须）和validator属性。validator属性当校验规则很复杂，默认提供的校验规则无法满足的时候可以使用自定义函数来校验。
 
 ```html
+// 子组件
 <template>
-  <div>
-    <h1>子组件</h1>
-    <p>下面是父组件传过来的数据</p>
-    <p>第一个数据：{{fData}}</p>
-    <p>第二个数据：{{fMessage}}</p>
-  </div>
+    <div id="son">
+        <p>{{msg}}</p>
+        <button @click="fn">按钮</button>
+    </div>
 </template>
-
 <script>
 export default {
-  props: ['fData', 'fMessage'],
-  data () {
-    return {
-
-    };
-  }
-}
+    name: "son",
+    props: ["msg", "fn"]
+};
 </script>
 ```
 
-
-
-##### 父组件把方法传递给子组件
-
-```html
-<template>
-  <div>
-    <h1>父组件</h1>
-    <router-view @show="showFather"></router-view>
-  </div>
-</template>
-
-<script>
-export default {
-  data () {
-    return {
-
-    };
-  },
-  methods: {
-    showFather (a, b) {
-      console.log('触发了父组件的方法' + '======' + a + '======' + b);
-    }
-  }
-}
-</script>
-```
-
-```html
-<template>
-  <div>
-    <h1>子组件</h1>
-    <Button type="primary" @click="sonClick">触发父组件方法</Button>
-  </div>
-</template>
-
-<script>
-export default {
-  data () {
-    return {
-
-    };
-  },
-  methods: {
-    sonClick () {
-      this.$emit('show', 111, 222);
-    }
-  }
-}
-</script>
-```
-
-
+------
 
 ##### 子组件通过事件调用向父组件传值
 
@@ -818,6 +999,16 @@ export default {
 </script>
 ```
 
+------
+
+##### 子组件可以直接改变父组件的数据吗
+
+子组件不可以直接改变父组件的数据。这样做主要是为了维护父子组件的单向数据流。每次父级组件发生更新时，子组件中所有的 prop 都将会刷新为最新的值。如果这样做了，Vue 会在浏览器的控制台中发出警告。
+
+Vue提倡单向数据流，即父级 props 的更新会流向子组件，但是反过来则不行。这是为了防止意外的改变父组件状态，使得应用的数据流变得难以理解，导致数据流混乱。如果破坏了单向数据流，当应用复杂时，debug 的成本会非常高。
+
+**只能通过 $emit 派发一个自定义事件，父组件接收到后，由父组件修改。**
+
 
 
 #### vue页面传参（3种）
@@ -836,6 +1027,8 @@ this.$router.push({
 ```
 
 在b.vue通过地址栏的url 进行接收参数；可以在created这个函数里面进行接收的，**var name = this.$route.query.name;**就可以接收到name这个参数了；**需要注意的是接收参数的时候是route而不是router。两种方式一一对应，名字不能混用**
+
+------
 
 ##### params传值--地址栏不可见
 
@@ -860,9 +1053,11 @@ query更加类似于我们ajax中get传参；
 
 params则类似于post；说的再简单一点，前者在浏览器地址栏中显示参数，后者则不显示 ；
 
+------
+
 ##### 通过eventBus传递数据
 
-使用前可以在全局定义一个eventBus
+使用前可以在全局定义一个eventBus，如定义在js文件中
 
 ```js
 window.eventBus = new Vue();
@@ -886,6 +1081,277 @@ eventBus.$on('eventBusName', function(val) {console.log(val)})
 ```js
 eventBus.$off('eventBusName');
 ```
+
+------
+
+##### 依赖注入（provide / inject）
+
+这种方式就是Vue中的**依赖注入**，该方法用于**父子组件之间的通信**。当然这里所说的父子不一定是真正的父子，也可以是祖孙组件，在**层数很深的情况**下，可以使用这种方法来进行传值。就不用一层一层的传递了。
+
+`provide / inject`是Vue提供的两个钩子，和`data`、`methods`是同级的。并且`provide`的书写形式和`data`一样。
+
+- `provide` 钩子用来发送数据或方法
+- `inject`钩子用来接收数据或方法
+
+在父组件中：
+
+```javascript
+provide() { 
+    return {     
+        num: this.num  
+    };
+}
+```
+
+在子组件中：
+
+```javascript
+inject: ['num']
+```
+
+还可以这样写，这样写就可以访问父组件中的所有属性：
+
+```javascript
+provide() {
+ return {
+    app: this
+  };
+}
+data() {
+ return {
+    num: 1
+  };
+}
+
+inject: ['app']
+console.log(this.app.num)
+```
+
+**注意：** 依赖注入所提供的属性是**非响应式**的。
+
+------
+
+##### ref / $refs
+
+这种方式也是实现**父子组件**之间的通信。
+
+`ref`： 这个属性用在子组件上，它的引用就指向了子组件的实例。可以通过实例来访问组件的数据和方法。
+
+在子组件中：
+
+```javascript
+export default {
+  data () {
+    return {
+      name: 'JavaScript'
+    }
+  },
+  methods: {
+    sayHello () {
+      console.log('hello')
+    }
+  }
+}
+```
+
+在父组件中：
+
+```html
+<template>
+  <child ref="child"></component-a>
+</template>
+<script>
+  import child from './child.vue'
+  export default {
+    components: { child },
+    mounted () {
+      console.log(this.$refs.child.name);  // JavaScript
+      this.$refs.child.sayHello();  // hello
+    }
+  }
+</script>
+```
+
+------
+
+##### $parent / $children
+
+- 使用`$parent`可以让组件访问父组件的实例（访问的是上一级父组件的属性和方法）
+- 使用`$children`可以让组件访问子组件的实例，但是，`$children`并不能保证顺序，并且访问的数据也不是响应式的。
+
+在子组件中：
+
+```html
+<template>
+  <div>
+    <span>{{message}}</span>
+    <p>获取父组件的值为:  {{parentVal}}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      message: 'Vue'
+    }
+  },
+  computed:{
+    parentVal(){
+      return this.$parent.msg;
+    }
+  }
+}
+</script>
+```
+
+在父组件中：
+
+```html
+// 父组件中
+<template>
+  <div class="hello_world">
+    <div>{{msg}}</div>
+    <child></child>
+    <button @click="change">点击改变子组件值</button>
+  </div>
+</template>
+
+<script>
+import child from './child.vue'
+export default {
+  components: { child },
+  data() {
+    return {
+      msg: 'Welcome'
+    }
+  },
+  methods: {
+    change() {
+      // 获取到子组件
+      this.$children[0].message = 'JavaScript'
+    }
+  }
+}
+</script>
+```
+
+在上面的代码中，子组件获取到了父组件的`parentVal`值，父组件改变了子组件中`message`的值。 **需要注意：**
+
+- 通过`$parent`访问到的是上一级父组件的实例，可以使用`$root`来访问根组件的实例
+- 在组件中使用`$children`拿到的是所有的子组件的实例，它是一个数组，并且是无序的
+- 在根组件`#app`上拿`$parent`得到的是`new Vue()`的实例，在这实例上再拿`$parent`得到的是`undefined`，而在最底层的子组件拿`$children`是个空数组
+- `$children` 的值是**数组**，而`$parent`是个**对象**
+
+------
+
+##### $attrs / $listeners
+
+考虑一种场景，如果A是B组件的父组件，B是C组件的父组件。如果想要组件A给组件C传递数据，这种隔代的数据，该使用哪种方式呢？
+
+如果是用`props/$emit`来一级一级的传递，确实可以完成，但是比较复杂；如果使用事件总线，在多人开发或者项目较大的时候，维护起来很麻烦；如果使用Vuex，的确也可以，但是如果仅仅是传递数据，那可能就有点浪费了。
+
+针对上述情况，Vue引入了`$attrs / $listeners`，实现组件之间的跨代通信。
+
+先来看一下`inheritAttrs`，它的默认值true，继承所有的父组件属性除`props`之外的所有属性；`inheritAttrs：false` 只继承class属性 。
+
+- `$attrs`：继承所有的父组件属性（除了prop传递的属性、class 和 style ），一般用在子组件的子元素上
+- `$listeners`：该属性是一个对象，里面包含了作用在这个组件上的所有监听器，可以配合 `v-on="$listeners"` 将所有的事件监听器指向这个组件的某个特定的子元素。（相当于子组件继承父组件的事件）
+
+A组件（`APP.vue`）：
+
+```html
+<template>
+    <div id="app">
+        //此处监听了两个事件，可以在B组件或者C组件中直接触发 
+        <child1 :p-child1="child1" :p-child2="child2" @test1="onTest1" @test2="onTest2"></child1>
+    </div>
+</template>
+<script>
+import Child1 from './Child1.vue';
+export default {
+    components: { Child1 },
+    methods: {
+        onTest1() {
+            console.log('test1 running');
+        },
+        onTest2() {
+            console.log('test2 running');
+        }
+    }
+};
+</script>
+```
+
+B组件（`Child1.vue`）：
+
+```html
+<template>
+    <div class="child-1">
+        <p>props: {{pChild1}}</p>
+        <p>$attrs: {{$attrs}}</p>
+        <child2 v-bind="$attrs" v-on="$listeners"></child2>
+    </div>
+</template>
+<script>
+import Child2 from './Child2.vue';
+export default {
+    props: ['pChild1'],
+    components: { Child2 },
+    inheritAttrs: false,
+    mounted() {
+        this.$emit('test1'); // 触发APP.vue中的test1方法
+    }
+};
+</script>
+```
+
+C 组件 (`Child2.vue`)：
+
+```html
+<template>
+    <div class="child-2">
+        <p>props: {{pChild2}}</p>
+        <p>$attrs: {{$attrs}}</p>
+    </div>
+</template>
+<script>
+export default {
+    props: ['pChild2'],
+    inheritAttrs: false,
+    mounted() {
+        this.$emit('test2');// 触发APP.vue中的test2方法
+    }
+};
+</script>
+```
+
+在上述代码中：
+
+- C组件中能直接触发test的原因在于 B组件调用C组件时 使用 v-on 绑定了`$listeners` 属性
+- 在B组件中通过v-bind 绑定`$attrs`属性，C组件可以直接获取到A组件中传递下来的props（除了B组件中props声明的）
+
+------
+
+**总结**
+
+**（1）父子组件间通信**
+
+- 子组件通过 props 属性来接受父组件的数据，然后父组件在子组件上注册监听事件，子组件通过 emit 触发事件来向父组件发送数据。
+- 通过 ref 属性给子组件设置一个名字。父组件通过 `$refs` 组件名来获得子组件，子组件通过 `$parent` 获得父组件，这样也可以实现通信。
+- 使用 provide/inject，在父组件中通过 provide提供变量，在子组件中通过 inject 来将变量注入到组件中。不论子组件有多深，只要调用了 inject 那么就可以注入 provide中的数据。
+
+**（2）兄弟组件间通信**
+
+- 使用 eventBus 的方法，它的本质是通过创建一个空的 Vue 实例来作为消息传递的对象，通信的组件引入这个实例，通信的组件通过在这个实例上监听和触发事件，来实现消息的传递。
+- 通过 `$parent/$refs` 来获取到兄弟组件，也可以进行通信。
+
+**（3）任意组件之间**
+
+- 使用 eventBus ，其实就是创建一个事件中心，相当于中转站，可以用它来传递事件和接收事件。
+
+如果业务逻辑复杂，很多组件之间需要同时处理一些公共的数据，这个时候采用上面这一些方法可能不利于项目的维护。这个时候可以使用 **vuex** ，vuex 的思想就是将这一些公共的数据抽离出来，将它作为一个全局的变量来管理，然后其他组件就可以对这个公共数据进行读写操作，这样达到了解耦的目的。
+
 
 
 
@@ -988,10 +1454,10 @@ var var vm = new Vue({
 3. 监听的函数接收两个参数，第一个参数是最新的值；第二个参数是输入之前的值；
 4. 当一个属性发生变化时，需要执行对应的操作；一对多；
 5. 监听数据必须是data中声明过或者父组件传递过来的props中的数据，当数据变化时，触发其他操作，函数有两个参数，
+   - immediate：控制是否第一次渲染时执行回调函数，如果为true组件加载立即触发回调函数执行; 
+   - deep: 深度监听，为了发现**对象内部值**的变化，监听器会一层层的往下遍历，给对象的所有属性都加上这个监听器，但是这样性能开销就会非常大，任何修改obj里面任何一个属性都会触发这个监听器里的 handler。复杂类型的数据时使用，例如数组中的对象内容的改变，注意监听数组的变动不需要这么做。
 
-　　immediate：控制是否第一次渲染时执行回调函数，如果为true组件加载立即触发回调函数执行; 
-
-　　deep: 深度监听，为了发现**对象内部值**的变化，监听器会一层层的往下遍历，给对象的所有属性都加上这个监听器，但是这样性能开销就会非常大，任何修改obj里面任何一个属性都会触发这个监听器里的 handler。复杂类型的数据时使用，例如数组中的对象内容的改变，注意监听数组的变动不需要这么做。deep可以进行优化：给对象的指定属性添加侦听，减少性能开销,这样vue.js会一层一层解析直到遇到属性a，才给a设置监听函数。
+deep可以进行优化：给对象的指定属性添加侦听，减少性能开销，这样vue.js会一层一层解析直到遇到属性a，才给a设置监听函数。
 
 注意：
 
@@ -1003,11 +1469,141 @@ var var vm = new Vue({
 
 ![](前端图片/1402448-20190809160648619-505189772.png)
 
+**Computed 和 Methods 的区别**
+
+相同点：可以将同一函数定义为一个 method 或者一个计算属性。对于最终的结果，两种方式是相同的
+
+不同点：
+
+- computed: 计算属性是基于它们的依赖进行缓存的，只有在它的相关依赖发生改变时才会重新求值；
+- method 调用总会执行该函数。
+
 **总结**
 
 - computed 的话是通过几个数据的变化，来影响一个数据；而 watch则是可以通过一个数据的变化，去影响多个数据。
 - 如果一个数据需要经过复杂计算就用 computed
 - 如果一个数据需要被监听并且对数据做一些操作就用 watch
+
+
+
+#### slot
+
+slot又名插槽，是Vue的内容分发机制，组件内部的模板引擎使用slot元素作为承载分发内容的出口。插槽slot是子组件的一个模板标签元素，而这一个标签元素是否显示，以及怎么显示是由父组件决定的。slot又分三类，默认插槽，具名插槽和作用域插槽。
+
+- 默认插槽：又名匿名查抄，当slot没有指定name属性值的时候一个默认显示插槽，一个组件内只有有一个匿名插槽。
+- 具名插槽：带有具体名字的插槽，也就是带有name属性的slot，一个组件可以出现多个具名插槽。
+- 作用域插槽：默认插槽、具名插槽的一个变体，可以是匿名插槽，也可以是具名插槽，该插槽的不同点是在子组件渲染作用域插槽时，可以将子组件内部的数据传递给父组件，让父组件根据子组件的传递过来的数据决定如何渲染该插槽。
+
+实现原理：当子组件vm实例化时，获取到父组件传入的slot标签的内容，存放在`vm.$slot`中，默认插槽为`vm.$slot.default`，具名插槽为`vm.$slot.xxx`，xxx 为插槽名，当组件执行渲染函数时候，遇到slot标签，使用`$slot`中的内容进行替换，此时可以为插槽传递数据，若存在数据，则可称该插槽为作用域插槽。
+
+
+
+#### 过滤器fliters
+
+据过滤器的名称，过滤器是用来过滤数据的，在Vue中使用`filters`来过滤数据，`filters`不会修改数据，而是过滤数据，改变用户看到的输出（计算属性 `computed` ，方法 `methods` 都是通过修改数据来处理数据格式的输出显示）。
+
+**使用场景：**
+
+- 需要格式化数据的情况，比如需要处理时间、价格等数据格式的输出 / 显示。
+- 比如后端返回一个 **年月日的日期字符串**，前端需要展示为 **多少天前** 的数据格式，此时就可以用`fliters`过滤器来处理数据。
+
+过滤器是一个函数，它会把表达式中的值始终当作函数的第一个参数。过滤器用在**插值表达式 `{{ }}` 和 `v-bind`表达式** 中，然后放在操作符“ `|` ”后面进行指示。
+
+例如，在显示金额，给商品价格添加单位：
+
+```javascript
+<li>商品价格：{{item.price | filterPrice}}</li>
+
+ filters: {
+    filterPrice (price) {
+      return price ? ('￥' + price) : '--'
+    }
+  }
+```
+
+
+
+#### 如何保存页面的当前的状态
+
+既然是要保持页面的状态（其实也就是组件的状态），那么会出现以下两种情况：
+
+- 前组件会被卸载
+- 前组件不会被卸载
+
+那么可以按照这两种情况分别得到以下方法：
+
+##### 组件会被卸载
+
+**（1）将状态存储在LocalStorage / SessionStorage**
+
+只需要在组件即将被销毁的生命周期 `componentWillUnmount` （react）中在 LocalStorage / SessionStorage 中把当前组件的 state 通过 JSON.stringify() 储存下来就可以了。在这里面需要注意的是组件更新状态的时机。
+
+比如从 B 组件跳转到 A 组件的时候，A 组件需要更新自身的状态。但是如果从别的组件跳转到 B 组件的时候，实际上是希望 B 组件重新渲染的，也就是不要从 Storage 中读取信息。所以需要在 Storage 中的状态加入一个 flag 属性，用来控制 A 组件是否读取 Storage 中的状态。
+
+**优点：**
+
+- 兼容性好，不需要额外库或工具。
+- 简单快捷，基本可以满足大部分需求。
+
+**缺点：**
+
+- 状态通过 JSON 方法储存（相当于深拷贝），如果状态中有特殊情况（比如 Date 对象、Regexp 对象等）的时候会得到字符串而不是原来的值。（具体参考用 JSON 深拷贝的缺点）
+- 如果 B 组件后退或者下一页跳转并不是前组件，那么 flag 判断会失效，导致从其他页面进入 A 组件页面时 A 组件会重新读取 Storage，会造成很奇怪的现象
+
+**（2）路由传值**
+
+通过 react-router 的 Link 组件的 prop —— to 可以实现路由间传递参数的效果。
+
+在这里需要用到 state 参数，在 B 组件中通过 history.location.state 就可以拿到 state 值，保存它。返回 A 组件时再次携带 state 达到路由状态保持的效果。
+
+**优点：**
+
+- 简单快捷，不会污染 LocalStorage / SessionStorage。
+- 可以传递 Date、RegExp 等特殊对象（不用担心 JSON.stringify / parse 的不足）
+
+**缺点：**
+
+- 如果 A 组件可以跳转至多个组件，那么在每一个跳转组件内都要写相同的逻辑。
+
+------
+
+##### 组件不会被卸载
+
+**（1）单页面渲染**
+
+要切换的组件作为子组件全屏渲染，父组件中正常储存页面状态。
+
+**优点：**
+
+- 代码量少
+- 不需要考虑状态传递过程中的错误
+
+**缺点：**
+
+- 增加 A 组件维护成本
+- 需要传入额外的 prop 到 B 组件
+- 无法利用路由定位页面
+
+除此之外，在Vue中，还可以是用keep-alive来缓存页面，当组件在keep-alive内被切换时组件的**activated、deactivated**这两个生命周期钩子函数会被执行 被包裹在keep-alive中的组件的状态将会被保留：
+
+```html
+<keep-alive>
+	<router-view v-if="$route.meta.keepAlive"></router-view>
+</kepp-alive>
+```
+
+**router.js**
+
+```javascript
+{
+  path: '/',
+  name: 'xxx',
+  component: ()=>import('../src/views/xxx.vue'),
+  meta:{
+    keepAlive: true // 需要被缓存
+  }
+},
+```
 
 
 
@@ -1142,7 +1738,7 @@ proxyTable: {
 
 
 
-#### **Vue.nextTick()**
+#### vue.nextTick()
 
 **定义：**Vue 在修改数据后，视图不会立刻更新，而是**等同一事件循环中的所有数据变化完成之后，再统一进行视图更新**。在修改数据之后立即使用这个方法，获取更新后的 DOM。
 
@@ -1193,7 +1789,7 @@ methods:{
 
 什么时候需要用的Vue.nextTick()？
 
-1、Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.nextTick()的回调函数中，原因是在created()钩子函数执行的时候DOM 其实并未进行任何渲染，而此时进行DOM操作无异于徒劳，所以此处一定要将DOM操作的js代码放进Vue.nextTick()的回调函数中。与之对应的就是mounted钩子函数，因为该钩子函数执行时所有的DOM挂载已完成。
+1、Vue生命周期的created()钩子函数进行的DOM操作一定要放在Vue.nextTick()的回调函数中，原因是在**created()钩子函数执行的时候DOM 其实并未进行任何渲染**，而此时进行DOM操作无异于徒劳，所以此处一定要将DOM操作的js代码放进Vue.nextTick()的回调函数中。与之对应的就是mounted钩子函数，因为该钩子函数执行时所有的DOM挂载已完成。
 
 ```js
 created(){
@@ -1211,73 +1807,6 @@ created(){
 **Vue.nextTick**(callback) 使用原理：
 原因是，Vue是异步执行dom更新的，一旦观察到数据变化，Vue就会开启一个队列，然后把在同一个事件循环 (event loop) 当中观察到数据变化的 watcher 推送进这个队列。如果这个watcher被触发多次，只会被推送到队列一次。这种缓冲行为可以有效的去掉重复数据造成的不必要的计算和dom操作。而在下一个事件循环时，Vue会清空队列，并进行必要的DOM更新。
 当你设置 vm.someData = 'new value'，DOM 并不会马上更新，而是在异步队列被清除，也就是下一个事件循环开始时执行更新时才会进行必要的DOM更新。如果此时你想要根据更新的 DOM 状态去做某些事情，就会出现问题。。为了在数据变化之后等待 Vue 完成更新 DOM ，可以在数据变化之后立即使用 Vue.nextTick(callback) 。这样回调函数在 DOM 更新完成后就会调用。
-
-
-
-#### **template 模板编译**
-
-Vue.js通过编译将template 模板转换成渲染函数(render ) 
-
-`compile` 编译可以分成 `parse`、`optimize` 与 `generate` 三个阶段，最终需要得到render函数。
-
-```
-<div :class="c" class="demo" v-if="isShow">
-    <span v-for="item in sz">{{item}}</span>
-</div>
-```
-
-首先是 `parse`，`parse` 会用正则等方式将 template 模板中进行字符串解析，得到指令、class、style等数据，形成 AST（[在计算机科学中，抽象语法树（abstract syntax tree或者缩写为AST），或者语法树（syntax tree），是源代码的抽象语法结构的树状表现形式，这里特指编程语言的源代码。](https://zh.wikipedia.org/wiki/抽象語法樹)）。
-
-这个过程比较复杂，会涉及到比较多的正则进行字符串解析，我们来看一下得到的 AST 的样子。
-
-```
-{
-    /* 标签属性的map，记录了标签上属性 */
-    'attrsMap': {
-        ':class': 'c',
-        'class': 'demo',
-        'v-if': 'isShow'
-    },
-    /* 解析得到的:class */
-    'classBinding': 'c',
-    /* 标签属性v-if */
-    'if': 'isShow',
-    /* v-if的条件 */
-    'ifConditions': [
-        {
-            'exp': 'isShow'
-        }
-    ],
-    /* 标签属性class */
-    'staticClass': 'demo',
-    /* 标签的tag */
-    'tag': 'div',
-    /* 子标签数组 */
-    'children': [
-        {
-            'attrsMap': {
-                'v-for': "item in sz"
-            },
-            /* for循环的参数 */
-            'alias': "item",
-            /* for循环的对象 */
-            'for': 'sz',
-            /* for循环是否已经被处理的标记位 */
-            'forProcessed': true,
-            'tag': 'span',
-            'children': [
-                {
-                    /* 表达式，_s是一个转字符串的函数 */
-                    'expression': '_s(item)',
-                    'text': '{{item}}'
-                }
-            ]
-        }
-    ]
-}
-```
-
-最终得到的 AST 通过一些特定的属性，能够比较清晰地描述出标签的属性以及依赖关系。
 
 
 
@@ -1328,8 +1857,9 @@ var vm = new Vue({
 // 问题
 vm.userProfile.age = 27;// 非响应
 // 解决方案
-Vue.set(vm.userProfile, 'age', 27);// 方案一
-vm.$set(vm.userProfile, 'age', 27);// 等同方案一
+Vue.set(vm.userProfile, 'age', 27);		//方案一，响应式
+vm.$set(vm.userProfile, 'age', 27);		//等同方案一，响应式
+this.$set(this.userProfile, 'age', 27); 	//在methods内部使用，等同方案一，响应式
 vm.userProfile = Object.assign({}, vm.userProfile, {
   age: 27,
   favoriteColor: 'Vue Green'
@@ -1374,6 +1904,151 @@ created () {
     }, 0)
 }
 ```
+
+vm.`$set` 的实现原理是：
+
+- 如果目标是数组，直接使用数组的 splice 方法触发相应式；
+- 如果目标是对象，会先判读属性是否存在、对象是否是响应式，最终如果要对属性进行响应式处理，则是通过调用 defineReactive 方法进行响应式处理（ defineReactive 方法就是 Vue 在初始化对象时，给对象属性采用 Object.defineProperty 动态添加 getter 和 setter 的功能所调用的方法）
+
+
+
+#### 路由
+
+##### Vue-Router 的懒加载
+
+非懒加载：
+
+```javascript
+import List from '@/components/list.vue'
+const router = new VueRouter({
+  routes: [
+    { path: '/list', component: List }
+  ]
+})
+```
+
+（1）方案一(常用)：**使用箭头函数+import动态加载**
+
+```javascript
+const List = () => import('@/components/list.vue')
+const router = new VueRouter({
+  routes: [
+    { path: '/list', component: List }
+  ]
+})
+```
+
+（2）方案二：**使用箭头函数+require动态加载**
+
+```javascript
+const router = new Router({
+  routes: [
+   {
+     path: '/list',
+     component: resolve => require(['@/components/list'], resolve)
+   }
+  ]
+})
+```
+
+（3）方案三：**使用webpack的require.ensure技术**，也可以实现按需加载。 这种情况下，多个路由指定相同的chunkName，会合并打包成一个js文件。
+
+```javascript
+// r就是resolve
+const List = r => require.ensure([], () => r(require('@/components/list')), 'list');
+// 路由也是正常的写法  这种是官方推荐的写的 按模块划分懒加载 
+const router = new Router({
+  routes: [
+  {
+    path: '/list',
+    component: List,
+    name: 'list'
+  }
+ ]
+}))
+```
+
+------
+
+##### 路由的hash和history模式的区别
+
+Vue-Router有两种模式：**hash模式**和**history模式**。默认的路由模式是hash模式。
+
+**1. hash模式**
+
+**简介：** hash模式是开发中默认的模式，它的URL带着一个#，例如：[www.abc.com/#/vue](https://link.juejin.cn?target=http%3A%2F%2Fwww.abc.com%2F%23%2Fvue)，它的hash值就是`#/vue`。
+
+**特点**：hash值会出现在URL里面，但是不会出现在HTTP请求中，对后端完全没有影响。所以改变hash值，不会重新加载页面。这种模式的浏览器支持度很好，低版本的IE浏览器也支持这种模式。hash路由被称为是前端路由，已经成为SPA（单页面应用）的标配。
+
+**原理：** hash模式的主要原理就是**onhashchange()事件**：
+
+```javascript
+window.onhashchange = function(event){
+	console.log(event.oldURL, event.newURL);
+	let hash = location.hash.slice(1);
+}
+```
+
+使用onhashchange()事件的好处就是，在页面的hash值发生变化时，无需向后端发起请求，window就可以监听事件的改变，并按规则加载相应的代码。除此之外，hash值变化对应的URL都会被浏览器记录下来，这样浏览器就能实现页面的前进和后退。虽然是没有请求后端服务器，但是页面的hash值和对应的URL关联起来了。
+
+**2. history模式**
+
+**简介：** history模式的URL中没有#，它使用的是传统的路由分发模式，即用户在输入一个URL时，服务器会接收这个请求，并解析这个URL，然后做出相应的逻辑处理。 **特点：** 当使用history模式时，URL就像这样：[abc.com/user/id](https://link.juejin.cn?target=http%3A%2F%2Fabc.com%2Fuser%2Fid)。相比hash模式更加好看。但是，history模式需要后台配置支持。如果后台没有正确配置，访问时会返回404。 **API：** history api可以分为两大部分，切换历史状态和修改历史状态：
+
+- **修改历史状态**：包括了 HTML5 History Interface 中新增的 `pushState()` 和 `replaceState()` 方法，这两个方法应用于浏览器的历史记录栈，提供了对历史记录进行修改的功能。只是当他们进行修改时，虽然修改了url，但浏览器不会立即向后端发送请求。如果要做到改变url但又不刷新页面的效果，就需要前端用上这两个API。
+- **切换历史状态：** 包括`forward()`、`back()`、`go()`三个方法，对应浏览器的前进，后退，跳转操作。
+
+虽然history模式丢弃了丑陋的#。但是，它也有自己的缺点，就是在刷新页面的时候，如果没有相应的路由或资源，就会刷出404来。
+
+如果想要切换到history模式，就要进行以下配置（后端也要进行配置）：
+
+```javascript
+const router = new VueRouter({
+  mode: 'history',
+  routes: [...]
+})
+```
+
+**3. 两种模式对比**
+
+调用 history.pushState() 相比于直接修改 hash，存在以下优势:
+
+- pushState() 设置的新 URL 可以是与当前 URL 同源的任意 URL；而 hash 只可修改 # 后面的部分，因此只能设置与当前 URL 同文档的 URL；
+- pushState() 设置的新 URL 可以与当前 URL 一模一样，这样也会把记录添加到栈中；而 hash 设置的新值必须与原来不一样才会触发动作将记录添加到栈中；
+- pushState() 通过 stateObject 参数可以添加任意类型的数据到记录中；而 hash 只可添加短字符串；
+- pushState() 可额外设置 title 属性供后续使用。
+- hash模式下，仅hash符号之前的url会被包含在请求中，后端如果没有做到对路由的全覆盖，也不会返回404错误；history模式下，前端的url必须和实际向后端发起请求的url一致，如果没有对用的路由处理，将返回404错误。
+
+hash模式和history模式都有各自的优势和缺陷，还是要根据实际情况选择性的使用。
+
+------
+
+##### 如何获取页面的hash变化
+
+**（1）监听$route的变化**
+
+```javascript
+// 监听,当路由发生变化的时候执行
+watch: {
+  $route: {
+    handler: function(val, oldVal){
+      console.log(val);
+    },
+    // 深度观察监听
+    deep: true
+  }
+},
+```
+
+**（2）window.location.hash读取#值** window.location.hash 的值可读可写，读取来判断状态是否改变，写入时可以在不重载网页的前提下，添加一条历史访问记录。
+
+------
+
+##### `$route 和$router` 的区别
+
+- $route 是“路由信息对象”，包括 path，params，hash，query，fullPath，matched，name 等路由信息参数
+- $router 是“路由实例”对象包括了路由的跳转方法，钩子函数等。
+
 
 
 
@@ -1462,73 +2137,221 @@ export default service
 
 
 
-#### **如何进行网站性能优化**（13种）
+#### mixin、extends 的覆盖逻辑
 
-**1.合并js和css文件**
+**（1）mixin 和 extends** mixin 和 extends均是用于合并、拓展组件的，两者均通过 mergeOptions 方法实现合并。
 
-将js和css分别合并到一个共享文件，这样不仅能够简化代码，而且在执行js文件时，如果js文件较多，就需要多次向服务器请求数据，这样将会延长加载速度，将js文件合并在一起，减少了请求的次数，就能够提高加载的速度；
+- mixins 接收一个混入对象的数组，其中混入对象可以像正常的实例对象一样包含实例选项，这些选项会被合并到最终的选项中。Mixin 钩子按照传入顺序依次调用，并在调用组件自身的钩子之前被调用。
+- extends 主要是为了便于扩展单文件组件，接收一个对象或构造函数。
 
-**2.Sprites图片技术（图片精灵技术）**
+![image-20220406204431092](前端图片/image-20220406204431092.png)
 
-图片精灵技术是一种常用的页面速度加载优化的方式，它是将一个页面涉及到的所有的零星图片（注意：只是那些晓得图片、icon）都包含到一张大图中，然后利用css的背景属性将其相应的图片在现在响应的文字，这样当访问一面时，只用加载一张大图即可，而不用一幅一幅的去请求。这种方法既减少了图片的大小，有减少了http请求的次数，可以很大程度的优化页面的加载熟读
+ **（2）mergeOptions 的执行过程**
 
-**3.压缩图片、文本和代码**
+- 规范化选项（normalizeProps、normalizelnject、normalizeDirectives)
+- 对未合并的选项，进行判断
 
-压缩图片和文本也可以减小数据的大小，尤其是代码的压缩，如HTML、XML、JSON、javascript、css等代码的压缩率可达70%以上，代码压缩后可以大大减少文件的体积，是页面可以快速的加载
+```javascript
+if(!child._base) {    
+    if(child.extends) {        
+    	parent = mergeOptions(parent, child.extends, vm);    
+	}    
+	if(child.mixins) {        
+        for(let i = 0, l = child.mixins.length; i < l; i++){            
+            parent = mergeOptions(parent, child.mixins[i], vm);        
+        }    
+	}
+}
+```
 
-**4.按需加载（及可见区域以外的区域延时加载）**
+- 合并处理。根据一个通用 Vue 实例所包含的选项进行分类逐一判断合并，如 props、data、 methods、watch、computed、生命周期等，将合并结果存储在新定义的 options 对象里。
+- 返回合并结果 options。
 
-为了让用户可以更快的看到网页中最重要的内容，可以优先加载可见区域的内容，延时加载不可见区域的内容，为了避免页面变形可以使用占位符，占位图片来固定宽高。如jquery中的ImageLazyLoad等一些插件就可以很好的实现按需加载，只有当用户鼠标向下滚动式，下面得图片才会加载。当然也可以用原生的js来实现。
+------
 
-**5.确保功能图片优先加载**
+##### mixin 和 mixins 区别
 
-网站主要考虑可用性的重要性，一个功能按钮要提前加载出来，用户进入下载页，一个只需要8s时间的下载，花了5s在等待、寻找下载按钮图片，谁能忍受?
+`mixin` 用于全局混入，会影响到每个组件实例，通常插件都是这样做初始化的。
 
-**6.图片格式优化**
+```javascript
+Vue.mixin({
+    beforeCreate() {        
+        // ...逻辑        // 这种方式会影响到每个组件的 beforeCreate 钩子函数 
+    }})
+```
 
-不正确的使用图片格式是一种很常见的拖慢加载速度的原因，正确的使用图片格式可以数倍的减小图片的大小。一般网页的大图，**如banner图片一般使用jpg格式**，因为jpg是一种有损压缩，可以最大程度的减小图片的体积，而且不会影响视觉体验（不支持透明通道）；**小图片一般用png格式**，一般是无损压缩的（保留透明通道）。
+虽然文档不建议在应用中直接使用 `mixin`，但是如果不滥用的话也是很有帮助的，比如可以全局混入封装好的 `ajax` 或者一些工具函数等等。
 
-**7. 使用 Progressive JPEGs（高级JPEG）**
+`mixins` 应该是最常使用的扩展组件的方式了。如果多个组件中有相同的业务逻辑，就可以将这些逻辑剥离出来，通过 `mixins` 混入代码，比如上拉下拉加载数据这种逻辑等等。 另外需要注意的是 `mixins` 混入的钩子函数会先于组件内的钩子函数执行，并且在遇到同名选项的时候也会有选择性的进行合并。
 
-Progressive JPEGs图片是JPEG格式的一个特殊变种，名为“高级JPEG”。在创建高级JPEG文件时，数据是这样安排的：在装入图像时，开始只显示一个模糊的图像，随着数据的装入，图像逐步变得清晰。它相当于交织的GIF格式的图片。高级JPEG主要是考虑到使用调制解调器的慢速网络而设计的，快速网络的使用者通常不会体会到它和正常JPEG格式图片的区别。对于网速比较慢的用户，这无疑有很好的体验。
 
-**8.代码的精简**
 
-代码的精简是最直接的方法，也是对于一个程序员编程能力的考验。对代码进行优化，以最少的代码来实现所需的功能，及减少了文件的体积，同时也减少了不必要的时间的浪费。同时不必要的空格、注释、换行等的减少，也可以减少文件的体积。
 
-**9.延迟加载**
+#### SSR
 
-网页中的大部分js代码都是在页面加载后才需要执行的，所以对于这些代码可以写在window.onload事件的回调函数中。这样可以使页面主体和一些必要的js代码优先加载的出来，然后来去请求非一开始就需要的代码。
+SSR也就是服务端渲染，也就是将Vue在客户端把标签渲染成HTML的工作放在服务端完成，然后再把html直接返回给客户端
 
-**10.使用Ajax**
+SSR的优势：
 
-当一个页面只有一部分需要更新时，可以使用ajax来对页面进行异步的更新，这样不需要重新的刷新整个页面，重新请求整个页面的数据，而只需要请求需要的那部分数据更新页面即可。这样既提高了页面的加载速度，有提高了体验性。
+- 更好的SEO
+- 首屏加载速度更快
 
-**11.数据缓存**
+SSR的缺点：
 
-HTTP 协议缓存请求，离线缓存 manifest，离线数据缓存localStorage。
+- 开发条件会受到限制，服务器端渲染只支持beforeCreate和created两个钩子；
+- 当需要一些外部扩展库时需要特殊处理，服务端渲染应用程序也需要处于Node.js的运行环境；
+- 更多的服务端负载。
 
-**12.提高请求速度**
 
-预解析DNS，减少域名数，并行加载，CDN 分发。
 
-**13.借助自动化工具来实现页面的优化**
+#### SPA与MPA
 
-比如RadwareFastView
+**概念：**
+
+- SPA单页面应用（SinglePage Web Application），指只有一个主页面的应用，一开始只需要加载一次js、css等相关资源。所有内容都包含在主页面，对每一个功能模块组件化。单页应用跳转，就是切换相关组件，仅仅刷新局部资源。
+- MPA多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载js、css等相关资源。多页应用跳转，需要整页资源刷新。
+
+SPA（ single-page application ）仅在 Web 页面初始化时加载相应的 HTML、JavaScript 和 CSS。一旦页面加载完成，SPA 不会因为用户的操作而进行页面的重新加载或跳转；取而代之的是利用路由机制实现 HTML 内容的变换，UI 与用户的交互，避免页面的重新加载。
+
+**优点：**
+
+- 用户体验好、快，内容的改变不需要重新加载整个页面，避免了不必要的跳转和重复渲染；
+- 基于上面一点，SPA 相对对服务器压力小；
+- 前后端职责分离，架构清晰，前端进行交互逻辑，后端负责数据处理；
+
+**缺点：**
+
+- 初次加载耗时多：为实现单页 Web 应用功能及显示效果，需要在加载页面的时候将 JavaScript、CSS 统一加载，部分页面按需加载；
+- 前进后退路由管理：由于单页应用在一个页面中显示所有的内容，所以不能使用浏览器的前进后退功能，所有的页面切换需要自己建立堆栈管理；
+- SEO 难度较大：由于所有的内容都在一个页面中动态替换显示，所以在 SEO 上其有着天然的弱势。
+
+
+
+####  vue性能优化
+
+**（1）编码阶段**
+
+- 尽量减少data中的数据，data中的数据都会增加getter和setter，会收集对应的watcher
+- v-if和v-for不能连用
+- 如果需要使用v-for给每项元素绑定事件时使用事件代理
+- SPA 页面采用keep-alive缓存组件
+- 在更多的情况下，使用v-if替代v-show
+- key保证唯一
+- 使用路由懒加载、异步组件
+- 防抖、节流
+- 第三方模块按需导入
+- 长列表滚动到可视区域动态加载
+- 图片懒加载
+
+**（2）SEO优化**
+
+- 预渲染
+- 服务端渲染SSR
+
+**（3）打包优化**
+
+- 压缩代码
+- Tree Shaking/Scope Hoisting
+- 使用cdn加载第三方模块
+- 多线程打包happypack
+- splitChunks抽离公共文件
+- sourceMap优化
+
+**（4）用户体验**
+
+- 骨架屏
+- PWA
+- 还可以使用缓存(客户端缓存、服务端缓存)优化、服务端开启gzip压缩等。
+
+
+
+#### vue与react的对比
+
+**相似之处：**
+
+- 都将注意力集中保持在核心库，而将其他功能如路由和全局状态管理交给相关的库；
+- 都有自己的构建工具，能让你得到一个根据最佳实践设置的项目模板；
+- 都使用了Virtual DOM（虚拟DOM）提高重绘性能；
+- 都有props的概念，允许组件间的数据传递；
+- 都鼓励组件化应用，将应用分拆成一个个功能明确的模块，提高复用性。
+
+**不同之处 ：**
+
+**1）数据流**
+
+Vue默认支持数据双向绑定，而React一直提倡单向数据流
+
+**2）虚拟DOM**
+
+Vue2.x开始引入"Virtual DOM"，消除了和React在这方面的差异，但是在具体的细节还是有各自的特点。
+
+- Vue宣称可以更快地计算出Virtual DOM的差异，这是由于它在渲染过程中，会跟踪每一个组件的依赖关系，不需要重新渲染整个组件树。
+- 对于React而言，每当应用的状态被改变时，全部子组件都会重新渲染。当然，这可以通过 PureComponent/shouldComponentUpdate这个生命周期方法来进行控制，但Vue将此视为默认的优化。
+
+**3）组件化**
+
+React与Vue最大的不同是模板的编写。
+
+- Vue鼓励写近似常规HTML的模板。写起来很接近标准 HTML元素，只是多了一些属性。
+- React推荐你所有的模板通用JavaScript的语法扩展——JSX书写。
+
+具体来讲：React中render函数是支持闭包特性的，所以import的组件在render中可以直接调用。但是在Vue中，由于模板中使用的数据都必须挂在 this 上进行一次中转，所以 import 一个组件完了之后，还需要在 components 中再声明下。 
+
+**4）监听数据变化的实现原理不同**
+
+- Vue 通过 getter/setter 以及一些函数的劫持，能精确知道数据变化，不需要特别的优化就能达到很好的性能
+- React 默认是通过比较引用的方式进行的，如果不优化（PureComponent/shouldComponentUpdate）可能导致大量不必要的vDOM的重新渲染。这是因为 Vue 使用的是可变数据，而React更强调数据的不可变。
+
+**5）高阶组件**
+
+react可以通过高阶组件（HOC）来扩展，而Vue需要通过mixins来扩展。
+
+高阶组件就是高阶函数，而React的组件本身就是纯粹的函数，所以高阶函数对React来说易如反掌。相反Vue.js使用HTML模板创建视图组件，这时模板无法有效的编译，因此Vue不能采用HOC来实现。
+
+**6）构建工具**
+
+两者都有自己的构建工具：
+
+- React ==> Create React APP
+- Vue ==> vue-cli
+
+**7）跨平台**
+
+- React ==> React Native
+- Vue ==> Weex
 
 
 
 #### 单个问题汇总
 
-##### 如何让CSS只在当前组件中起作用？
-
-在组件中的style前面加上scoped。
-
-------
-
 ##### keep-alive标签的作用是什么
 
 keep-alive标签用于切换组件时**保留隐藏组件的状态**。例如当组件a变更了组件a的data，然后把组件a切换为组件b，再切回组件a：如果组件被keep-alive包裹，则组件a的data为变更后的状态；如果组件未被keep-alive包裹，则组件a的data为初始化状态。
+
+keep-alive有以下三个属性：
+
+- include 字符串或正则表达式，只有名称匹配的组件会被匹配；
+- exclude 字符串或正则表达式，任何名称匹配的组件都不会被缓存；
+- max 数字，最多可以缓存多少组件实例。
+
+注意：keep-alive 包裹动态组件时，会缓存不活动的组件实例。
+
+**主要流程**
+
+1. 判断组件 name ，不在 include 或者在 exclude 中，直接返回 vnode，说明该组件不被缓存。
+2. 获取组件实例 key ，如果有获取实例的 key，否则重新生成。
+3. key生成规则，cid +"∶∶"+ tag ，仅靠cid是不够的，因为相同的构造函数可以注册为不同的本地组件。
+4. 如果缓存对象内存在，则直接从缓存对象中获取组件实例给 vnode ，不存在则添加到缓存对象中。 5.最大缓存数量，当缓存组件数量超过 max 值时，清除 keys 数组内第一个组件。
+
+------
+
+##### LRU （least recently used）缓存策略
+
+LRU 缓存策略∶ 从内存中找出最久未使用的数据并置换新的数据。 LRU（Least rencently used）算法根据数据的历史访问记录来进行淘汰数据，其核心思想是 **"如果数据最近被访问过，那么将来被访问的几率也更高"**。 最常见的实现是使用一个链表保存缓存数据，详细算法实现如下∶
+
+- 新数据插入到链表头部
+- 每当缓存命中（即缓存数据被访问），则将数据移到链表头部
+- 链表满的时候，将链表尾部的数据丢弃。
 
 ------
 
@@ -1565,13 +2388,23 @@ keep-alive标签用于切换组件时**保留隐藏组件的状态**。例如当
 
 ##### v-if与v-show
 
-答: 共同点：都能控制元素的显示和隐藏；
+**手段**：v-if是动态的向DOM树内添加或者删除DOM元素；v-show是通过设置DOM元素的display样式属性控制显隐；
 
-不同点：实现本质方法不同，v-show本质就是通过控制css中的display设置为none，控制隐藏，只会编译一次；
+**编译过程**：v-if切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件；v-show只是简单的基于css切换；
 
-v-if是动态的向DOM树内添加或者删除DOM元素，若初始值为false，就不会编译了。而且v-if不停的销毁和创建比较消耗性能。
+**编译条件**：v-if是惰性的，如果初始条件为假，则什么也不做；只有在条件第一次变为真时才开始局部编译; v-show是在任何条件下，无论首次条件是否为真，都被编译，然后被缓存，而且DOM元素保留；
 
-总结：如果要频繁切换某节点，使用v-show(切换开销比较小，初始开销较大)。如果不需要频繁切换某节点使用v-if（初始渲染开销较小，切换开销比较大）。
+**性能消耗**：v-if有更高的切换消耗；v-show有更高的初始渲染消耗；
+
+**使用场景**：v-if适合运营条件不大可能改变；v-show适合频繁切换。
+
+------
+
+##### v-if、v-show、v-html 的原理
+
+- v-if会调用addIfCondition方法，生成vnode的时候会忽略对应节点，render的时候就不会渲染；
+- v-show会生成vnode，render的时候也会渲染成真实节点，只是在render过程中会在节点的属性中修改show属性值，也就是常说的display；
+- v-html会先移除节点下的所有节点，调用html方法，通过addProp添加innerHTML属性，归根结底还是设置innerHTML为v-html的值。
 
 ------
 
@@ -1632,11 +2465,11 @@ export default {
 
 ##### vue常用的修饰符
 
-.stop：等同于JavaScript中的event.stopPropagation()，防止事件冒泡；
-.prevent：等同于JavaScript中的event.preventDefault()，防止执行预设的行为（如果事件可取消，则取消该事件，而不停止事件的进一步传播）；
-.capture：与事件冒泡的方向相反，事件捕获由外到内；
-.self：只会触发自己范围内的事件，不包含子元素；
-.once：只会触发一次。
+**.stop**：等同于JavaScript中的event.stopPropagation()，防止事件冒泡；
+**.prevent**：等同于JavaScript中的event.preventDefault()，防止执行预设的行为（如果事件可取消，则取消该事件，而不停止事件的进一步传播）；
+**.capture**：与事件冒泡的方向相反，事件捕获由外到内；
+**.self**：只会触发自己范围内的事件，不包含子元素；
+**.once**：只会触发一次。
 
 ------
 
@@ -1699,17 +2532,6 @@ export default {
 
 ------
 
-##### **如何解决props层级过深的问题**
-
-```
-(1)使用vuex
-(2)传递数据，使用以下接收（均不含被props接收的数据）
-this.$attrs 接收属性
-this.$listeners 接收事件（不含被 .native 修饰符的事件）
-```
-
-------
-
 ##### **解决初始化页面闪动问题v-cloak**
 
 作用：当网络较慢，网页还在加载 Vue.js ，而导致 Vue 来不及渲染，这时页面就会显示出 Vue 源代码，闪烁花括号{{}}。我们可以使用 v-cloak 指令来解决这一问题，隐藏未编译时候的标签。
@@ -1719,6 +2541,14 @@ this.$listeners 接收事件（不含被 .native 修饰符的事件）
     {{context}}
 </div>
 ```
+
+或者：
+
+```css
+[v-cloak] {display: none;}
+```
+
+如果没有彻底解决问题，则在根元素加上`style="display: none;" :style="{display: 'block'}"`
 
 在简单项目中，使用  v-cloak 指令是解决屏幕闪动的好方法。但在大型、工程化的项目中（webpack、vue-router）只有一个空的 div 元素，元素中的内容是通过路由挂载来实现的，这时我们就不需要用到 v-cloak 指令咯。
 
@@ -1789,4 +2619,12 @@ move(){
     document.removeEventListener("touchmove",mo,false);
 }
 ```
+
+------
+
+##### template和jsx的有什么分别？
+
+对于 runtime 来说，只需要保证组件存在 render 函数即可，而有了预编译之后，只需要保证构建过程中生成 render 函数就可以。在 webpack 中，使用`vue-loader`编译.vue文件，内部依赖的`vue-template-compiler`模块，在 webpack 构建过程中，将template预编译成 render 函数。与 react 类似，在添加了jsx的语法糖解析器`babel-plugin-transform-vue-jsx`之后，就可以直接手写render函数。
+
+所以，template和jsx的都是render的一种表现形式，不同的是：JSX相对于template而言，具有更高的灵活性，在复杂的组件中，更具有优势，而 template 虽然显得有些呆滞。但是 template 在代码结构上更符合视图与逻辑分离的习惯，更简单、更直观、更好维护。
 

@@ -1,4 +1,4 @@
-### JavaScript
+JavaScript
 
 #### JS数据类型
 
@@ -220,35 +220,594 @@ Array.prototype.isPrototypeOf(obj)
 
 那也就是说null的类型标签也是000，和Object的类型标签一样，所以会被判定为Object。
 
+------
+
+##### typeof NaN
+
+NaN 指“不是一个数字”（not a number），NaN 是一个“警戒值”（sentinel value，有特殊用途的常规值），用于指出数字类型中的错误情况，即“执行数学运算没有成功，这是失败后返回的结果”。
+
+```javascript
+typeof NaN; // "number"
+```
+
+NaN 是一个特殊值，它和自身不相等，是唯一一个非自反（自反，reflexive，即 x === x 不成立）的值。而 NaN !== NaN 为 true。
+
+------
+
+##### isNaN 和 Number.isNaN 函数的区别
+
+- 函数 isNaN 接收参数后，会尝试将这个参数转换为数值，任何不能被转换为数值的的值都会返回 true，因此非数字值传入也会返回 true ，会影响 NaN 的判断。
+- 函数 Number.isNaN 会首先判断传入参数是否为数字，如果是数字再继续判断是否为 NaN ，不会进行数据类型的转换，这种方法对于 NaN 的判断更为准确。
+
+------
+
+##### JS判断相等原理
+
+在相等运算中，应注意以下几个问题：
+
+- 如果`x`不是正常值（比如抛出一个错误），中断执行。
+
+- 如果`y`不是正常值，中断执行。
+
+- 如果`Type(x)`与`Type(y)`相同，执行严格相等运算`x === y`。
+
+- 如果`x`是`null`，`y`是`undefined`，返回`true`。
+
+- 如果`x`是`undefined`，`y`是`null`，返回`true`。
+
+- 如果`Type(x)`是数值，`Type(y)`是字符串，返回`x == ToNumber(y)`的结果。
+
+- 如果`Type(x)`是字符串，`Type(y)`是数值，返回`ToNumber(x) == y`的结果。
+
+- 如果`Type(x)`是布尔值，返回`ToNumber(x) == y`的结果。
+
+- 如果`Type(y)`是布尔值，返回`x == ToNumber(y)`的结果。
+
+- 如果`Type(x)`是字符串或数值或`Symbol`值，`Type(y)`是对象，返回`x == ToPrimitive(y)`的结果。
+
+- 如果`Type(x)`是对象，`Type(y)`是字符串或数值或`Symbol`值，返回`ToPrimitive(x) == y`的结果。
+
+  ```js
+  '1' == { name: 'js' }       '1' == '[object Object]'
+  ```
+
+- 返回`false`。
+
+  由于`0`的类型是数值，`null`的类型是Null。因此上面的前11步都得不到结果，要到第12步才能得到`false`。
+
+------
+
+##### 数值转换规则
+
+**其他值转成数值的规则**
+
+- Undefined 类型的值转换为 NaN。
+- Null 类型的值转换为 0。
+- Boolean 类型的值，true 转换为 1，false 转换为 0。
+- String 类型的值转换如同使用 Number() 函数进行转换，如果包含非数字值则转换为 NaN，空字符串为 0。
+- Symbol 类型的值不能转换为数字，会报错。
+- 对象（包括数组）会首先被转换为相应的基本类型值，如果返回的是非数字的基本类型值，则再遵循以上规则将其强制转换为数字。
+
+为了将值转换为相应的基本类型值，抽象操作 ToPrimitive 会首先（通过内部操作 DefaultValue）检查该值是否有valueOf()方法。如果有并且返回基本类型值，就使用该值进行强制类型转换。如果没有就使用 toString() 的返回值（如果存在）来进行强制类型转换。
+
+如果 valueOf() 和 toString() 均不返回基本类型值，会产生 TypeError 错误。
+
+**其他值转成布尔值的规则**
+
+以下这些是假值：
+
+-  undefined 
+-  null 
+- false
+- +0、-0
+- NaN
+-  ""
+
+假值的布尔强制类型转换结果为 false。从逻辑上说，假值列表以外的都应该是真值。
+
+------
+
+##### ==和===、以及Object.is的区别
+
+- ==
+
+使用双等号（==）进行相等判断时，如果两边的类型不一致，则会进行强制类型转化后再进行比较。
+
+" "==0  //true
+
+"0"==0  //true
+
+" " !="0" //true
+
+123=="123" //true
+
+null==undefined //true
+
+- 使用三等号（===）进行相等判断时，如果两边的类型不一致时，不会做强制类型准换，直接返回 false。
+
+- Object.is
+
+使用 Object.is 来进行相等判断时，一般情况下和三等号的判断相同，它处理了一些特殊的情况，比如 -0 和 +0 不再相等，两个 NaN 是相等的。
+
+主要的区别就是+0 ！= -0 而NaN == NaN
+
+Object.is(NaN, NaN);  		//true
+
+console.log(+0 === -0);	 	//false
+
+(相对比===和==的改进)
+
+------
+
+##### || 和 && 操作符的返回值
+
+|| 和 && 首先会对第一个操作数执行条件判断，如果其不是布尔值就先强制转换为布尔类型，然后再执行条件判断。
+
+- 对于 || 来说，如果条件判断结果为 true 就返回第一个操作数的值，如果为 false 就返回第二个操作数的值。
+- && 则相反，如果条件判断结果为 true 就返回第二个操作数的值，如果为 false 就返回第一个操作数的值。
+
+|| 和 && 返回它们其中一个操作数的值，而非条件判断的结果。
+
+------
+
+#####  JavaScript 中的包装类型
+
+在 JavaScript 中，基本类型是没有属性和方法的，但是为了便于操作基本类型的值，在调用基本类型的属性或方法时 JavaScript 会在后台隐式地将基本类型的值转换为对象，如：
+
+```javascript
+const a = "abc";
+a.length; // 3
+a.toUpperCase(); // "ABC"
+```
+
+在访问`'abc'.length`时，JavaScript 将`'abc'`在后台转换成`String('abc')`，然后再访问其`length`属性。
+
+JavaScript也可以使用`Object`函数显式地将基本类型转换为包装类型：
+
+```javascript
+var a = 'abc'
+Object(a) // String {"abc"}
+```
+
+也可以使用`valueOf`方法将包装类型倒转成基本类型：
+
+```javascript
+var a = 'abc'
+var b = Object(a)
+var c = b.valueOf() // 'abc'
+```
+
+看看如下代码会打印出什么：
+
+```javascript
+var a = new Boolean( false );
+if (!a) {
+	console.log( "Oops" ); // never runs
+}
+```
+
+答案是什么都不会打印，因为虽然包裹的基本类型是`false`，但是`false`被包裹成包装类型后就成了对象，所以其非值为`false`，所以循环体中的内容不会运行。
+
+------
+
+##### ToPrimitive
+
+首先要介绍`ToPrimitive`方法，这是 JavaScript 中每个值隐含的自带的方法，用来将值 （无论是基本类型值还是对象）转换为基本类型值。如果值为基本类型，则直接返回值本身；如果值为对象，其看起来大概是这样：
+
+```js
+/**
+* @obj 需要转换的对象
+* @type 期望的结果类型
+*/
+ToPrimitive(obj, type)
+```
+
+`type`的值为`number`或者`string`。
+
+**（1）当**`type`**为**`number`**时规则如下：**
+
+- 调用`obj`的`valueOf`方法，如果为原始值，则返回，否则下一步；
+- 调用`obj`的`toString`方法，后续同上；
+- 抛出`TypeError` 异常。
+
+**（2）当**`type`**为**`string`**时规则如下：**
+
+- 调用`obj`的`toString`方法，如果为原始值，则返回，否则下一步；
+- 调用`obj`的`valueOf`方法，后续同上；
+- 抛出`TypeError` 异常。
+
+可以看出两者的主要区别在于调用`toString`和`valueOf`的先后顺序。默认情况下：
+
+- 如果对象为 Date 对象，则`type`默认为`string`；
+- 其他情况下，`type`默认为`number`。
+
+总结上面的规则，对于 Date 以外的对象，转换为基本类型的大概规则可以概括为一个函数：
+
+```js
+var objToNumber = value => Number(value.valueOf().toString())
+objToNumber([]) === 0
+objToNumber({}) === NaN
+```
+
+而 JavaScript 中的隐式类型转换主要发生在`+、-、*、/`以及`==、>、<`这些运算符之间。而这些运算符只能操作基本类型值，所以在进行这些运算前的第一步就是将两边的值用`ToPrimitive`转换成基本类型，再进行操作。
 
 
-#### **普通函数和箭头函数的区别**
 
-1、普通函数
-可以通过bind、call、apply改变this指向
-可以使用new
+####  let、const、var
 
-2、箭头函数
-本身没有this指向，
-它的this在定义的时候继承自外层第一个普通函数的this
-被继承的普通函数的this指向改变，箭头函数的this指向会跟着改变
-箭头函数外层没有普通函数时，this指向window
-不能通过bind、call、apply改变this指向
-使用new调用箭头函数会报错，因为箭头函数没有constructor
+##### 属性对比
+
+**（1）块级作用域：** 块作用域由 `{ }`包括，let和const具有块级作用域，var不存在块级作用域。块级作用域解决了ES5中的两个问题：
+
+- 内层变量可能覆盖外层变量
+- 用来计数的循环变量泄露为全局变量
+
+**（2）变量提升：** var存在变量提升，let和const不存在变量提升，即在变量只能在声明之后使用，否则会报错。
+
+**（3）给全局添加属性：** 浏览器的全局对象是window，Node的全局对象是global。var声明的变量为全局变量，并且会将该变量添加为全局对象的属性，但是let和const不会。
+
+**（4）重复声明：** var声明变量时，可以重复声明变量，后声明的同名变量会覆盖之前声明的遍历。const和let不允许重复声明变量。
+
+**（5）暂时性死区：** 在使用let、const命令声明变量之前，该变量都是不可用的。这在语法上，称为**暂时性死区**。使用var声明的变量不存在暂时性死区。
+
+**（6）初始值设置：** 在变量声明时，var 和 let 可以不用设置初始值。而const声明变量必须设置初始值。
+
+**（7）指针指向：** let和const都是ES6新增的用于创建变量的语法。 let创建的变量是可以更改指针指向（可以重新赋值）。但const声明的变量是不允许改变指针的指向。
+
+------
+
+##### const对象的属性可以修改吗
+
+const保证的并不是变量的值不能改动，而是变量指向的那个内存地址不能改动。对于基本类型的数据（数值、字符串、布尔值），其值就保存在变量指向的那个内存地址，因此等同于常量。
+
+但对于引用类型的数据（主要是对象和数组）来说，变量指向数据的内存地址，保存的只是一个指针，const只能保证这个指针是固定不变的，至于它指向的数据结构是不是可变的，就完全不能控制了。
 
 
 
-#### **栈和堆的区别**
+#### 变量提升
 
-1、堆
-动态分配内存，内存大小不一，也不会自动释放
+JavaScript 中，函数及变量的声明都将被提升到函数的最顶部。
 
-2、栈
-自动分配相对固定大小的内存空间，并由系统自动释放
+JavaScript 中，变量可以在使用后声明，也就是变量可以先使用再声明。
 
-3、基本类型都是存储在栈中，每种类型的数据占用的空间的大小是确定的，并由系统自动分配和释放。内存可以及时回收。
+以下两个实例将获得相同的结果：
 
-4、引用类型的数据都是存储在堆中。准确说是栈中会存储这些数据的地址指针，并指向堆中的具体数据。
+```js
+x = 5; // 变量 x 设置为 5
+
+elem = document.getElementById("demo"); // 查找元素
+elem.innerHTML = x;                     // 在元素中显示 x
+
+var x; // 声明 x
+```
+
+```js
+var x; // 声明 x
+x = 5; // 变量 x 设置为 5
+
+elem = document.getElementById("demo"); // 查找元素
+elem.innerHTML = x;                     // 在元素中显示 x
+```
+
+变量提升：函数声明和变量声明总是会被解释器悄悄地被"提升"到方法体的最顶部。JavaScript 只有声明的变量会提升，初始化的不会。
+
+const 关键字定义的变量则不可以在使用后声明，也就是变量需要先声明再使用。
+
+JavaScript 严格模式(strict mode)不允许使用未声明的变量。
+
+造成变量声明提升的**本质原因**是 js 引擎在代码执行前有一个解析的过程，创建了执行上下文，初始化了一些代码执行时需要用到的对象。当访问一个变量时，会到当前执行上下文中的作用域链中去查找，而作用域链的首端指向的是当前执行上下文的变量对象，这个变量对象是执行上下文的一个属性，它包含了函数的形参、所有的函数和变量声明，这个对象的是在代码解析的时候创建的。
+
+首先要知道，JS在拿到一个变量或者一个函数的时候，会有两步操作，即解析和执行。
+
+- 在解析阶段
+
+  ，JS会检查语法，并对函数进行预编译。解析的时候会先创建一个全局执行上下文环境，先把代码中即将执行的变量、函数声明都拿出来，变量先赋值为undefined，函数先声明好可使用。在一个函数执行之前，也会创建一个函数执行上下文环境，跟全局执行上下文类似，不过函数执行上下文会多出this、arguments和函数的参数。
+
+  - 全局上下文：变量定义，函数声明
+  - 函数上下文：变量定义，函数声明，this，arguments
+
+- **在执行阶段**，就是按照代码的顺序依次执行。
+
+那为什么会进行变量提升呢？主要有以下两个原因：
+
+- 提高性能
+- 容错性更好
+
+**（1）提高性能** 在JS代码执行之前，会进行语法检查和预编译，并且这一操作只进行一次。这么做就是为了提高性能，如果没有这一步，那么每次执行代码前都必须重新解析一遍该变量（函数），而这是没有必要的，因为变量（函数）的代码并不会改变，解析一遍就够了。
+
+在解析的过程中，还会为函数生成预编译代码。在预编译时，会统计声明了哪些变量、创建了哪些函数，并对函数的代码进行压缩，去除注释、不必要的空白等。这样做的好处就是每次执行函数时都可以直接为该函数分配栈空间（不需要再解析一遍去获取代码中声明了哪些变量，创建了哪些函数），并且因为代码压缩的原因，代码执行也更快了。
+
+**（2）容错性更好**
+
+变量提升可以在一定程度上提高JS的容错性，看下面的代码：
+
+```javascript
+a = 1; var a; console.log(a);
+```
+
+如果没有变量提升，这两行代码就会报错，但是因为有了变量提升，这段代码就可以正常执行。
+
+虽然，在可以开发过程中，可以完全避免这样写，但是有时代码很复杂的时候。可能因为疏忽而先使用后定义了，这样也不会影响正常使用。由于变量提升的存在，而会正常运行。
+
+**总结：**
+
+- 解析和预编译过程中的声明提升可以提高性能，让函数可以在执行时预先为变量分配栈空间
+- 声明提升还可以提高JS代码的容错性，使一些不规范的代码也可以正常执行
+
+变量提升虽然有一些优点，但是他也会造成一定的问题，在ES6中提出了let、const来定义变量，它们就没有变量提升的机制。下面看一下变量提升可能会导致的问题：
+
+```javascript
+var tmp = new Date();
+
+function fn(){
+	console.log(tmp);
+	if(false){
+		var tmp = 'hello world';
+	}
+}
+
+fn();  // undefined
+```
+
+在这个函数中，原本是要打印出外层的tmp变量，但是因为变量提升的问题，内层定义的tmp被提到函数内部的最顶部，相当于覆盖了外层的tmp，所以打印结果为undefined。
+
+```javascript
+var tmp = 'hello world';
+
+for (var i = 0; i < tmp.length; i++) {
+	console.log(tmp[i]);
+}
+
+console.log(i); // 11
+```
+
+由于遍历时定义的i会变量提升成为一个全局变量，在函数结束之后不会被销毁，所以打印出来11。
+
+**函数提升**
+
+```js
+myFunction(5);
+
+function myFunction(y) {
+    return y * y;
+}
+```
+
+
+
+#### 数组的遍历方法
+
+| **方法**                  | **是否改变原数组** | **特点**                                                     |
+| ------------------------- | ------------------ | ------------------------------------------------------------ |
+| forEach()                 | 否                 | 数组方法，不改变原数组，没有返回值                           |
+| map()                     | 否                 | 数组方法，不改变原数组，有返回值，可链式调用                 |
+| filter()                  | 否                 | 数组方法，过滤数组，返回包含符合条件的元素的数组，可链式调用 |
+| for...of                  | 否                 | for...of遍历具有Iterator迭代器的对象的属性，返回的是数组的元素、对象的属性值，不能遍历普通的obj对象，将异步循环变成同步循环 |
+| every() 和 some()         | 否                 | 数组方法，some()只要有一个是true，便返回true；而every()只要有一个是false，便返回false. |
+| find() 和 findIndex()     | 否                 | 数组方法，find()返回的是第一个符合条件的值；findIndex()返回的是第一个返回条件的值的索引值 |
+| reduce() 和 reduceRight() | 否                 | 数组方法，reduce()对数组正序操作；reduceRight()对数组逆序操作 |
+
+**forEach和map方法有什么区别**
+
+这方法都是用来遍历数组的，两者区别如下：
+
+- forEach()方法会针对每一个元素执行提供的函数，对数据的操作会改变原数组，该方法没有返回值；
+- map()方法不会改变原数组的值，返回一个新数组，新数组中的值为原数组调用函数处理之后的值；
+
+
+
+#### 箭头函数与普通函数的区别
+
+**（1）箭头函数比普通函数更加简洁**
+
+- 如果没有参数，就直接写一个空括号即可
+- 如果只有一个参数，可以省去参数的括号
+- 如果有多个参数，用逗号分割
+- 如果函数体的返回值只有一句，可以省略大括号
+- 如果函数体不需要返回值，且只有一句话，可以给这个语句前面加一个void关键字。最常见的就是调用一个函数：
+
+```javascript
+let fn = () => void doesNotReturn();
+```
+
+**（2）箭头函数没有自己的this**
+
+箭头函数不会创建自己的this， 所以它没有自己的this，它只会在自己作用域的上一层继承this。所以箭头函数中this的指向在它在定义时已经确定了，之后不会改变。
+
+**（3）箭头函数继承来的this指向永远不会改变**
+
+```javascript
+var id = 'GLOBAL';
+var obj = {
+  id: 'OBJ',
+  a: function(){
+    console.log(this.id);
+  },
+  b: () => {
+    console.log(this.id);
+  }
+};
+obj.a();    // 'OBJ'
+obj.b();    // 'GLOBAL'
+new obj.a()  // undefined
+new obj.b()  // Uncaught TypeError: obj.b is not a constructor
+```
+
+对象obj的方法b是使用箭头函数定义的，这个函数中的this就永远指向它定义时所处的全局执行环境中的this，即便这个函数是作为对象obj的方法调用，this依旧指向Window对象。需要注意，定义对象的大括号`{}`是无法形成一个单独的执行环境的，它依旧是处于全局执行环境中。
+
+**（4）call()、apply()、bind()等方法不能改变箭头函数中this的指向**
+
+```javascript
+var id = 'Global';
+let fun1 = () => {
+    console.log(this.id)
+};
+fun1();                     // 'Global'
+fun1.call({id: 'Obj'});     // 'Global'
+fun1.apply({id: 'Obj'});    // 'Global'
+fun1.bind({id: 'Obj'})();   // 'Global'
+```
+
+**（5）箭头函数不能作为构造函数使用**
+
+构造函数在new的步骤在上面已经说过了，实际上第二步就是将函数中的this指向该对象。 但是由于箭头函数时没有自己的this的，且this指向外层的执行环境，且不能改变指向，所以不能当做构造函数使用。
+
+**（6）箭头函数没有自己的arguments**
+
+箭头函数没有自己的arguments对象。在箭头函数中访问arguments实际上获得的是它外层函数的arguments值。
+
+**（7）箭头函数没有prototype**
+
+**（8）箭头函数不能用作Generator函数，不能使用yeild关键字**
+
+
+
+#### map和weakMap的区别
+
+**（1）Map** map本质上就是键值对的集合，但是普通的Object中的键值对中的键只能是字符串。而ES6提供的Map数据结构类似于对象，但是它的键不限制范围，可以是任意类型，是一种更加完善的Hash结构。如果Map的键是一个原始数据类型，只要两个键严格相同，就视为是同一个键。
+
+实际上Map是一个数组，它的每一个数据也都是一个数组，其形式如下：
+
+```javascript
+const map = [
+     ["name","张三"],
+     ["age",18],
+]
+```
+
+Map数据结构有以下操作方法：
+
+- **size**： `map.size` 返回Map结构的成员总数。
+- **set(key,value)**：设置键名key对应的键值value，然后返回整个Map结构，如果key已经有值，则键值会被更新，否则就新生成该键。（因为返回的是当前Map对象，所以可以链式调用）
+- **get(key)**：该方法读取key对应的键值，如果找不到key，返回undefined。
+- **has(key)**：该方法返回一个布尔值，表示某个键是否在当前Map对象中。
+- **delete(key)**：该方法删除某个键，返回true，如果删除失败，返回false。
+- **clear()**：map.clear()清除所有成员，没有返回值。
+
+Map结构原生提供是三个遍历器生成函数和一个遍历方法
+
+- keys()：返回键名的遍历器。
+- values()：返回键值的遍历器。
+- entries()：返回所有成员的遍历器。
+- forEach()：遍历Map的所有成员。
+
+```javascript
+const map = new Map([
+     ["foo",1],
+     ["bar",2],
+])
+for(let key of map.keys()){
+    console.log(key);  // foo bar
+}
+for(let value of map.values()){
+     console.log(value); // 1 2
+}
+for(let items of map.entries()){
+    console.log(items);  // ["foo",1]  ["bar",2]
+}
+map.forEach( (value,key,map) => {
+     console.log(key,value); // foo 1    bar 2
+})
+```
+
+**（2）WeakMap** WeakMap 对象也是一组键值对的集合，其中的键是弱引用的。**其键必须是对象**，原始数据类型不能作为key值，而值可以是任意的。
+
+该对象也有以下几种方法：
+
+- **set(key,value)**：设置键名key对应的键值value，然后返回整个Map结构，如果key已经有值，则键值会被更新，否则就新生成该键。（因为返回的是当前Map对象，所以可以链式调用）
+- **get(key)**：该方法读取key对应的键值，如果找不到key，返回undefined。
+- **has(key)**：该方法返回一个布尔值，表示某个键是否在当前Map对象中。
+- **delete(key)**：该方法删除某个键，返回true，如果删除失败，返回false。
+
+其clear()方法已经被弃用，所以可以通过创建一个空的WeakMap并替换原对象来实现清除。
+
+WeakMap的设计目的在于，有时想在某个对象上面存放一些数据，但是这会形成对于这个对象的引用。一旦不再需要这两个对象，就必须手动删除这个引用，否则垃圾回收机制就不会释放对象占用的内存。
+
+而WeakMap的**键名所引用的对象都是弱引用**，即垃圾回收机制不将该引用考虑在内。因此，只要所引用的对象的其他引用都被清除，垃圾回收机制就会释放该对象所占用的内存。也就是说，一旦不再需要，WeakMap 里面的**键名对象和所对应的键值对会自动消失，不用手动删除引用**。
+
+**总结：**
+
+- Map 数据结构。它类似于对象，也是键值对的集合，但是“键”的范围不限于字符串，各种类型的值（包括对象）都可以当作键。
+- WeakMap 结构与 Map 结构类似，也是用于生成键值对的集合。但是 WeakMap 只接受对象作为键名（ null 除外），不接受其他类型的值作为键名。而且 WeakMap 的键名所指向的对象，不计入垃圾回收机制。
+
+
+
+#### JSON
+
+JSON 是一种基于文本的轻量级的数据交换格式。它可以被任何的编程语言读取和作为数据格式来传递。
+
+在项目开发中，使用 JSON 作为前后端数据交换的方式。在前端通过将一个符合 JSON 格式的数据结构序列化为 JSON 字符串，然后将它传递到后端，后端通过 JSON 格式的字符串解析后生成对应的数据结构，以此来实现前后端数据的一个传递。
+
+因为 JSON 的语法是基于 js 的，因此很容易将 JSON 和 js 中的对象弄混，但是应该注意的是 JSON 和 js 中的对象不是一回事，JSON 中对象格式更加严格，比如说在 JSON 中属性值不能为函数，不能出现 NaN 这样的属性值等，因此大多数的 js 对象是不符合 JSON 对象的格式的。
+
+在 js 中提供了两个函数来实现 js 数据结构和 JSON 格式的转换处理，
+
+- JSON.stringify 函数，通过传入一个符合 JSON 格式的数据结构，将其转换为一个 JSON 字符串。如果传入的数据结构不符合 JSON 格式，那么在序列化的时候会对这些值进行对应的特殊处理，使其符合规范。在前端向后端发送数据时，可以调用这个函数将数据对象转化为 JSON 格式的字符串。
+- JSON.parse() 函数，这个函数用来将 JSON 格式的字符串转换为一个 js 数据结构，如果传入的字符串不是标准的 JSON 格式的字符串的话，将会抛出错误。当从后端接收到 JSON 格式的字符串时，可以通过这个方法来将其解析为一个 js 数据结构，以此来进行数据的访问。
+
+
+
+#### 类数组
+
+##### 如何遍历类数组
+
+`arguments`是一个对象，它的属性是从 0 开始依次递增的数字，还有`callee`和`length`等属性，与数组相似；但是它却没有数组常见的方法属性，如`forEach`, `reduce`等，所以叫它们类数组。
+
+要遍历类数组，有三个方法：
+
+（1）将数组的方法应用到类数组上，这时候就可以使用`call`和`apply`方法，如：
+
+```javascript
+function foo(){ 
+  Array.prototype.forEach.call(arguments, a => console.log(a))
+}
+```
+
+（2）使用Array.from方法将类数组转化成数组：‌
+
+```javascript
+function foo(){ 
+  const arrArgs = Array.from(arguments) 
+  arrArgs.forEach(a => console.log(a))
+}
+```
+
+（3）使用展开运算符将类数组转化成数组
+
+```javascript
+function foo(){ 
+    const arrArgs = [...arguments] 
+    arrArgs.forEach(a => console.log(a)) 
+}
+```
+
+------
+
+##### 如何将类数组转化为数组
+
+- 通过 call 调用数组的 slice 方法来实现转换
+
+```javascript
+Array.prototype.slice.call(arrayLike);
+```
+
+- 通过 call 调用数组的 splice 方法来实现转换
+
+```javascript
+Array.prototype.splice.call(arrayLike, 0);
+```
+
+- 通过 apply 调用数组的 concat 方法来实现转换
+
+```javascript
+Array.prototype.concat.apply([], arrayLike);
+```
+
+- 通过 Array.from 方法来实现转换
+
+```javascript
+Array.from(arrayLike);
+```
 
 
 
@@ -366,6 +925,17 @@ bar()
 // 最后浏览器给你一个默认的 this —— window 对象
 ```
 
+this 是执行上下文中的一个属性，它指向最后一次调用这个方法的对象。在实际开发中，this 的指向可以通过四种调用模式来判断。
+
+- 第一种是**函数调用模式**，当一个函数不是一个对象的属性时，直接作为函数来调用时，this 指向全局对象。
+- 第二种是**方法调用模式**，如果一个函数作为一个对象的方法来调用时，this 指向这个对象。
+- 第三种是**构造器调用模式**，如果一个函数用 new 调用时，函数执行前会新创建一个对象，this 指向这个新创建的对象。
+- 第四种是 **apply 、 call 和 bind 调用模式**，这三个方法都可以显示的指定调用函数的 this 指向。其中 apply 方法接收两个参数：一个是 this 绑定的对象，一个是参数数组。call 方法接收的参数，第一个是 this 绑定的对象，后面的其余参数是传入函数执行的参数。也就是说，在使用 call() 方法时，传递给函数的参数必须逐个列举出来。bind 方法通过传入一个对象，返回一个 this 绑定了传入对象的新函数。这个函数的 this 指向除了使用 new 时会被改变，其他情况下都不会改变。
+
+这四种方式，**使用构造器调用模式的优先级最高**，然后是 apply、call 和 bind 调用模式，然后是方法调用模式，然后是函数调用模式。
+
+------
+
 ##### [ ] 语法
 
 ```js
@@ -434,13 +1004,13 @@ f.apply(zs,[23,'nan']);
 
 这个两个方法的最大作用基本就是用来强制指定函数调用时this的指向；
 
+------
 
-
-#### bind、apply和call的区别
+##### bind、apply和call的区别
 
 通过apply和call改变函数的this指向，他们两个函数的第一个参数都是一样的表示要改变指向的那个对象，第二个参数，apply是数组，而call则是arg1,arg2...这种形式。通过bind改变this作用域会返回一个新的函数，这个函数不会马上执行。
 
-##### call
+**call**
 
 原生的call函数：
 
@@ -482,7 +1052,7 @@ function fn2(){
 
 
 
-#### __proto__和prototype
+#### 原型链
 
 **实例对象->构造函数->原型**
 
@@ -528,9 +1098,7 @@ person1和person2是Person这个对象的两个实例，这两个对象也有属
 
 最后，**Object.prototype的`_proto_`属性指向null**。
 
-
-
-#### 原型链
+------
 
 原型链顶端是Object.prototype
 
@@ -559,6 +1127,113 @@ null表示没有对象，即该处不应有值，所以Object.prototype没有原
 
 图中这条蓝色的线即是原型链
 
+------
+
+##### 原型修改、重写
+
+```javascript
+function Person(name) {
+    this.name = name
+}
+// 修改原型
+Person.prototype.getName = function() {}
+var p = new Person('hello')
+console.log(p.__proto__ === Person.prototype) // true
+console.log(p.__proto__ === p.constructor.prototype) // true
+// 重写原型
+Person.prototype = {
+    getName: function() {}
+}
+var p = new Person('hello')
+console.log(p.__proto__ === Person.prototype)        // true
+console.log(p.__proto__ === p.constructor.prototype) // false
+```
+
+可以看到修改原型的时候p的构造函数不是指向Person了，因为直接给Person的原型对象直接用对象赋值时，它的构造函数指向的了根构造函数Object，所以这时候`p.constructor === Object` ，而不是`p.constructor === Person`。要想成立，就要用constructor指回来：
+
+```javascript
+Person.prototype = {
+    getName: function() {}
+}
+var p = new Person('hello')
+p.constructor = Person
+console.log(p.__proto__ === Person.prototype)        // true
+console.log(p.__proto__ === p.constructor.prototype) // true
+```
+
+------
+
+##### 原型链指向
+
+```javascript
+p.__proto__  // Person.prototype
+Person.prototype.__proto__  // Object.prototype
+p.__proto__.__proto__ //Object.prototype
+p.__proto__.constructor.prototype.__proto__ // Object.prototype
+Person.prototype.constructor.prototype.__proto__ // Object.prototype
+p1.__proto__.constructor // Person
+Person.prototype.constructor  // Person
+```
+
+------
+
+##### 原型链的终点
+
+由于`Object`是构造函数，原型链终点是`Object.prototype.__proto__`，而`Object.prototype.__proto__=== null // true`，所以，原型链的终点是`null`。原型链上的所有原型都是对象，所有的对象最终都是由`Object`构造的，而`Object.prototype`的下一级是`Object.prototype.__proto__`。
+
+
+
+#### 回调函数
+
+以下代码就是一个回调函数的例子：
+
+```javascript
+ajax(url, () => {
+    // 处理逻辑
+})
+```
+
+回调函数有一个致命的弱点，就是容易写出回调地狱（Callback hell）。假设多个请求存在依赖性，可能会有如下代码：
+
+```javascript
+ajax(url, () => {
+    // 处理逻辑
+    ajax(url1, () => {
+        // 处理逻辑
+        ajax(url2, () => {
+            // 处理逻辑
+        })
+    })
+})
+```
+
+以上代码看起来不利于阅读和维护，当然，也可以把函数分开来写：
+
+```javascript
+function firstAjax() {
+  ajax(url1, () => {
+    // 处理逻辑
+    secondAjax()
+  })
+}
+function secondAjax() {
+  ajax(url2, () => {
+    // 处理逻辑
+  })
+}
+ajax(url, () => {
+  // 处理逻辑
+  firstAjax()
+})
+```
+
+以上的代码虽然看上去利于阅读了，但是还是没有解决根本问题。回调地狱的根本问题就是：
+
+1. 嵌套函数存在耦合性，一旦有所改动，就会牵一发而动全身
+2. 嵌套函数一多，就很难处理错误
+
+当然，回调函数还存在着别的几个缺点，比如不能使用 `try catch` 捕获错误，不能直接 `return`。
+
 
 
 #### Promise
@@ -568,6 +1243,73 @@ null表示没有对象，即该处不应有值，所以Object.prototype没有原
 - 等待（pending）：初始状态；
 - 已完成（fulfilled）：操作成功完成；
 - 被拒绝（rejected）：操作失败；
+
+Promise有五个常用的方法：then()、catch()、all()、race()、finally。下面就来看一下这些方法。
+
+------
+
+##### then()
+
+当Promise执行的内容符合成功条件时，调用`resolve`函数，失败就调用`reject`函数。Promise创建完了，那该如何调用呢？
+
+```
+promise.then(function(value) {
+  // success
+}, function(error) {
+  // failure
+});
+```
+
+`then`方法可以接受两个回调函数作为参数。第一个回调函数是Promise对象的状态变为`resolved`时调用，第二个回调函数是Promise对象的状态变为`rejected`时调用。其中第二个参数可以省略。 `then`方法返回的是一个新的Promise实例（不是原来那个Promise实例）。因此可以采用链式写法，即`then`方法后面再调用另一个then方法。
+
+当要写有顺序的异步事件时，需要串行时，可以这样写：
+
+```javascript
+let promise = new Promise((resolve,reject)=>{
+    ajax('first').success(function(res){
+        resolve(res);
+    })
+})
+promise.then(res=>{
+    return new Promise((resovle,reject)=>{
+        ajax('second').success(function(res){
+            resolve(res)
+        })
+    })
+}).then(res=>{
+    return new Promise((resovle,reject)=>{
+        ajax('second').success(function(res){
+            resolve(res)
+        })
+    })
+}).then(res=>{
+    
+})
+```
+
+那当要写的事件没有顺序或者关系时，还如何写呢？可以使用`all` 方法来解决。
+
+------
+
+##### catch()
+
+Promise对象除了有then方法，还有一个catch方法，该方法相当于`then`方法的第二个参数，指向`reject`的回调函数。不过`catch`方法还有一个作用，就是在执行`resolve`回调函数时，如果出现错误，抛出异常，不会停止运行，而是进入`catch`方法中。
+
+```javascript
+p.then((data) => {
+     console.log('resolved',data);
+},(err) => {
+     console.log('rejected',err);
+     }
+); 
+p.then((data) => {
+    console.log('resolved',data);
+}).catch((err) => {
+    console.log('rejected',err);
+});
+```
+
+------
 
 ##### Promise.all
 
@@ -633,11 +1375,311 @@ Promise.all = function (values) {
 - 如果入参数组中有基本数值，则直接返回
 - 通过计数器，来判断函数的执行结果
 
+------
+
+##### race()
+
+`race`方法和`all`一样，接受的参数是一个每项都是`promise`的数组，但是与`all`不同的是，当最先执行完的事件执行完之后，就直接返回该`promise`对象的值。如果第一个`promise`对象状态变成`resolved`，那自身的状态变成了`resolved`；反之第一个`promise`变成`rejected`，那自身状态就会变成`rejected`。
+
+```javascript
+let promise1 = new Promise((resolve,reject)=>{
+	setTimeout(()=>{
+       reject(1);
+	},2000)
+});
+let promise2 = new Promise((resolve,reject)=>{
+	setTimeout(()=>{
+       resolve(2);
+	},1000)
+});
+let promise3 = new Promise((resolve,reject)=>{
+	setTimeout(()=>{
+       resolve(3);
+	},3000)
+});
+Promise.race([promise1,promise2,promise3]).then(res=>{
+	console.log(res);
+	//结果：2
+},rej=>{
+    console.log(rej)};
+)
+复制代码
+```
+
+那么`race`方法有什么实际作用呢？当要做一件事，**超过多长时间就不做了**，可以用这个方法来解决：
+
+```javascript
+Promise.race([promise1,timeOutPromise(5000)]).then(res=>{})
+```
+
+------
+
+**finally()**
+
+`finally`方法用于指定不管 Promise 对象最后状态如何，都会执行的操作。该方法是 ES2018 引入标准的。
+
+```javascript
+promise
+.then(result => {···})
+.catch(error => {···})
+.finally(() => {···});
+```
+
+上面代码中，不管`promise`最后的状态，在执行完`then`或`catch`指定的回调函数以后，都会执行`finally`方法指定的回调函数。
+
+下面是一个例子，服务器使用 Promise 处理请求，然后使用`finally`方法关掉服务器。
+
+```javascript
+server.listen(port)
+  .then(function () {
+    // ...
+  })
+  .finally(server.stop);
+```
+
+`finally`方法的回调函数不接受任何参数，这意味着没有办法知道，前面的 Promise 状态到底是`fulfilled`还是`rejected`。这表明，`finally`方法里面的操作，应该是与状态无关的，不依赖于 Promise 的执行结果。`finally`本质上是`then`方法的特例：
+
+```javascript
+promise
+.finally(() => {
+  // 语句
+});
+// 等同于
+promise
+.then(
+  result => {
+    // 语句
+    return result;
+  },
+  error => {
+    // 语句
+    throw error;
+  }
+);
+```
+
+上面代码中，如果不使用`finally`方法，同样的语句需要为成功和失败两种情况各写一次。有了`finally`方法，则只需要写一次。
+
+------
+
+##### Promise解决了什么问题
+
+在工作中经常会碰到这样一个需求，比如我使用ajax发一个A请求后，成功后拿到数据，需要把数据传给B请求；那么需要如下编写代码：
+
+```javascript
+let fs = require('fs')
+fs.readFile('./a.txt','utf8',function(err,data){
+  fs.readFile(data,'utf8',function(err,data){
+    fs.readFile(data,'utf8',function(err,data){
+      console.log(data)
+    })
+  })
+})
+```
+
+上面的代码有如下缺点：
+
+- 后一个请求需要依赖于前一个请求成功后，将数据往下传递，会导致多个ajax请求嵌套的情况，代码不够直观。
+- 如果前后两个请求不需要传递参数的情况下，那么后一个请求也需要前一个请求成功后再执行下一步操作，这种情况下，那么也需要如上编写代码，导致代码不够直观。
+
+`Promise`出现之后，代码变成这样：
+
+```javascript
+let fs = require('fs')
+function read(url){
+  return new Promise((resolve,reject)=>{
+    fs.readFile(url,'utf8',function(error,data){
+      error && reject(error)
+      resolve(data)
+    })
+  })
+}
+read('./a.txt').then(data=>{
+  return read(data) 
+}).then(data=>{
+  return read(data)  
+}).then(data=>{
+  console.log(data)
+})
+```
+
+这样代码看起了就简洁了很多，解决了地狱回调的问题。
 
 
-##### Promise替代方法
 
-**事件监听**
+#### async与await
+
+使用`async / await`明显节约了不少代码。我们不需要写`.then`，不需要写匿名函数处理`Promise`的`resolve`值，也不需要定义多余的data变量，还避免了嵌套代码。这些小的优点会迅速累计起来，这在之后的代码示例中会更加明显。
+
+```js
+(async function() {
+  try {
+    const res1 = await axios.post('/submit');
+    // dosomething
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log('go next!');
+  }
+
+  try {
+    const res2 = await axios.get('/next');
+    // dosomething
+  } catch (err) {
+    console.log(err);
+  } finally {
+    console.log('done!');
+  }
+})();
+```
+
+------
+
+##### async/await线程执行顺序
+
+```js
+async function async1(){
+   console.log('async1 start');
+    await async2();
+    console.log('async1 end')
+}
+async function async2(){
+    console.log('async2')
+}
+console.log('script start');
+async1();
+console.log('script end')
+// 输出顺序：script start->async1 start->async2->script end->async1 end
+```
+
+async 函数返回一个 Promise 对象，当函数执行的时候，一旦遇到 await 就会先返回，等到触发的异步操作完成，再执行函数体内后面的语句。可以理解为，是让出了线程，跳出了 async 函数体。
+
+------
+
+##### 对async/await 的理解
+
+async/await其实是`Generator` 的语法糖，它能实现的效果都能用then链来实现，它是为优化then链而开发出来的。从字面上来看，async是“异步”的简写，await则为等待，所以很好理解async 用于申明一个 function 是异步的，而 await 用于等待一个异步方法执行完成。当然语法上强制规定await只能出现在asnyc函数中，先来看看async函数返回了什么：
+
+```javascript
+async function testAsy(){
+   return 'hello world';
+}
+let result = testAsy(); 
+console.log(result)
+```
+
+![image-20220402224940134](前端图片/image-20220402224940134.png)
+
+所以，async 函数返回的是一个 Promise 对象。async 函数（包含函数语句、函数表达式、Lambda表达式）会返回一个 Promise 对象，如果在函数中 `return` 一个直接量，async 会把这个直接量通过 `Promise.resolve()` 封装成 Promise 对象。
+
+async 函数返回的是一个 Promise 对象，所以在最外层不能用 await 获取其返回值的情况下，当然应该用原来的方式：`then()` 链来处理这个 Promise 对象，就像这样：
+
+```javascript
+async function testAsy(){
+   return 'hello world'
+}
+let result = testAsy() 
+console.log(result)
+result.then(v=>{
+    console.log(v)   // hello world
+})
+```
+
+那如果 async 函数没有返回值，又该如何？很容易想到，它会返回 `Promise.resolve(undefined)`。
+
+联想一下 Promise 的特点——无等待，所以在没有 `await` 的情况下执行 async 函数，它会立即执行，返回一个 Promise 对象，并且，绝不会阻塞后面的语句。这和普通返回 Promise 对象的函数并无二致。
+
+**注意：**`Promise.resolve(x)` 可以看作是 `new Promise(resolve => resolve(x))` 的简写，可以用于快速封装字面量对象或其他对象，将其封装成 Promise 实例。
+
+------
+
+##### await 等待原理
+
+await 在等待什么呢？ 一般来说，都认为 await 是在等待一个 async 函数完成。不过按语法说明，await 等待的是一个表达式，这个表达式的计算结果是 Promise 对象或者其它值（换句话说，就是没有特殊限定）。
+
+因为 async 函数返回一个 Promise 对象，所以 await 可以用于等待一个 async 函数的返回值——这也可以说是 await 在等 async 函数，但要清楚，它等的实际是一个返回值。注意到 await 不仅仅用于等 Promise 对象，它可以等任意表达式的结果，所以，await 后面实际是可以接普通函数调用或者直接量的。所以下面这个示例完全可以正确运行：
+
+```javascript
+function getSomething() {
+    return "something";
+}
+async function testAsync() {
+    return Promise.resolve("hello async");
+}
+async function test() {
+    const v1 = await getSomething();
+    const v2 = await testAsync();
+    console.log(v1, v2);
+}
+test();
+```
+
+await 表达式的运算结果取决于它等的是什么。
+
+- 如果它等到的不是一个 Promise 对象，那 await 表达式的运算结果就是它等到的东西。
+- 如果它等到的是一个 Promise 对象，await 就忙起来了，它会阻塞后面的代码，等着 Promise 对象 resolve，然后得到 resolve 的值，作为 await 表达式的运算结果。
+
+来看一个例子：
+
+```javascript
+function testAsy(x){
+   return new Promise(resolve=>{setTimeout(() => {
+       resolve(x);
+     }, 3000)
+    }
+   )
+}
+async function testAwt(){    
+  let result =  await testAsy('hello world');
+  console.log(result);    // 3秒钟之后出现hello world
+  console.log('cuger')   // 3秒钟之后出现cug
+}
+testAwt();
+console.log('cug')  //立即输出cug
+```
+
+这就是 await 必须用在 async 函数中的原因。**async 函数调用不会造成阻塞**，它内部所有的阻塞都被封装在一个 Promise 对象中异步执行。await暂停当前async的执行，所以'cug''最先输出，hello world'和‘cuger’是3秒钟后同时出现的。
+
+------
+
+##### async/await对比Promise的优势
+
+- 代码读起来更加同步，Promise虽然摆脱了回调地狱，但是then的链式调⽤也会带来额外的阅读负担
+- Promise传递中间值⾮常麻烦，⽽async/await⼏乎是同步的写法，⾮常优雅
+- 错误处理友好，async/await可以⽤成熟的try/catch，Promise的错误捕获⾮常冗余
+- 调试友好，Promise的调试很差，由于没有代码块，你不能在⼀个返回表达式的箭头函数中设置断点，如果你在⼀个.then代码块中使⽤调试器的步进(step-over)功能，调试器并不会进⼊后续的.then代码块，因为调试器只能跟踪同步代码的每⼀步。
+
+------
+
+##### async/await 如何捕获异常
+
+```js
+async function fn(){
+    try{
+        let a = await Promise.reject('error')
+    }catch(error){
+        console.log(error)
+    }
+}
+```
+
+
+
+#### 异步编程
+
+##### 回调函数
+
+使用回调函数的方式有一个缺点是，多个回调函数嵌套的时候会造成回调函数地狱，上下两层的回调函数间的代码耦合度太高，不利于代码的可维护。
+
+------
+
+##### **Promise** 
+
+使用 Promise 的方式可以将嵌套的回调函数作为链式调用。但是使用这种方法，有时会造成多个 then 的链式调用，可能会造成代码的语义不够明确。
+
+------
+
+##### 事件监听
 
 首先，为f1绑定一个事件（这里采用的jQuery的[写法](https://api.jquery.com/on/)）。
 
@@ -660,7 +1702,9 @@ f1.trigger('done')表示，执行完成后，立即触发done事件，从而开�
 
 这种方法的优点是比较容易理解，可以绑定多个事件，每个事件可以指定多个回调函数，而且可以["去耦合"](https://en.wikipedia.org/wiki/Decoupling)（Decoupling），有利于实现[模块化](https://www.ruanyifeng.com/blog/2012/10/javascript_module.html)。缺点是整个程序都要变成事件驱动型，运行流程会变得很不清晰。
 
-**事件发布/订阅模式**
+------
+
+##### 事件发布/订阅模式
 
 我们假定，存在一个"信号中心"，某个任务执行完成，就向信号中心"发布"（publish）一个信号，其他任务可以向信号中心"订阅"（subscribe）这个信号，从而知道什么时候自己可以开始执行。这就叫做["发布/订阅模式"](https://en.wikipedia.org/wiki/Publish-subscribe_pattern)（publish-subscribe pattern），又称["观察者模式"](https://en.wikipedia.org/wiki/Observer_pattern)（observer pattern）。
 
@@ -693,33 +1737,9 @@ jQuery.unsubscribe("done", f2);
 
 这种方法的性质与"事件监听"类似，但是明显优于后者。因为我们可以通过查看"消息中心"，了解存在多少信号、每个信号有多少订阅者，从而监控程序的运行。
 
-**async与await**
+------
 
-使用`async / await`明显节约了不少代码。我们不需要写`.then`，不需要写匿名函数处理`Promise`的`resolve`值，也不需要定义多余的data变量，还避免了嵌套代码。这些小的优点会迅速累计起来，这在之后的代码示例中会更加明显。
-
-```js
-(async function() {
-  try {
-    const res1 = await axios.post('/submit');
-    // dosomething
-  } catch (err) {
-    console.log(err);
-  } finally {
-    console.log('go next!');
-  }
-
-  try {
-    const res2 = await axios.get('/next');
-    // dosomething
-  } catch (err) {
-    console.log(err);
-  } finally {
-    console.log('done!');
-  }
-})();
-```
-
-**generator**
+##### generator
 
 generator是es6中的一个新的语法。在function关键字后添加*即可将函数变为generator。
 
@@ -768,6 +1788,35 @@ res.value.then(res => gen.next(res));12345678910
 如果B跟着**也变了**，说明是浅拷贝，拿人手短！（修改堆内存中的同一个值）
 
 如果B**没有改变**，说明是深拷贝，自食其力！（修改堆内存中的不同的值）
+
+##### 浅拷贝
+
+扩展运算符：
+
+```javascript
+let outObj = {
+  inObj: {a: 1, b: 2}
+}
+let newObj = {...outObj}
+newObj.inObj.a = 2
+console.log(outObj) // {inObj: {a: 2, b: 2}}
+```
+
+Object.assign():
+
+```javascript
+let outObj = {
+  inObj: {a: 1, b: 2}
+}
+let newObj = Object.assign({}, outObj)
+newObj.inObj.a = 2
+console.log(outObj) // {inObj: {a: 2, b: 2}}
+```
+
+可以看到，两者都是浅拷贝。
+
+- Object.assign()方法接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。它会修改了一个对象，因此会触发 ES6 setter。
+- 扩展操作符（…）使用它时，数组或对象中的每一个值都会被拷贝到一个新的数组或对象中。它不复制继承的属性或类的属性，但是它会复制ES6的 symbols 属性。
 
 ##### 对象深拷贝的方法（3种）
 
@@ -1037,15 +2086,17 @@ console.log(cat instanceof Cat); //true感谢 @bluedrink 提醒，该实现没�
 
 
 
-#### JS阻塞
+#### JS阻塞与延迟加载
 
  JavaScript既会阻塞HTML的解析，也会阻塞CSS的解析。因此我们可以对JavaScript的加载方式进行改变，来进行优化：
 
 （1）尽量将JavaScript文件放在body的最后
 
-（2） body中间尽量不要写`<script>`标签
+（2） **动态创建 DOM 方式：** 动态创建 DOM 标签的方式，可以对文档的加载事件进行监听，当文档加载完成后再动态的创建 script 标签来引入 js 脚本。
 
-（3）`<script>`标签的引入资源方式有三种，有一种就是我们常用的直接引入，还有两种就是使用 async 属性和 defer 属性来异步引入，两者都是去异步加载外部的JS文件，不会阻塞DOM的解析（尽量使用异步加载）。  三者的区别如下：
+（3）使用 setTimeout 延迟方法： 设置一个定时器来延迟加载js脚本文件。
+
+（4）`<script>`标签的引入资源方式有三种，有一种就是我们常用的直接引入，还有两种就是使用 async 属性和 defer 属性来异步引入，两者都是去异步加载外部的JS文件，不会阻塞DOM的解析（尽量使用异步加载）。  三者的区别如下：
 
 **script** 立即停止页面渲染去加载资源文件，当资源加载完毕后立即执行js代码，js代码执行完毕后继续渲染页面；
 
@@ -1065,7 +2116,7 @@ JavaScript 在定义变量时就完成了内存分配。当不在使用变量了
 
 垃圾回收器在运行的时候会给存储在内存中的变量都加上标记（所有都加），然后去掉环境变量中的变量，以及被环境变量中的变量所引用的变量（条件性去除标记），删除所有被标记的变量，删除的变量无法在环境变量中被访问所以会被删除，最后垃圾回收器完成了内存的清除工作，并回收他们所占用的内存。
 
-
+------
 
 ##### **引用计数法**
 
@@ -1075,11 +2126,27 @@ JavaScript 在定义变量时就完成了内存分配。当不在使用变量了
 const arr = [1, 2, 3, 4];
 ```
 
-上面代码中，数组`[1, 2, 3, 4]`是一个值，会占用内存。变量`arr`是仅有的对这个值的引用，因此引用次数为`1`。尽管后面的代码没有用到`arr`，它还是会持续占用内存。
+上面代码中，数组`[1, 2, 3, 4]`是一个值，会占用内存。变量`arr`是仅有的对这个值的引用，因此引用次数为`1`。尽管后面的代码没有用到`arr`，它还是会持续占用内存。如果增加一行代码，解除`arr`对`[1, 2, 3, 4]`引用，这块内存就可以被垃圾回收机制释放了。
 
-如果增加一行代码，解除`arr`对`[1, 2, 3, 4]`引用，这块内存就可以被垃圾回收机制释放了。
+引用计数法会引起**循环引用**的问题：例如：` obj1`和`obj2`通过属性进行相互引用，两个对象的引用次数都是2。当使用循环计数时，由于函数执行完后，两个对象都离开作用域，函数执行结束，`obj1`和`obj2`还将会继续存在，因此它们的引用次数永远不会是0，就会引起循环引用。
 
+```javascript
+function fun() {
+    let obj1 = {};
+    let obj2 = {};
+    obj1.a = obj2; // obj1 引用 obj2
+    obj2.a = obj1; // obj2 引用 obj1
+}
+```
 
+这种情况下，就要手动释放变量占用的内存：
+
+```javascript
+obj1.a =  null
+obj2.a =  null
+```
+
+------
 
 ##### V8的垃圾回收机制
 
@@ -1130,12 +2197,23 @@ enum AllocationSpace {
 
 需要的内存。
 
+------
 
+##### 减少垃圾回收
 
-#### **JS内存泄露**（4种）
+虽然浏览器可以进行垃圾自动回收，但是当代码比较复杂时，垃圾回收所带来的代价比较大，所以应该尽量减少垃圾回收。
+
+- **对数组进行优化：** 在清空一个数组时，最简单的方法就是给其赋值为[ ]，但是与此同时会创建一个新的空对象，可以将数组的长度设置为0，以此来达到清空数组的目的。
+- **对**`object`**进行优化：** 对象尽量复用，对于不再使用的对象，就将其设置为null，尽快被回收。
+- **对函数进行优化：** 在循环中的函数表达式，如果可以复用，尽量放在函数的外面。
+
+------
+
+##### 内存泄漏
 
 内存泄漏是指一块被分配的内存既不能使用，也不能回收，直到浏览器进程结束。
-1、意外的全局变量
+
+- 意外的全局变量
 
 JavaScript 处理未定义变量的方式比较宽松：未定义的变量会在全局对象创建一个新变量。在浏览器中，全局对象是 `window` 。
 
@@ -1169,12 +2247,14 @@ foo();
 
 在 JavaScript 文件头部加上 `'use strict'`，可以避免此类错误发生。启用严格模式解析 JavaScript ，避免意外的全局变量
 
-2、闭包
+- 闭包
 
-3、没有清理的dom元素
-dom元素赋值给变量，又通过removeChild移除dom元素。但是dom元素的引用还在内存中
 
-4、被遗忘的定时器或者回调
+- 没有清理的dom元素
+  dom元素赋值给变量，又通过removeChild移除dom元素。但是dom元素的引用还在内存中
+
+- 被遗忘的定时器或者回调
+
 
 
 
@@ -1529,49 +2609,6 @@ var sum_curry =function(a){
 
 
 
-#### 变量提升
-
-JavaScript 中，函数及变量的声明都将被提升到函数的最顶部。
-
-JavaScript 中，变量可以在使用后声明，也就是变量可以先使用再声明。
-
-以下两个实例将获得相同的结果：
-
-```js
-x = 5; // 变量 x 设置为 5
-
-elem = document.getElementById("demo"); // 查找元素
-elem.innerHTML = x;                     // 在元素中显示 x
-
-var x; // 声明 x
-```
-
-```js
-var x; // 声明 x
-x = 5; // 变量 x 设置为 5
-
-elem = document.getElementById("demo"); // 查找元素
-elem.innerHTML = x;                     // 在元素中显示 x
-```
-
-变量提升：函数声明和变量声明总是会被解释器悄悄地被"提升"到方法体的最顶部。JavaScript 只有声明的变量会提升，初始化的不会。
-
-const 关键字定义的变量则不可以在使用后声明，也就是变量需要先声明再使用。
-
-JavaScript 严格模式(strict mode)不允许使用未声明的变量。
-
-**函数提升**
-
-```js
-myFunction(5);
-
-function myFunction(y) {
-    return y * y;
-}
-```
-
-
-
 #### 事件模型
 
 ##### 事件模型
@@ -1738,27 +2775,95 @@ node.addEventListener(
 
 
 
-#### js性能优化
+#### JS性能优化（13种）
 
-减少HTTP请求
+**1.合并js和css文件**
 
-使用内容发布网络（CDN）
+将js和css分别合并到一个共享文件，这样不仅能够简化代码，而且在执行js文件时，如果js文件较多，就需要多次向服务器请求数据，这样将会延长加载速度，将js文件合并在一起，减少了请求的次数，就能够提高加载的速度；
 
-添加本地缓存
+**2.Sprites图片技术（图片精灵技术）**
 
-压缩资源文件
+图片精灵技术是一种常用的页面速度加载优化的方式，它是将一个页面涉及到的所有的零星图片（注意：只是那些晓得图片、icon）都包含到一张大图中，然后利用css的背景属性将其相应的图片在现在响应的文字，这样当访问一面时，只用加载一张大图即可，而不用一幅一幅的去请求。这种方法既减少了图片的大小，有减少了http请求的次数，可以很大程度的优化页面的加载熟读
 
-将CSS样式表放在顶部，把javascript放在底部（浏览器的运行机制决定）
+**3.压缩图片、文本和代码**
 
-避免使用CSS表达式
+压缩图片和文本也可以减小数据的大小，尤其是代码的压缩，如HTML、XML、JSON、javascript、css等代码的压缩率可达70%以上，代码压缩后可以大大减少文件的体积，是页面可以快速的加载
 
-减少DNS查询
+**4.按需加载（及可见区域以外的区域延时加载）**
 
-使用外部javascript和CSS
+为了让用户可以更快的看到网页中最重要的内容，可以优先加载可见区域的内容，延时加载不可见区域的内容，为了避免页面变形可以使用占位符，占位图片来固定宽高。如jquery中的ImageLazyLoad等一些插件就可以很好的实现按需加载，只有当用户鼠标向下滚动式，下面得图片才会加载。当然也可以用原生的js来实现。
 
-避免重定向
+**5.确保功能图片优先加载**
 
-图片懒加载
+网站主要考虑可用性的重要性，一个功能按钮要提前加载出来，用户进入下载页，一个只需要8s时间的下载，花了5s在等待、寻找下载按钮图片，谁能忍受?
+
+**6.图片格式优化**
+
+不正确的使用图片格式是一种很常见的拖慢加载速度的原因，正确的使用图片格式可以数倍的减小图片的大小。一般网页的大图，**如banner图片一般使用jpg格式**，因为jpg是一种有损压缩，可以最大程度的减小图片的体积，而且不会影响视觉体验（不支持透明通道）；**小图片一般用png格式**，一般是无损压缩的（保留透明通道）。
+
+**7. 使用 Progressive JPEGs（高级JPEG）**
+
+Progressive JPEGs图片是JPEG格式的一个特殊变种，名为“高级JPEG”。在创建高级JPEG文件时，数据是这样安排的：在装入图像时，开始只显示一个模糊的图像，随着数据的装入，图像逐步变得清晰。它相当于交织的GIF格式的图片。高级JPEG主要是考虑到使用调制解调器的慢速网络而设计的，快速网络的使用者通常不会体会到它和正常JPEG格式图片的区别。对于网速比较慢的用户，这无疑有很好的体验。
+
+**8.代码的精简**
+
+代码的精简是最直接的方法，也是对于一个程序员编程能力的考验。对代码进行优化，以最少的代码来实现所需的功能，及减少了文件的体积，同时也减少了不必要的时间的浪费。同时不必要的空格、注释、换行等的减少，也可以减少文件的体积。
+
+**9.延迟加载**
+
+网页中的大部分js代码都是在页面加载后才需要执行的，所以对于这些代码可以写在window.onload事件的回调函数中。这样可以使页面主体和一些必要的js代码优先加载的出来，然后来去请求非一开始就需要的代码。
+
+**10.使用Ajax**
+
+当一个页面只有一部分需要更新时，可以使用ajax来对页面进行异步的更新，这样不需要重新的刷新整个页面，重新请求整个页面的数据，而只需要请求需要的那部分数据更新页面即可。这样既提高了页面的加载速度，有提高了体验性。
+
+**11.数据缓存**
+
+HTTP 协议缓存请求，离线缓存 manifest，离线数据缓存localStorage。
+
+**12.提高请求速度**
+
+预解析DNS，减少域名数，并行加载，CDN 分发。
+
+**13.借助自动化工具来实现页面的优化**
+
+比如RadwareFastView
+
+
+
+#### JS执行上下文
+
+**（1）全局执行上下文**
+
+任何不在函数内部的都是全局执行上下文，它首先会创建一个全局的window对象，并且设置this的值等于这个全局对象，一个程序中只有一个全局执行上下文。
+
+**（2）函数执行上下文**
+
+当一个函数被调用时，就会为该函数创建一个新的执行上下文，函数的上下文可以有任意多个。
+
+**（3）**`eval`**函数执行上下文**
+
+执行在eval函数中的代码会有属于他自己的执行上下文，不过eval函数不常使用，不做介绍。
+
+**执行上下文栈**
+
+- JavaScript引擎使用执行上下文栈来管理执行上下文
+- 当JavaScript执行代码时，首先遇到全局代码，会创建一个全局执行上下文并且压入执行栈中，每当遇到一个函数调用，就会为该函数创建一个新的执行上下文并压入栈顶，引擎会执行位于执行上下文栈顶的函数，当函数执行完成之后，执行上下文从栈中弹出，继续执行下一个上下文。当所有的代码都执行完毕之后，从栈中弹出全局执行上下文。
+
+```javascript
+let a = 'Hello World!';
+function first() {
+  console.log('Inside first function');
+  second();
+  console.log('Again inside first function');
+}
+function second() {
+  console.log('Inside second function');
+}
+first();
+//执行顺序
+//先执行second(),在执行first()
+```
 
 
 
@@ -1843,6 +2948,196 @@ removeEventListener() ? removeEventListener() : detachEvent()
 （5）事件目标对象兼容
 var src = event.target || event.srcElement;
 ```
+
+
+
+#### MVC与MVVM
+
+##### MVC
+
+MVC全名是Model View Controller，是**模型(model)**－**视图(view)**－**控制器(controller)**的缩写，一种软件设计典范，用一种业务逻辑、数据、界面显示分离的方
+
+法组织代码，将业务逻辑聚集到一个部件里面，在改进和个性化定制界面及用户交互的同时，不需要重新编写业务逻辑。MVC被独特的发展起来用于映射传统的输
+
+入、处理和输出功能在一个逻辑的图形化用户界面的结构中。
+
+几乎所有的App都只干这么一件事：将数据展示给用户看，并处理用户对界面的操作。
+
+MVC的思想：一句话描述就是**Controller负责将Model的数据用View显示出来**，换句话说就是在Controller里面把Model的数据赋值给View。
+
+**Model（模型）**：是应用程序中用于处理应用程序数据逻辑的部分。通常模型对象负责在数据库中存取数据。
+
+比如我们人类有一双手，一双眼睛，一个脑袋，没有尾巴，这就是模型，Model定义了这个模块的数据模型。
+
+在代码中体现为数据管理者，Model负责对数据进行获取及存放。
+
+数据不可能凭空生成的，要么是从服务器上面获取到的数据，要么是本地数据库中的数据，
+
+也有可能是用户在UI上填写的表单即将上传到服务器上面存放，所以需要有数据来源。
+
+既然Model是数据管理者，则自然由它来负责获取数据。
+
+Controller不需要关心Model是如何拿到数据的，只管调用就行了。
+
+数据存放的地方是在Model，而使用数据的地方是在Controller，
+
+所以Model应该提供接口供controller访问其存放的数据（通常通过.h里面的只读属性）
+
+**View（视图）**：是应用程序中处理数据显示的部分。通常视图是依据模型数据创建的。
+
+View，视图，简单来说，就是我们在界面上看见的一切。
+
+它们有一部分是我们UI定死的，也就是不会根据数据来更新显示的，比如一些Logo图片啊，这里有个按钮啊，那里有个输入框啊，一些显示特定内容label啊等
+
+等；有一部分是会根据数据来显示内容的，比如tableView来显示好友列表啊，这个tableView的显示内容肯定是根据数据来显示的。我们使用MVC解决问题的时
+
+候，通常是解决这些根据数据来显示内容的视图。
+
+**Controller（控制器）**：是应用程序中处理用户交互的部分。通常控制器负责从视图读取数据，控制用户输入，并向模型发送数据。
+
+Controller是MVC中的数据和视图的协调者，也就是在Controller里面把Model的数据赋值给View来显示（或者是View接收用户输入的数据然后由Controller把这
+
+些数据传给Model来保存到本地或者上传到服务器）。
+
+------
+
+综合以上内容，实际上你应该可以通过面向对象的基本思想来推导出controller出现的原因：我们所有的App都是界面和数据的交互，所以需要类来进行界面的绘
+
+制，于是出现了View，需要类来管理数据于是出现了Model。我们设计的View应该能显示任意的内容比如UILabel显示的文字应该是任意的而不只是某个特定
+
+Model的内容，所以我们不应该在View的实现中去写和Model相关的任何代码，如果这样做了，那么View的可扩展性就相当低了。而Model只是负责处理数据的，
+
+它根本不知道数据到时候会拿去干啥，可能拿去作为算法噼里啪啦去了，可能拿去显示给用户了，它既然无法接收用户的交互，它就不应该去管和视图相关的任何
+
+信息，所以Model中不应该写任何View相关代码。然而我们的数据和界面应该同步，也就是一定要有个地方要把Model的数据赋值给View，而Model内部和View
+
+的内部都不可能去写这样的代码，所以只能新创造一个类出来了，取名为Controller。它被UIKit逐渐完善成了我们现在使用的UIViewController。
+![](前端图片/201904232014235.png)
+
+这张图把MVC分为三个独立的区域，并且中间用了一些线来隔开。很有意思的设计，因为这些线似乎出现在了驾校科目一的内容中，你瞧C和V以及C和M之间的白
+
+线，一部分是虚线一部分是实线对吧，这就表明了引用关系：C可以直接引用V和M，而V和M不能直接引用C，至少你不能显式的在V和M的代码中去写和C相关的
+
+任何代码，而V和M之间则是双黄线，没错，它们俩谁也不能引用谁，你既不能在M里面写V，也不能在V里面写M。哦，上面的描述有点小小的问题，你不是“不
+
+能”这样写，而是“不应该”这样写，没人能阻止你在写代码的时候在一个M里面去写V，但是一旦你这样做了，那么你就违背了MVC的规范，你就不是在使用MVC
+
+了，所以这算是MVC的一个必要条件：使用MVC –> M里面没有V的代码。所以M里面没有V的代码就是使用MVC的必要条件。
+
+**View和Controller的交互**
+
+按钮点击事件，是View来接收的，但是处理这个事件的应该是Controller，所以View把这个事件传递给了Controller，如何传递的呢，见图，看到View上面的
+
+action没有，这就是事件，看到Controller上面的target没有，这就是靶子，View究竟要把事件传递给谁，它被规定了传递给靶子，Controller实际上就是靶子。只
+
+是View只负责传递事件，不负责关心靶子是谁。就像你是一个负责运货的少年，你唯一知道的是你要把货（action）交给上头（开发者）告诉你的那个收货的人
+
+（target），至于那个收货的人是警察还是怪兽，你都不需要关心。这是V和C的一种交互方式，叫做target-action。所以你看，这张图简直就是神来之笔，旁边还
+
+栩栩如生的画出了V对C的另一种传值：协议-委托。委托有两种：代理和数据源。什么是代理，就是专门处理should、will、did事件的委托，什么是数据源，就是
+
+专门处理data、count等等的委托。
+
+**Model和Controller的交互**
+
+M是干嘛的？上面说了，M就是数据管理者，你可以理解为它直接和数据库打交道。这里的数据库可能是本地的，也可能是服务器上的，M会从数据库获取数据，
+
+也可能把数据上传给数据库。M也将提供属性或者接口来供C访问其持有的数据。我们就拿一个简单的需求作为例子，假如我想在一个模块中显示一段文字，这段
+
+文字是从网上获取下来的。
+
+那么使用MVC的话，在C中肯定需要一个UILabel（V）作为属性来显示这段文字，而这段文字由谁来获取呢，肯定是由M来获取了。而获取的地方在哪里呢？通常
+
+在C的生命周期里面，所以往往是在C的一个生命周期方法比如viewDidLoad里面调用M获取数据的方法来获取数据。现在问题来了，M获取数据的方法是异步的网
+
+络请求，网络请求结束后，C才应该用请求下来的数据重新赋值给V，现在的问题是，C如何知道网络请求结束了？
+
+这里我们一定要换一种角度去思考，我们进一步考虑M和V之间的关系：它们应该是一种同步的关系，也就是，不管任何时刻，只要M的值发生改变，V的显示就应
+
+该发生改变（显示最新的M的内容）。所以我们可以关注M的值改变，而不用关心M的网络请求是否结束了。实际上C根本不知道M从哪去拿的数据，C的责任是负
+
+责把M最新的数据赋值给V。所以C应该关注的事件是：M的值是否发生了变化。
+
+------
+
+##### MVVM
+
+就像我们之前分析MVC是如何合理分配工作的一样，我们需要数据所以有了M，我们需要界面所以有了V，而我们需要找一个地方把M赋值给V来显示，所以有了
+
+C，然而我们忽略了一个很重要的操作：数据解析。在MVC出生的年代，手机APP的数据往往都比较简单，没有现在那么复杂，所以那时的数据解析很可能一步就
+
+解决了，所以既然有这样一个问题要处理，而面向对象的思想就是用类和对象来解决问题，显然V和M早就被定义死了，它们都不应该处理“解析数据”的问题，理所
+
+应当的，“解析数据”这个问题就交给C来完成了。而现在的手机App功能越来越复杂，数据结构也越来越复杂，所以数据解析也就没那么简单了。如果我们继续按照
+
+MVC的设计思路，将数据解析的部分放到了Controller里面，那么Controller就将变得相当臃肿。还有相当重要的一点：Controller被设计出来并不是处理数据解析
+
+的。1、管理自己的生命周期；2、处理Controller之间的跳转；3、实现Controller容器。这里面根本没有“数据解析”这一项，所以显然，数据解析也不应该由
+
+Controller来完成。那么我们的MVC中，M、V、C都不应该处理数据解析，那么由谁来呢？这个问题实际上在面向对象的时候相当好回答：既然目前没有类能够处
+
+理这个问题，那么就创建一个新的类出来解决不就好了？所以我们聪明的开发者们就专门为数据解析创建出了一个新的类：ViewModel。这就是MVVM的诞生。
+
+**如何实现MVVM**
+
+搞清楚了MVVM为什么会出现，将对于你理解如何实现MVVM有极大的帮助。在我们开始着手实现MVVM之前，我先简单提一下之前遗留的一个问题：为什么
+
+MVVM这个名字里面，没有Controller的出现（为什么不叫MVCVM，C去哪了）。本来这个问题应该在实现后再来解释，但是我们这里是教学，为了让大家更好的
+
+明白我们接下来的思想，所以这里要提前解释一下这个结论：Controller的存在感被完全的降低了。我们在待会实现MVVM的时候你就能体会到了，这里请先把这
+
+个结论印在脑海当中：Controller的存在感被完全的降低了、Controller的存在感被完全的降低了、Controller的存在感被完全的降低了。
+
+好的，我们终于要开始着手实现MVVM了。如果你已经搞懂了MVC，那么用MVVM实现一个相同的功能将会变得非常简单。你只需要记住两点：1、Controller的
+
+存在感被完全的降低了；2、VM的出现就是Controller存在感降低的原因。
+
+**Controller存在感降低的原因**
+
+在MVVM中，Controller不再像MVC那样直接持有Model了。想象Controller是一个Boss，数据是一堆文件（Model），如果现在是MVC，那么数据解析（比如整
+
+理文件）需要由Boss亲自完成，然而实际上Boss需要的仅仅是整理好的文件而不是那一堆乱七八糟的整理前的文件。所以Boss招聘了一个秘书，现在Boss就不再
+
+需要管理原始数据（整理之前的文件）了，他只需要去找秘书：你帮我把文件整理好后给我。那么这个秘书就首先去拿到文件（原始数据），然后进行整理（数据
+
+解析），接下来把整理的结果给Boss。所以秘书就是VM了，并且Controller（Boss）现在只需要直接持有VM而不需要再持有M了。如果再进一步理解C、VM、M
+
+之间的关系：因为Controller只需要数据解析的结果而不关心过程，所以就相当于VM把“如何解析Model”给封装起来了，C甚至根本就不需要知道M的存在就能把
+
+工作做好，前提它需要持有一个VM。那么我们MVVM中的持有关系就是：C持有VM，VM持有M。这里有一个比较争议的地方：C该不该持有M。我的答案是不
+
+该。为什么呢，因为C持有M没有任何意义。就算C直接拿到了M的数据，它还是要去让VM进行数据解析，而数据解析就需要M，那么直接让VM持有M而C直接持
+
+有VM就足够了。最后再分享一个我在实现MVVM中的一个技巧，也谈不上是技巧吧，算是一种必要的思想：一旦在实现Controller的过程中遇到任何跟Model（或
+
+者数据）相关的问题，就找VM要答案。这个思想待会我们会在实现代码的时候用到。
+![](前端图片/202204012222.png)
+
+**Model 和 View 并无直接关联**，它们是通过 ViewModel 来进行联系的。
+
+**ViewModel 通常要做实现一个OB服务的观察者**，当数据发生变化，ViewModel 能够**监听到数据的这种变化**，然后通过到**对应的视图做自动更新**，而当用户操作
+
+视图，ViewModel也能监听到视图的变化，然后通知数据做改动，这实际上就实现了数据的双向绑定。并且 View 和 ViewModel 可以互相通信。
+
+**在MVVM架构下，View 和 Model 之间没有直接的关系，而是通过 ViewModel 进行交互，Model 和 ViewModel 之间的交互是双向的，因此 View 数据的变化会同步到 Model 中，而 Model 数据的变化也会立即反应到 View 上。**
+
+ViewModel 通过双向数据绑定把 View 和 Model 连接了起来，而 View 和 Model 之间的同步工作完全是自动的，无需人为干涉，因此开发者只需关注业务逻辑，
+
+不需要手动操作DOM， 不需要关注数据状态的同步问题，复杂的数据状态维护完全由 MVVM 来统一管理。
+
+![在这里插入图片描述](前端图片/202204012224.png)
+
+缺点:
+
+- Bug很难被调试: 因为使⽤双向绑定的模式，当你看到界⾯异常了，有可能是你View的代码有Bug，也可能是Model的代码有问题。数据绑定使得⼀个位置的Bug被快速传递到别的位置，要定位原始出问题的地⽅就变得不那么容易了。另外，数据绑定的声明是指令式地写在View的模版当中的，这些内容是没办法去打断点debug的
+- ⼀个⼤的模块中model也会很⼤，虽然使⽤⽅便了也很容易保证了数据的⼀致性，当时⻓期持有，不释放内存就造成了花费更多的内存
+- 对于⼤型的图形应⽤程序，视图状态较多，ViewModel的构建和维护的成本都会⽐较⾼。
+
+------
+
+##### MVP
+
+MVP 模式与 MVC 唯一不同的在于 Presenter 和 Controller。在 MVC 模式中使用观察者模式，来实现当 Model 层数据发生变化的时候，通知 View 层的更新。这样 View 层和 Model 层耦合在一起，当项目逻辑变得复杂的时候，可能会造成代码的混乱，并且可能会对代码的复用性造成一些问题。MVP 的模式通过使用 Presenter 来实现对 View 层和 Model 层的解耦。MVC 中的Controller 只知道 Model 的接口，因此它没有办法控制 View 层的更新，MVP 模式中，View 层的接口暴露给了 Presenter 因此可以在 Presenter 中将 Model 的变化和 View 的变化绑定在一起，以此来实现 View 和 Model 的同步更新。这样就实现了对 View 和 Model 的解耦，Presenter 还包含了其他的响应逻辑。
 
 
 
@@ -1951,6 +3246,17 @@ CommonJS模块的特点如下。
 - 所有代码都运行在模块作用域，不会污染全局作用域。
 - 模块可以多次加载，但是只会在第一次加载时运行一次，然后运行结果就被缓存了，以后再加载，就直接读取缓存结果。要想让模块再次运行，必须清除缓存。
 - 模块加载的顺序，按照其在代码中出现的顺序。
+
+**ES6模块与CommonJS模块有什么异同**
+
+ES6 Module和CommonJS模块的区别：
+
+- CommonJS是对模块的浅拷⻉，ES6 Module是对模块的引⽤，即ES6 Module只存只读，不能改变其值，也就是指针指向不能变，类似const；
+- import的接⼝是read-only（只读状态），不能修改其变量值。 即不能修改其变量的指针指向，但可以改变变量内部指针指向，可以对commonJS对重新赋值（改变指针指向），但是对ES6 Module赋值会编译报错。
+
+ES6 Module和CommonJS模块的共同点：
+
+- CommonJS和ES6 Module都可以对引⼊的对象进⾏赋值，即对对象内部属性的值进⾏改变。
 
 
 
@@ -2104,6 +3410,44 @@ xmlhttp.onreadystatechange = function (ev2) {
 xmlhttp.send();
 ```
 
+------
+
+##### ajax、axios、fetch的区别
+
+**（1）AJAX** Ajax 即“AsynchronousJavascriptAndXML”（异步 JavaScript 和 XML），是指一种创建交互式网页应用的网页开发技术。它是一种在无需重新加载整个网页的情况下，能够更新部分网页的技术。通过在后台与服务器进行少量数据交换，Ajax 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。传统的网页（不使用 Ajax）如果需要更新内容，必须重载整个网页页面。其缺点如下：
+
+- 本身是针对MVC编程，不符合前端MVVM的浪潮
+- 基于原生XHR开发，XHR本身的架构不清晰
+- 不符合关注分离（Separation of Concerns）的原则
+- 配置和调用方式非常混乱，而且基于事件的异步模型不友好。
+
+**（2）Fetch** fetch号称是AJAX的替代品，是在ES6出现的，使用了ES6中的promise对象。Fetch是基于promise设计的。Fetch的代码结构比起ajax简单多。**fetch不是ajax的进一步封装，而是原生js，没有使用XMLHttpRequest对象**。
+
+fetch的优点：
+
+- 语法简洁，更加语义化
+- 基于标准 Promise 实现，支持 async/await
+- 更加底层，提供的API丰富（request, response）
+- 脱离了XHR，是ES规范里新的实现方式
+
+fetch的缺点：
+
+- fetch只对网络请求报错，对400，500都当做成功的请求，服务器返回 400，500 错误码时并不会 reject，只有网络错误这些导致请求不能完成时，fetch 才会被 reject。
+- fetch默认不会带cookie，需要添加配置项： fetch(url, {credentials: 'include'})
+- fetch不支持abort，不支持超时控制，使用setTimeout及Promise.reject的实现的超时控制并不能阻止请求过程继续在后台运行，造成了流量的浪费
+- fetch没有办法原生监测请求的进度，而XHR可以
+
+**（3）Axios** Axios 是一种基于Promise封装的HTTP客户端，其特点如下：
+
+- 浏览器端发起XMLHttpRequests请求
+- node端发起http请求
+- 支持Promise API
+- 监听请求和返回
+- 对请求和返回进行转化
+- 取消请求
+- 自动转换json数据
+- 客户端支持抵御XSRF攻击
+
 
 
 #### 单个问题汇总
@@ -2152,66 +3496,6 @@ eval(string) 函数计算 JavaScript 字符串，并把它作为脚本代码来�
 特殊：eval("{b:2}") // 声明一个对象
 
 eval("（{b:2}）") // 返回对象{b:2}
-
-------
-
-##### JS判断相等原理
-
-在相等运算中，应注意以下几个问题：
-
-- 如果`x`不是正常值（比如抛出一个错误），中断执行。
-
-- 如果`y`不是正常值，中断执行。
-
-- 如果`Type(x)`与`Type(y)`相同，执行严格相等运算`x === y`。
-
-- 如果`x`是`null`，`y`是`undefined`，返回`true`。
-
-- 如果`x`是`undefined`，`y`是`null`，返回`true`。
-
-- 如果`Type(x)`是数值，`Type(y)`是字符串，返回`x == ToNumber(y)`的结果。
-
-- 如果`Type(x)`是字符串，`Type(y)`是数值，返回`ToNumber(x) == y`的结果。
-
-- 如果`Type(x)`是布尔值，返回`ToNumber(x) == y`的结果。
-
-- 如果`Type(y)`是布尔值，返回`x == ToNumber(y)`的结果。
-
-- 如果`Type(x)`是字符串或数值或`Symbol`值，`Type(y)`是对象，返回`x == ToPrimitive(y)`的结果。
-
-- 如果`Type(x)`是对象，`Type(y)`是字符串或数值或`Symbol`值，返回`ToPrimitive(x) == y`的结果。
-
-- 返回`false`。
-
-  由于`0`的类型是数值，`null`的类型是Null。因此上面的前11步都得不到结果，要到第12步才能得到`false`。
-
-------
-
-##### ==和===、以及Object.is的区别
-
-(1) ==
-
-主要存在：强制转换成number,null==undefined
-
-" "==0  //true
-
-"0"==0  //true
-
-" " !="0" //true
-
-123=="123" //true
-
-null==undefined //true
-
-(2)Object.is
-
-主要的区别就是+0！=-0 而NaN==NaN
-
-Object.is(NaN, NaN);  //true
-
-console.log(+0 === -0);	 //false
-
-(相对比===和==的改进)
 
 ------
 
@@ -2415,9 +3699,9 @@ JavaScript的单线程，与它的用途有关。作为浏览器脚本语言，J
 
 **从静态类型还是动态类型来看**
 
-静态类型，编译的时候就能够知道每个变量的类型，编程的时候也需要给定类型，如Java中的整型int，浮点型float等。C、C++、Java都属于静态类型语言。
+静态类型，编译的时候就能够知道每个变量的类型，编程的时候也需要给定类型，如Java中的整型int，浮点型float等。**C、C++、Java都属于静态类型语言**。
 
-动态类型，运行的时候才知道每个变量的类型，编程的时候无需显示指定类型，如JavaScript中的var、PHP中的$。JavaScript、Ruby、Python都属于动态类型语言。
+动态类型，运行的时候才知道每个变量的类型，编程的时候无需显示指定类型，如JavaScript中的var、PHP中的$。**JavaScript、Ruby、Python都属于动态类型语言**。
 
 对于静态类型，在编译后会大量利用已知类型的优势，如int类型，占用4个字节，编译后的代码就可以用内存地址加偏移量的方法存取变量，而地址加偏移量的算法汇编很容易实现。
 
@@ -2425,11 +3709,11 @@ JavaScript的单线程，与它的用途有关。作为浏览器脚本语言，J
 
 **从编译型还是解释型来看**
 
-编译型语言，像C、C++，需要编译器编译成本地可执行程序后才能运行，由开发人员在编写完成后手动实施。用户只使用这些编译好的本地代码，这些本地代码由系统加载器执行，由操作系统的CPU直接执行，无需其他额外的虚拟机等。
+**编译型语言，像C、C++**，需要编译器编译成本地可执行程序后才能运行，由开发人员在编写完成后手动实施。用户只使用这些编译好的本地代码，这些本地代码由系统加载器执行，由操作系统的CPU直接执行，无需其他额外的虚拟机等。
 
 源代码=》抽象语法树=》中间表示=》本地代码
 
-解释性语言，像JavaScript、Python，开发语言写好后直接将代码交给用户，用户使用脚本解释器将脚本文件解释执行。对于脚本语言，没有开发人员的编译过程，当然，也不绝对。
+**解释性语言，像JavaScript、Python**，开发语言写好后直接将代码交给用户，用户使用脚本解释器将脚本文件解释执行。对于脚本语言，没有开发人员的编译过程，当然，也不绝对。
 
 源代码=》抽象语法树=》解释器解释执行。
 
@@ -2437,13 +3721,33 @@ JavaScript的单线程，与它的用途有关。作为浏览器脚本语言，J
 
 Java语言，分为两个阶段。首先像C++语言一样，经过编译器编译。和C++的不同，C++编译生成本地代码，Java编译后，生成字节码，字节码与平台无关。第二阶段，由Java的运行环境也就是Java虚拟机运行字节码，使用解释器执行这些代码。一般情况下，Java虚拟机都引入了JIT技术，将字节码转换成本地代码来提高执行效率。
 
+**两者主要区别在于：** 前者源程序编译后即可在该平台运行，后者是在运行期间才编译。所以前者运行速度快，后者跨平台性好。
+
 注意，在上述情况中，编译器的编译过程没有时间要求，所以编译器可以做大量的代码优化措施。
 
 对于JavaScript与Java它们还有的不同：
 
 对于Java，Java语言将源代码编译成字节码，这个同执行阶段是分开的。也就是从源代码到抽象语法树到字节码这段时间的长短是无所谓的。
 
-对于JavaScript，这些都是
+对于JavaScript，这些都是在网页和JavaScript文件下载后同执行阶段一起在网页的加载和渲染过程中实施的，所以对于它们的处理时间有严格要求。
+
+- **强类型语言**：强类型语言也称为强类型定义语言，是一种总是强制类型定义的语言，要求变量的使用要严格符合定义，所有变量都必须先定义后使用。Java和C++等语言都是强制类型定义的，也就是说，一旦一个变量被指定了某个数据类型，如果不经过强制转换，那么它就永远是这个数据类型了。例如你有一个整数，如果不显式地进行转换，你不能将其视为一个字符串。
+- **弱类型语言**：弱类型语言也称为弱类型定义语言，与强类型定义相反。JavaScript语言就属于弱类型语言。简单理解就是一种变量类型可以被忽略的语言。比如JavaScript是弱类型定义的，在JavaScript中就可以将字符串'12'和整数3进行连接得到字符串'123'，在相加的时候会进行强制类型转换。
+
+两者对比：强类型语言在速度上可能略逊色于弱类型语言，但是强类型语言带来的严谨性可以有效地帮助避免许多错误。
+
+JavaScript 是一种[弱类型](https://en.wikipedia.org/wiki/Strong_and_weak_typing)（或称[动态类型](https://en.wikipedia.org/wiki/Dynamic_programming_language)）语言，即变量的类型是不确定的。
+
+> ```javascript
+> x = 5; // 5
+> x = x + 'A'; // '5A'
+> ```
+
+上面代码中，变量x起先是一个数值，后来是一个字符串，类型完全由当前的值决定，这就叫弱类型。
+
+弱类型的好处是十分灵活，可以写出非常简洁的代码。但是，对于大型项目来说，强类型更有利，可以降低系统的复杂度，在编译时就发现类型错误，减轻程序员的负担。
+
+一直有人尝试，让 JavaScript 变成强类型语言。在官方最终支持强类型之前，目前有三种可用的解决方案。TypeScript，Flowcheck和Flow。
 
 ------
 
@@ -2523,23 +3827,6 @@ Java语言，分为两个阶段。首先像C++语言一样，经过编译器编�
 > 8["double"]["square"]
 > // 256
 > ```
-
-------
-
-##### JS弱类型
-
-JavaScript 是一种[弱类型](https://en.wikipedia.org/wiki/Strong_and_weak_typing)（或称[动态类型](https://en.wikipedia.org/wiki/Dynamic_programming_language)）语言，即变量的类型是不确定的。
-
-> ```javascript
-> x = 5; // 5
-> x = x + 'A'; // '5A'
-> ```
-
-上面代码中，变量x起先是一个数值，后来是一个字符串，类型完全由当前的值决定，这就叫弱类型。
-
-弱类型的好处是十分灵活，可以写出非常简洁的代码。但是，对于大型项目来说，强类型更有利，可以降低系统的复杂度，在编译时就发现类型错误，减轻程序员的负担。
-
-一直有人尝试，让 JavaScript 变成强类型语言。在[官方](http://wiki.ecmascript.org/doku.php?id=strawman:types)最终支持强类型之前，目前有三种可用的解决方案。TypeScript，Flowcheck和Flow。
 
 ------
 
@@ -2635,6 +3922,18 @@ JSONP 是一种非正式传输协议，允许用户传递一个callback给服务
 **ajax的核心是通过xmlHttpRequest获取非本页内容**
 **jsonp的核心是动态添加script标签调用服务器提供的js脚本**
 **jsonp只支持get请求，ajax支持get和post请求**
+
+------
+
+##### for...in和for...of的区别
+
+for…of 是ES6新增的遍历方式，允许遍历一个含有iterator接口的数据结构（数组、对象等）并且返回各项的值，和ES3中的for…in的区别如下
+
+- for…of 遍历获取的是对象的键值，for…in 获取的是对象的键名；
+- for… in 会遍历对象的整个原型链，性能非常差不推荐使用，而 for … of 只遍历当前对象不会遍历原型链；
+- 对于数组的遍历，for…in 会返回数组中所有可枚举的属性(包括原型链上可枚举的属性)，for…of 只返回数组的下标对应的属性值；
+
+**总结：** for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象。
 
 ------
 
@@ -2784,3 +4083,15 @@ function numberepsilon(arg1,arg2){
 console.log(numberepsilon(0.1 + 0.2, 0.3)); // true
 ```
 
+------
+
+##### 尾调用
+
+尾调用指的是函数的最后一步调用另一个函数。代码执行是基于执行栈的，所以当在一个函数里调用另一个函数时，会保留当前的执行上下文，然后再新建另外一个执行上下文加入栈中。使用尾调用的话，因为已经是函数的最后一步，所以这时可以不必再保留当前的执行上下文，从而节省了内存，这就是尾调用优化。但是 ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。
+
+------
+
+##### 并发与并行的区别
+
+- 并发是宏观概念，我分别有任务 A 和任务 B，在一段时间内通过任务间的切换完成了这两个任务，这种情况就可以称之为并发。
+- 并行是微观概念，假设 CPU 中存在两个核心，那么我就可以同时完成任务 A、B。同时完成多个任务的情况就可以称之为并行。
