@@ -575,24 +575,130 @@ function myFunction(y) {
 
 
 
-#### 数组的遍历方法
+#### 数组方法汇总
 
-| **方法**                  | **是否改变原数组** | **特点**                                                     |
-| ------------------------- | ------------------ | ------------------------------------------------------------ |
-| forEach()                 | 否                 | 数组方法，不改变原数组，没有返回值                           |
-| map()                     | 否                 | 数组方法，不改变原数组，有返回值，可链式调用                 |
-| filter()                  | 否                 | 数组方法，过滤数组，返回包含符合条件的元素的数组，可链式调用 |
-| for...of                  | 否                 | for...of遍历具有Iterator迭代器的对象的属性，返回的是数组的元素、对象的属性值，不能遍历普通的obj对象，将异步循环变成同步循环 |
-| every() 和 some()         | 否                 | 数组方法，some()只要有一个是true，便返回true；而every()只要有一个是false，便返回false. |
-| find() 和 findIndex()     | 否                 | 数组方法，find()返回的是第一个符合条件的值；findIndex()返回的是第一个返回条件的值的索引值 |
-| reduce() 和 reduceRight() | 否                 | 数组方法，reduce()对数组正序操作；reduceRight()对数组逆序操作 |
+|    方法名     | 对应版本 |                             功能                             | 原数组是否改变 |
+| :-----------: | :------: | :----------------------------------------------------------: | :------------: |
+|    sort()     |   ES5-   |                  排序（字符规则），返回结果                  |       y        |
+|   reverse()   |   ES5-   |                      反转数组，返回结果                      |       y        |
+|     pop()     |   ES5-   |                删除最后一位，并返回删除的数据                |       y        |
+|    push()     |   ES5-   |             在最后一位新增一或多个数据，返回长度             |       y        |
+|   unshift()   |   ES5-   |              在第一位新增一或多个数据，返回长度              |       y        |
+|    shift()    |   ES5-   |                 删除第一位，并返回删除的数据                 |       y        |
+|   splice()    |   ES5-   |             删除指定位置，并替换，返回删除的数据             |       y        |
+|               |          |                                                              |                |
+|   concat()    |   ES5-   |                合并数组，并返回合并之后的数据                |       n        |
+|    join()     |   ES5-   |              使用分隔符，将数组转为字符串并返回              |       n        |
+|    slice()    |   ES5-   |                  截取指定位置的数组，并返回                  |       n        |
+|  toString()   |   ES5-   |                    直接转为字符串，并返回                    |       n        |
+|   valueOf()   |   ES5-   |                     返回数组对象的原始值                     |       n        |
+|   indexOf()   |   ES5    |                     查询并返回数据的索引                     |       n        |
+| lastIndexOf() |   ES5    |                   反向查询并返回数据的索引                   |       n        |
+|   forEach()   |   ES5    | 参数为回调函数，会遍历数组所有的项，回调函数接受三个参数，分别为value，index，self；forEach没有返回值 |       n        |
+|     map()     |   ES5    |     同forEach，同时回调函数返回数据，组成新数组由map返回     |       n        |
+|   filter()    |   ES5    | 同forEach，同时回调函数返回布尔值，为true的数据组成新数组由filter返回 |       n        |
+|    every()    |   ES5    | 同forEach，同时回调函数返回布尔值，全部为true，由every返回true |       n        |
+|    some()     |   ES5    | 同forEach，同时回调函数返回布尔值，只要由一个为true，由some返回true |       n        |
+|   reduce()    |   ES5    | 归并，同forEach，迭代数组的所有项，并构建一个最终值，由reduce返回 |       n        |
+| reduceRight() |   ES5    | 反向归并，同forEach，迭代数组的所有项，并构建一个最终值，由reduceRight返回 |       n        |
 
-**forEach和map方法有什么区别**
+------
+
+##### forEach和map方法的区别
 
 这方法都是用来遍历数组的，两者区别如下：
 
-- forEach()方法会针对每一个元素执行提供的函数，对数据的操作会改变原数组，该方法没有返回值；
+- forEach()方法会针对每一个元素执行提供的函数，对数据的操作会改变原数组，该方法没有返回值；**使用break不能中断循环，使用return也不能返回到外层函数。**
 - map()方法不会改变原数组的值，返回一个新数组，新数组中的值为原数组调用函数处理之后的值；
+
+------
+
+##### for...in和for...of的区别
+
+for…of 是ES6新增的遍历方式，允许遍历一个含有iterator接口的数据结构（数组、对象等）并且返回各项的值，和ES3中的for…in的区别如下
+
+- for…of 遍历获取的是对象的**键值（value）**，for…in 获取的是对象的**键名（key）**；
+- for… in 会**遍历对象的整个原型链**，性能非常差不推荐使用，而 for … of **只遍历当前对象不会遍历原型链**；
+- 对于数组的遍历，for…in 会返回数组中所有可枚举的属性(包括原型链上可枚举的属性)，for…of 只返回数组的下标对应的属性值；
+
+**遍历数组**
+
+```js
+Array.prototype.method=function(){
+　　console.log(this.length);
+}
+var myArray=["one", "two", "three"]
+myArray.name="数组"
+for (let index in myArray) {
+  console.log(index);
+}
+//输出0 1 2 name method
+```
+
+**for...in遍历数组的毛病**
+
+1.index索引为字符串型数字，不能直接进行几何运算
+
+2.遍历顺序有可能不是按照实际数组的内部顺序
+
+3.使用for in会遍历数组所有的可枚举属性，包括原型。例如上例的原型方法method和name属性
+
+所以for in更适合遍历对象，不要使用for in遍历数组。
+
+```js
+Array.prototype.method=function(){
+　　console.log(this.length);
+}
+var myArray=["one", "two", "three"]
+myArray.name="数组";
+for (let value of myArray) {
+  console.log(value);
+}
+//输出one two three
+```
+
+**遍历对象**
+
+```js
+Object.prototype.method=function(){
+　　console.log(this);
+}
+var myObject={
+　　a:1,
+　　b:2,
+　　c:3
+}
+for (let key in myObject) {
+  console.log(key);
+}
+//输出a b c method
+```
+
+for in 可以遍历到myObject的原型方法method，如果不想遍历原型方法和属性的话，可以在循环内部判断一下，**hasOwnPropery方法可以判断某属性是否是该对象的实例属性**。
+
+```js
+for (var key in myObject) {
+　　if(myObject.hasOwnProperty(key)){
+　　　　console.log(key);
+　　}
+}
+```
+
+**同样可以通过ES5的Object.keys(myObject)获取对象的实例属性组成的数组，不包括原型方法和属性**
+
+**总结：**
+
+-  for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象。
+
+- for..of适用遍历数/数组对象/字符串/map/set等拥有迭代器对象的集合，但是**不能遍历对象，因为没有迭代器对象**。与forEach()不同的是，它可以正确响应break、continue和return语句。
+
+- for-of循环不支持普通对象，但如果你想迭代一个对象的属性，你可以用for-in循环（这也是它的本职工作）或内建的Object.keys()方法：
+
+  ```js
+  for (var key of Object.keys(someObject)) {
+    console.log(key + ": " + someObject[key]);
+  }
+  ```
 
 
 
@@ -3922,18 +4028,6 @@ JSONP 是一种非正式传输协议，允许用户传递一个callback给服务
 **ajax的核心是通过xmlHttpRequest获取非本页内容**
 **jsonp的核心是动态添加script标签调用服务器提供的js脚本**
 **jsonp只支持get请求，ajax支持get和post请求**
-
-------
-
-##### for...in和for...of的区别
-
-for…of 是ES6新增的遍历方式，允许遍历一个含有iterator接口的数据结构（数组、对象等）并且返回各项的值，和ES3中的for…in的区别如下
-
-- for…of 遍历获取的是对象的键值，for…in 获取的是对象的键名；
-- for… in 会遍历对象的整个原型链，性能非常差不推荐使用，而 for … of 只遍历当前对象不会遍历原型链；
-- 对于数组的遍历，for…in 会返回数组中所有可枚举的属性(包括原型链上可枚举的属性)，for…of 只返回数组的下标对应的属性值；
-
-**总结：** for...in 循环主要是为了遍历对象而生，不适用于遍历数组；for...of 循环可以用来遍历数组、类数组对象，字符串、Set、Map 以及 Generator 对象。
 
 ------
 
