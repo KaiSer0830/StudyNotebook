@@ -11,7 +11,7 @@ webpack安装    npm install -g webpack
 
 
 
-#### vue目录框架结构
+#### vue2.0目录框架结构
 
 ```
 ├── README.md            项目介绍
@@ -65,11 +65,11 @@ webpack安装    npm install -g webpack
 
 和methods中的数据都还没有初始化。不能在这个阶段使用data中的数据和methods中的方法。
 
-**created**：data 和 methods都已经被初始化好了，如果要调用 methods 中的方法，或者操作 data 中的数据，最早可以在这个阶段中操作。但是此时渲染得节点还未挂载到 DOM，所以不能访问到 `$el` 属性。
+**created**：data 和 methods都已经被初始化好了，如果要**调用 methods 中的方法**，或者**操作 data 中的数据**，最早可以在这个阶段中操作。但是此时渲染得节点还未挂载到 DOM，所以不能访问到 `$el` 属性。
 
-**beforeMount**：执行到这个钩子的时候，相关的render函数首次被调用。实例已完成以下的配置：编译模板，把data里面的数据和模板生成html。但是还没有挂载到页面中，此时，页面还是旧的。
+**beforeMount**：执行到这个钩子的时候，**相关的render函数首次被调用**。实例已完成以下的配置：编译模板，把data里面的数据和模板生成html。但是还没有挂载到页面中，此时，页面还是旧的。
 
-**mounted**：执行到这个钩子的时候，就表示Vue实例已经初始化完成了。此时组件脱离了创建阶段，进入到了运行阶段。 如果我们想要通过插件操作页面上的DOM节点，最早可以在和这个阶段中进行。
+**mounted**：执行到这个钩子的时候，就表示Vue实例已经初始化完成了。此时组件脱离了创建阶段，进入到了运行阶段。 如果我们想要通过插件**操作页面上的DOM节点**，最早可以在和这个阶段中进行。
 
 **beforeUpdate**： 当执行这个钩子时，页面中的显示的数据还是旧的，data中的数据是更新后的， 页面还没有和最新的数据保持同步。
 
@@ -91,7 +91,7 @@ webpack安装    npm install -g webpack
 
 1. 父组件 beforeCreate
 2. 父组件 created
-3. 父组件 beforeMount
+3. 父组件 **beforeMount**
 4. 子组件 beforeCreate
 5. 子组件 created
 6. 子组件 beforeMount
@@ -100,14 +100,14 @@ webpack安装    npm install -g webpack
 
 **更新过程：**
 
-1. 父组件 beforeUpdate
+1. 父组件 **beforeUpdate**
 2. 子组件 beforeUpdate
 3. 子组件 updated
 4. 父组件 updated
 
 **销毁过程：**
 
-1. 父组件 beforeDestroy
+1. 父组件 **beforeDestroy**
 2. 子组件 beforeDestroy
 3. 子组件 destroyed
 4. 父组件 destoryed
@@ -139,7 +139,7 @@ webpack安装    npm install -g webpack
 
 **虚拟DOM：**dom操作是非常耗费性能的， 不再使用原生的dom操作节点，极大解放dom操作，但具体操作的还是dom不过是换了另一种方式；
 
-**运行速度更快:**相比较与react而言，同样是操作虚拟dom，就性能而言，vue存在很大的优势。
+**运行速度更快:** 相比较与react而言，同样是操作虚拟dom，就性能而言，vue存在很大的优势。
 
 
 
@@ -147,8 +147,8 @@ webpack安装    npm install -g webpack
 
 Vue.js 是采用**数据劫持**结合**发布者-订阅者模式**的方式，通过Object.defineProperty()（vue3.0使用proxy ）来劫持各个属性的setter，getter，在数据变动时发布消息给订阅者，触发相应的监听回调。主要分为以下几个步骤：
 
-1. 需要observe的数据对象进行递归遍历，包括子属性对象的属性，都加上setter和getter这样的话，给这个对象的某个值赋值，就会触发setter，那么就能监听到了数据变化
-2. compile解析模板指令，将模板中的变量替换成数据，然后初始化渲染页面视图，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，更新视图
+1. 需要observe的数据**对象进行递归遍历，包括子属性对象的属性，都加上setter和getter**这样的话，给这个对象的某个值赋值，就会触发setter，那么就能监听到了数据变化
+2. compile解析模板指令，**将模板中的变量替换成数据，然后初始化渲染页面视图**，并将每个指令对应的节点绑定更新函数，添加监听数据的订阅者，一旦数据有变动，收到通知，更新视图
 3. Watcher订阅者是Observer和Compile之间通信的桥梁，主要做的事情是: ①在自身实例化时往属性订阅器(dep)里面添加自己 ②自身必须有一个update()方法 ③待属性变动dep.notice()通知时，能调用自身的update()方法，并触发Compile中绑定的回调，则功成身退。
 4. MVVM作为数据绑定的入口，整合Observer、Compile和Watcher三者，通过Observer来监听自己的model数据变化，通过Compile来解析编译模板指令，最终利用Watcher搭起Observer和Compile之间的通信桥梁，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据model变更的双向绑定效果。
 
@@ -160,15 +160,7 @@ vue数据双向绑定是通过**数据劫持**结合**发布者-订阅者模式*
 
 实现数据的双向绑定，首先要对数据进行劫持监听，所以我们需要设置一个监听器Observer，用来监听所有属性。如果属性发上变化了，就需要告诉订阅者Watcher看是否需要更新。因为订阅者是有很多个，所以我们需要有一个消息订阅器Dep来专门收集这些订阅者，然后在监听器Observer和订阅者Watcher之间进行统一管理的。接着，我们还需要有一个指令解析器Compile，对每个节点元素进行扫描和解析，将相关指令对应初始化成一个订阅者Watcher，并替换模板数据或者绑定相应的函数，此时当订阅者Watcher接收到相应属性的变化，就会执行对应的更新函数，从而更新视图。
 
-Dep 是一个 class ，其中有一个关 键的静态属性 static，它指向了一个全局唯一 Watcher，保证了同一时间全局只有一个 watcher 被计算，另一个属性 subs 则是一个 Watcher 的数组，所以 Dep 实际上就是对 Watcher 的管理，再看看 Watcher 的相关代码∶
-
-------
-
-##### Object.defineProperty() 缺点
-
-在对一些属性进行操作时，使用这种方法无法拦截，比如通过下标方式修改数组数据或者给对象新增属性，这都不能触发组件的重新渲染，因为 Object.defineProperty 不能拦截到这些操作。更精确的来说，对于数组而言，大部分操作都是拦截不到的，只是 Vue 内部通过重写函数的方式解决了这个问题。
-
-在 Vue3.0 中已经不使用这种方式了，而是通过使用 Proxy 对对象进行代理，从而实现数据劫持。使用Proxy 的好处是它可以完美的监听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为 Proxy 是 ES6 的语法。
+Dep 是一个 class ，其中有一个关键的静态属性static，它指向了一个全局唯一 Watcher，保证了同一时间全局只有一个 watcher 被计算，另一个属性 subs 则是一个 Watcher 的数组，所以 Dep 实际上就是对 Watcher 的管理，再看看 Watcher 的相关代码∶
 
 ------
 
@@ -348,7 +340,7 @@ function SelfVue (data, el, exp) {
 
 然后在页面上new以下SelfVue类，就可以实现数据的双向绑定了：
 
-```js
+```html
 <body>
     <h1 id="name">{{name}}</h1>
 </body>
@@ -482,7 +474,7 @@ function SelfVue (options) {
 
 更改后，我们就不要像之前通过传入固定的元素值进行双向绑定了，可以随便命名各种变量进行双向绑定了：
 
-```js
+```html
 <body>
     <div id="app">
         <h2>{{title}}</h2>
@@ -630,20 +622,20 @@ function SelfVue (options) {
 
 #### Vue2.0和Vue3.0的区别（5种）
 
-1.项目目录结构
+**1.项目目录结构**
 vue-cli2.0与3.0在目录结构方面，有明显的不同
 vue-cli3.0移除了配置文件目录，config 和 build 文件夹，同时移除了 static 静态文件夹
 新增了 public 文件夹，打开层级目录还会发现， index.html 移动到 public 中
 
-2.配置项
+**2.配置项**
 3.0中config文件已经被移除，但是多了.env.production和env.development文件，除了文件位置，实际配置起来和2.0没什么不同
 没了config文件，跨域需要配置域名时，从config/index.js 挪到了vue.config.js中，配置方法不变
 
-3.渲染
+**3.渲染**
 Vue2.x使用的Virtual Dom实现的渲染
 Vue3.0不论是原生的html标签还是vue组件，他们都会通过h函数来判断，如果是原生html标签，在运行时直接通过Virtual Dom来直接渲染，同样如果是组件会直接生成组件代码（优点：更快、更小）
 
-4.数据监听
+**4.数据监听**
 Vue2.x大家都知道使用的是es5的object.defineproperties中getter和setter实现的，而vue3.0的版本，是基于Proxy进行监听的，其实基于proxy监听就是所谓的lazy by default，什么意思呢，就是只要你用到了才会监听，可以理解为‘按需监听’，官方给出的诠释是：速度加倍，同时内存占用还减半。
 
 相比于vue2.x，使用proxy的优势如下：
@@ -654,11 +646,46 @@ defineProperty只能监听某个属性，不能对全对象监听。
 可以监听数组，不用再去单独的对数组做特异性操作 vue3.x可以检测到数组内部数据的变化。
 ```
 
-4.按需引入
-Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这样其实无论你用到还是没用到，都会跑一变。而vue3.0中可以用ES module imports按需引入，如：keep-alive内置组件、v-model指令，等等。
+**4.按需引入**
+Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这样其实无论你用到还是没用到，都会跑一变。而vue3.0中可以用ES module imports按需引入，如：keep-alive内置组件、v-model指令等，对Tree-shaking的支持更好。
 
-5.composition api
-提供了composition api，为更好的逻辑复用与代码组织。
+**5.composition API**
+
+新增了composition API（组合API）,原来vue2中的optionsAPI依然可以使用。即：vue3中同时兼容compositionAPI 和 optionsAPI。
+
+优点：一个基于函数的API。将同一功能逻辑的代码集合到一起。优化了之前项目大时，同一功能的逻辑代码分散的问题。可以更灵活的组织组件的逻辑
+
+compositionAPI侧重于将同一功能的代码，都封装在同一个函数中，比如变量的定义，变量的使用等等，都在一起，然后最终，在setup中调用。
+
+**6.源码**
+
+vue3源码组织方式，由vue2的flow改成了vue3的typescript。
+
+vue3移除了一些不常用的api，如inline-template，filter。
+
+新增3个响应式函数，reactive, toRefs, ref：
+
+1.reactive作用是将引用类型的数据转化为响应式数据（可监测的数据，响应式数据发生变化会触发页面重新渲染）
+
+![img](前端图片/af7a2f176ea94a33b2ca40abbf985174.png)
+
+上图，相当于创建一个响应式dog对象，如果不加reactive，那么当dog绑定在dom上时，dog对象发生变化时，视图是不会更新的。
+
+2.toRefs作用是将一个响应式对象的所有属性的值也转化为一个响应式对象，（即，toRefs的参数必须是一个响应式对象）这样，当把属性解构出来使用时，解构出来的变量也会是响应式对象，这个响应式对象都存在一个value属性，原本的属性值就放在这个value下面。
+
+![img](前端图片/77e2baa1792448f6b213c77f834ad80a.png)
+
+如上图，dog是响应式对象，我们通过解构的方式，解构出color, type两个变量，那么，假设我们把color, type这两个变量也绑定在模板上，比如:
+
+![img](前端图片/abd078c857c241f7b3d5caab2164e38c.png)
+
+那么，当color和type的值发生变化时，或者说dog.color, dog.type发生变化时，页面是不会更新的。因为解构出来的color和type并不是响应式的。此时，如果解构的时候我们加上toRefs，那么color,type也会变成响应式对象，它本质是一个对象，这个对象有个value属性，color的属性值是放在value下的，可以简单理解为 color = {value: ‘yellow’}， type = { value: ‘哈士奇’}。但是，color和type如果在模板上使用时，是可以直接使用的，不需要color.value,type.value。而在script中使用,就必须通过color.value, type.value才能获取到值。
+
+ref方法作用是将一个基本类型的数据转化为一个响应式对象，该对象也是存在value属性，基本数据类型的值存储在value属性中。如果ref参数传递了一个引用类型，那么ref内部会直接调用reactive去将这个对象转化为响应式对象。
+
+![img](前端图片/8961cabd9ec047b69ec3380e7e43d080.png)
+
+相当于创建一个变量count = 0. 本质count也是对象, 简单理解为count = {value: 0}
 
 ------
 
@@ -695,7 +722,9 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 
 ##### defineProperty和proxy的区别
 
-Vue 在实例初始化时遍历 data 中的所有属性，并使用 Object.defineProperty **把这些属性全部转为 getter/setter**。这样当追踪数据发生变化时，setter 会被自动调用。
+Vue 在实例初始化时遍历 data 中的所有属性，并使用 Object.defineProperty **把这些属性全部转为 getter/setter**。这样当追踪数据发生变化时，setter 会被自动调用。如果属性值为对象，还会**递归调用**defineproperty使之变为响应式对象。
+
+vue3使用proxy对象重写响应式。proxy的性能本来比defineproperty好，proxy可以拦截属性的访问、赋值、删除等操作，**不需要初始化的时候遍历所有属性**，另外有多层属性嵌套的话，**只有访问某个属性的时候，才会递归处理下一级的属性**。
 
 Object.defineProperty 是 ES5 中一个无法 shim 的特性，这也就是 Vue 不支持 IE8 以及更低版本浏览器的原因。
 
@@ -707,7 +736,15 @@ Object.defineProperty 是 ES5 中一个无法 shim 的特性，这也就是 Vue 
 Vue3 使用 Proxy 来监控数据的变化。Proxy 是 ES6 中提供的功能，其作用为：用于定义基本操作的自定义行为（如属性查找，赋值，枚举，函数调用等）。相对于`Object.defineProperty()`，其有以下特点：
 
 1. **Proxy 直接代理整个对象而非对象属性**，这样只需做一层代理就可以监听同级结构下的所有属性变化，包括新增属性和删除属性。
-2. Proxy 可以监听数组的变化。
+2. 可以监听数组的索引和 length 属性。
+
+------
+
+##### Object.defineProperty() 缺点
+
+在对一些属性进行操作时，使用这种方法无法拦截，比如通过下标方式修改数组数据或者给对象新增属性，这都不能触发组件的重新渲染，因为 Object.defineProperty 不能拦截到这些操作。更精确的来说，对于数组而言，大部分操作都是拦截不到的，只是 Vue 内部通过重写函数的方式解决了这个问题。
+
+在 Vue3.0 中已经不使用这种方式了，而是通过使用 Proxy 对对象进行代理，从而实现数据劫持。使用Proxy 的好处是它可以完美的监听到任何方式的数据改变，唯一的缺点是兼容性的问题，因为 Proxy 是 ES6 的语法。
 
 ------
 
@@ -877,7 +914,7 @@ methodsToPatch.forEach(function(method) {
 
 
 
-#### vue模版编译
+#### vue模版编译template->ast->render
 
 vue的模版编译过程主要如下：**template -> ast -> render函数**
 
@@ -887,7 +924,9 @@ vue 在模版编译版本的码中会执行 compileToFunctions 将template转化
 // 将模板编译为render函数const { render, staticRenderFns } = compileToFunctions(template,options//省略}, this)
 ```
 
-CompileToFunctions中的主要逻辑如下∶ **（1）调用parse方法将template转化为ast（抽象语法树）**
+CompileToFunctions中的主要逻辑如下∶ 
+
+**（1）调用parse方法将template转化为ast（抽象语法树）**
 
 ```javascript
 constast = parse(template.trim(), options)
@@ -904,7 +943,7 @@ AST元素节点总共三种类型：type为1表示普通元素、2为表达式�
 optimize(ast,options)
 ```
 
-这个过程主要分析出哪些是静态节点，给其打一个标记，为后续更新渲染可以直接跳过静态节点做优化
+这个过程主要**分析出哪些是静态节点**，给其打一个标记，为后续更新渲染可以直接跳过静态节点做优化
 
 深度遍历AST，查看每个子树的节点元素是否为静态节点或者静态节点根。如果为静态节点，他们生成的DOM永远不会改变，这对运行时模板更新起到了极大的优化作用。
 
@@ -918,9 +957,9 @@ generate将ast抽象语法树编译成 render字符串并将静态部分放到 s
 
 ------
 
-Vue.js通过编译将template 模板转换成渲染函数(render ) 
+**Vue.js通过编译将template 模板转换成渲染函数(render )** 
 
-`compile` 编译可以分成 `parse`、`optimize` 与 `generate` 三个阶段，最终需要得到render函数。
+`compile` 编译可以分成 **parse、optimize 与 generate** 三个阶段，最终需要得到render函数。
 
 ```
 <div :class="c" class="demo" v-if="isShow">
@@ -989,7 +1028,7 @@ Vue.js通过编译将template 模板转换成渲染函数(render )
 
 从本质上来说，Virtual Dom是一个JavaScript对象，通过对象的方式来表示DOM结构。将页面的状态抽象为JS对象的形式，配合不同的渲染工具，使跨平台渲染成为可能。通过事务处理机制，将多次DOM修改的结果一次性的更新到页面上，从而有效的减少页面渲染的次数，减少修改DOM的重绘重排次数，提高渲染性能。
 
-虚拟DOM是对DOM的抽象，这个对象是更加轻量级的对 DOM的描述。它设计的最初目的，就是更好的跨平台，比如Node.js就没有DOM，如果想实现SSR，那么一个方式就是借助虚拟DOM，因为虚拟DOM本身是js对象。 在代码渲染到页面之前，vue会把代码转换成一个对象（虚拟 DOM）。以对象的形式来描述真实DOM结构，最终渲染到页面。在每次数据发生变化前，虚拟DOM都会缓存一份，变化之时，现在的虚拟DOM会与缓存的虚拟DOM进行比较。在vue内部封装了diff算法，通过这个算法来进行比较，渲染时修改改变的变化，原先没有发生改变的通过原先的数据进行渲染。
+虚拟DOM是对DOM的抽象，这个对象是更加轻量级的对 DOM的描述。它设计的最初目的，就是更好的跨平台，比如Node.js就没有DOM，如果想实现SSR，那么一个方式就是借助虚拟DOM，因为虚拟DOM本身是js对象。 **在代码渲染到页面之前，vue会把代码转换成一个对象（虚拟 DOM）**。以对象的形式来描述真实DOM结构，最终渲染到页面。在每次数据发生变化前，虚拟DOM都会缓存一份，变化之时，现在的虚拟DOM会与缓存的虚拟DOM进行比较。在vue内部封装了diff算法，通过这个算法来进行比较，渲染时修改改变的变化，原先没有发生改变的通过原先的数据进行渲染。
 
 另外现代前端框架的一个基本要求就是无须手动操作DOM，一方面是因为手动操作DOM无法保证程序性能，多人协作的项目中如果review不严格，可能会有开发者写出性能较低的代码，另一方面更重要的是省略手动DOM操作可以大大提高开发效率。
 
@@ -1012,7 +1051,7 @@ Vue.js通过编译将template 模板转换成渲染函数(render )
 - **渲染函数**：渲染函数是用来生成Virtual DOM的。Vue推荐使用模板来构建我们的应用界面，在底层实现中Vue会将模板编译成渲染函数，当然我们也可以不写模板，直接写渲染函数，以获得更好的控制。
 
 - **VNode 虚拟节点**：它可以代表一个真实的 dom 节点。通过 createElement 方法能将 VNode 渲染成 dom 节点。简单地说，vnode可以理解成**节点描述对象**，它描述了应该怎样去创建真实的DOM节点。
-- **patch(也叫做patching算法)**：虚拟DOM最核心的部分，它可以将vnode渲染成真实的DOM，这个过程是对比新旧虚拟节点之间有哪些不同，然后根据对比结果找出需要更新的的节点进行更新。这点我们从单词含义就可以看出， patch本身就有补丁、修补的意思，其实际作用是在现有DOM上进行修改来实现更新视图的目的。Vue的Virtual DOM Patching算法是基于**[Snabbdom](https://github.com/snabbdom/snabbdom)**的实现，并在些基础上作了很多的调整和改进。
+- **patch(也叫做patching算法)**：虚拟DOM最核心的部分，它可以将vnode渲染成真实的DOM，这个过程是对比新旧虚拟节点之间有哪些不同，然后根据对比结果找出需要更新的的节点进行更新。这点我们从单词含义就可以看出， patch本身就有补丁、修补的意思，其实际作用是在现有DOM上进行修改来实现更新视图的目的。Vue的Virtual DOM Patching算法是基于**Snabbdom**的实现，并在些基础上作了很多的调整和改进。
 
 ------
 
@@ -1298,7 +1337,7 @@ inject: ['num']
 
 还可以这样写，这样写就可以访问父组件中的所有属性：
 
-```javascript
+```js
 provide() {
  return {
     app: this
@@ -1309,7 +1348,9 @@ data() {
     num: 1
   };
 }
+```
 
+```javascript
 inject: ['app']
 console.log(this.app.num)
 ```
@@ -1603,9 +1644,9 @@ export default {
 
 **computed特点：**
 
-1. 支持缓存，只有依赖数据发生改变，才会重新进行计算。
+1. **支持缓存**，只有依赖数据发生改变，才会重新进行计算。
 
-2. 不支持异步，当computed内有异步操作时无效，无法监听数据的变化。
+2. **不支持异步**，当computed内有异步操作时无效，无法监听数据的变化。
 
 3. computed 属性值会默认走缓存，计算属性是基于它们的响应式依赖进行缓存的，也就是基于data中声明过或者父组件传递的props中的数据通过计算得到的值。
 
@@ -1636,13 +1677,13 @@ var var vm = new Vue({
 
 侦听器watch是侦听一个特定的值，当该值变化时执行特定的函数。例如分页组件中，我们可以监听当前页码，当页码变化时执行对应的获取数据的函数。
 
-1. 不支持缓存，数据变，直接会触发相应的操作；
-2. watch支持异步；
-3. 监听的函数接收两个参数，第一个参数是最新的值；第二个参数是输入之前的值；
+1. **不支持缓存**，数据变，直接会触发相应的操作；
+2. watch**支持异步**；
+3. 监听的函数接收两个参数，**第一个参数是最新的值；第二个参数是输入之前的值**；
 4. 当一个属性发生变化时，需要执行对应的操作；一对多；
 5. 监听数据必须是data中声明过或者父组件传递过来的props中的数据，当数据变化时，触发其他操作，函数有两个参数，
    - immediate：控制是否第一次渲染时执行回调函数，如果为true组件加载立即触发回调函数执行; 
-   - deep: 深度监听，为了发现**对象内部值**的变化，监听器会一层层的往下遍历，给对象的所有属性都加上这个监听器，但是这样性能开销就会非常大，任何修改obj里面任何一个属性都会触发这个监听器里的 handler。复杂类型的数据时使用，例如数组中的对象内容的改变，注意监听数组的变动不需要这么做。
+   - deep: 深度监听，为了发现**对象内部值**的变化，监听器会一层层的往下遍历，给对象的所有属性都加上这个监听器，但是这样性能开销就会非常大，任何修改obj里面任何一个属性都会触发这个监听器里的 handler。复杂类型的数据时使用，例如数组中的对象内容的改变，**注意监听数组的变动不需要这么做**。
 
 deep可以进行优化：给对象的指定属性添加侦听，减少性能开销，这样vue.js会一层一层解析直到遇到属性a，才给a设置监听函数。
 
@@ -1650,7 +1691,7 @@ deep可以进行优化：给对象的指定属性添加侦听，减少性能开�
 
 **不应该使用箭头函数来定义 watcher 函数**，因为箭头函数没有 this，它的 this 会继承它的父级函数，但是它的父级函数是 window，导致箭头函数的 this 指向 window，而不是 Vue 实例。
 
-**deep无法监听到数组的变动和对象的新增**，参考vue数组变异,只有以响应式的方式触发才会被监听到
+**deep能监听数组的push操作，但是deep无法监听到数组的变动和对象的新增**，参考vue数组变异,只有以响应式的方式触发（$set）才会被监听到
 
 监听的对象也可以写成字符串的形式
 
@@ -1673,7 +1714,63 @@ deep可以进行优化：给对象的指定属性添加侦听，减少性能开�
 
 
 
-#### slot
+#### slot插槽
+
+插槽就是子组件中的提供给父组件使用的一个占位符，用<slot></slot> 表示，父组件可以在这个占位符中填充任何模板代码，如 HTML、组件等，填充的内容会替换子组件的<slot></slot>标签。
+
+在子组件中放一个占位符
+
+```html
+<template>
+    <div>
+        <div>使用slot分发内容</div>
+        <div>
+            <child>
+                <div style="margin-top: 30px">多云，最高气温34度，最低气温28度，微风</div>
+            </child>
+        </div>
+    </div>
+</template>
+<script>
+    import child from "./child.vue";
+    export default {
+        name: 'father',
+        components:{
+            child
+        }
+    }
+</script>
+```
+
+在父组件中给这个占位符填充内容
+
+```html
+<template>
+    <div>
+        <div>使用slot分发内容</div>
+        <div>
+            <child>
+                <div style="margin-top: 30px">多云，最高气温34度，最低气温28度，微风</div>
+            </child>
+        </div>
+    </div>
+</template>
+<script>
+    import child from "./child.vue";
+    export default {
+        name: 'father',
+        components:{
+            child
+        }
+    }
+</script>
+```
+
+展示效果：
+
+![img](前端图片/648753468549687987.png)
+
+![img](前端图片/20200412203018923.png)
 
 slot又名插槽，是Vue的内容分发机制，组件内部的模板引擎使用slot元素作为承载分发内容的出口。插槽slot是子组件的一个模板标签元素，而这一个标签元素是否显示，以及怎么显示是由父组件决定的。slot又分三类，默认插槽，具名插槽和作用域插槽。
 
@@ -1682,6 +1779,93 @@ slot又名插槽，是Vue的内容分发机制，组件内部的模板引擎使�
 - 作用域插槽：默认插槽、具名插槽的一个变体，可以是匿名插槽，也可以是具名插槽，该插槽的不同点是在子组件渲染作用域插槽时，可以将子组件内部的数据传递给父组件，让父组件根据子组件的传递过来的数据决定如何渲染该插槽。
 
 实现原理：当子组件vm实例化时，获取到父组件传入的slot标签的内容，存放在`vm.$slot`中，默认插槽为`vm.$slot.default`，具名插槽为`vm.$slot.xxx`，xxx 为插槽名，当组件执行渲染函数时候，遇到slot标签，使用`$slot`中的内容进行替换，此时可以为插槽传递数据，若存在数据，则可称该插槽为作用域插槽。
+
+------
+
+##### 具名插槽 
+
+有时候，也许子组件内的slot不止一个，那么我们如何在父组件中，精确的在想要的位置，插入对应的内容呢？ 给插槽命一个名即可，即添加name属性。
+
+```html
+//子组件 ： (假设名为：ebutton)
+<template>
+  <div class= 'button'>
+      <button>  </button>
+      <slot name= 'one'> 这就是默认值1</slot>
+      <slot name='two'> 这就是默认值2 </slot>
+      <slot name='three'> 这就是默认值3 </slot>
+  </div>
+</template>
+```
+
+父组件通过v-slot : name 的方式添加内容：
+
+```html
+//父组件：（引用子组件 ebutton）
+<template>
+  <div class= 'app'>
+     <ebutton> 
+        <template v-slot:one> 这是插入到one插槽的内容 </template>
+        <template v-slot:two> 这是插入到two插槽的内容 </template>
+        <template v-slot:three> 这是插入到three插槽的内容 </template>
+     </ebutton>
+  </div>
+</template>
+```
+
+当然 vue 为了方便，书写 v-slot:one 的形式时，可以简写为 #one
+
+------
+
+##### 作用域插槽
+
+通过slot 我们可以在父组件为子组件添加内容，通过给slot命名的方式，我们可以添加不止一个位置的内容。但是我们添加的数据都是父组件内的。上面我们说过不能直接使用子组件内的数据，但是我们是否有其他的方法，让我们能够**使用子组件的数据**呢？ 其实我们也可以使用v-slot的方式：
+
+```html
+//子组件 ： (假设名为：ebutton)
+<template>
+  <div class= 'button'>
+      <button>  </button>
+      <slot name= 'one' :value1='child1'> 这就是默认值1</slot>    //绑定child1的数据
+      <slot :value2='child2'> 这就是默认值2 </slot>  //绑定child2的数据，这里我没有命名slot
+  </div>           
+</template>
+
+new Vue({
+  el:'.button',
+  data:{
+    child1:'数据1',
+    child2:'数据2'
+  }
+})
+```
+
+```html
+//父组件：（引用子组件 ebutton）
+<template>
+  <div class= 'app'>
+     <ebutton> 
+
+        // 通过v-slot的语法 将插槽 one 的值赋值给slotonevalue 
+        <template v-slot:one = 'slotonevalue'>  
+           {{ slotonevalue.value1 }}
+        </template>
+
+        //同上，由于子组件没有给slot命名，默认值就为default
+        <template v-slot:default = 'slottwovalue'> 
+           {{ slottwovalue.value2 }}
+        </template>
+
+     </ebutton>
+  </div>
+</template>
+```
+
+总结来说就是：
+
+- 首先在子组件的slot上动态绑定一个值( :key='value')
+- 然后在父组件通过v-slot : name = ‘values ’的方式将这个值赋值给 values
+- 最后通过{{ values.key }}的方式获取数据
 
 
 
@@ -2671,7 +2855,7 @@ SSR的优势：
 
 SSR的缺点：
 
-- 开发条件会受到限制，服务器端渲染只支持beforeCreate和created两个钩子；
+- 开发条件会受到限制，**服务器端渲染只支持beforeCreate和created两个钩子**；
 - 当需要一些外部扩展库时需要特殊处理，服务端渲染应用程序也需要处于Node.js的运行环境；
 - 更多的服务端负载。
 
@@ -3013,7 +3197,7 @@ LRU 缓存策略∶ 从内存中找出最久未使用的数据并置换新的数
 </template>
 ```
 
-如果条件出现在循环内部，可通过计算属性 computed 提前过滤掉那些不需要显示的项：
+如果条件出现在循环内部，可通过**计算属性 computed** 提前过滤掉那些不需要显示的项：
 
 ```html
 <template>
@@ -3058,30 +3242,34 @@ export default {
 ##### vue常用的修饰符
 
 **.stop**：等同于JavaScript中的event.stopPropagation()，防止事件冒泡；
+
 **.prevent**：等同于JavaScript中的event.preventDefault()，防止执行预设的行为（如果事件可取消，则取消该事件，而不停止事件的进一步传播）；
+
 **.capture**：与事件冒泡的方向相反，事件捕获由外到内；
+
 **.self**：只会触发自己范围内的事件，不包含子元素；
+
 **.once**：只会触发一次。
 
 ------
 
-##### vue携带token
+##### vue中的token验证
 
 在前后端完全分离的情况下，Vue项目中实现token验证大致思路如下：
 
-1、第一次登录的时候，前端调后端的登陆接口，发送用户名和密码
+1、第一次登录的时候，前端调后端的登陆接口，发送用户名和密码。
 
-2、后端收到请求，验证用户名和密码，验证成功，就给前端返回一个token
+2、后端收到请求，验证用户名和密码，验证成功，就给前端返回一个token。
 
-3、前端拿到token，将token存储到localStorage和vuex中，并跳转路由页面
+3、前端拿到token，将token**存储到localStorage和vuex**中，并跳转路由页面。
 
-4、前端每次跳转路由，就判断 localStroage 中有无 token ，没有就跳转到登录页面，有则跳转到对应路由页面
+4、前端每次跳转路由，就判断 localStroage 中有无 token ，没有就跳转到登录页面，有则跳转到对应路由页面。
 
-5、每次调后端接口，都要在请求头中加token
+5、每次调后端接口，都要在请求头中加token。
 
-6、后端判断请求头中有无token，有token，就拿到token并验证token，验证成功就返回数据，验证失败（例如：token过期）就返回401，请求头中没有token也返回401
+6、后端判断请求头中有无token。有token，就拿到token并验证token，验证成功就返回数据，验证失败（例如：token过期）就返回401（请求身份验证），请求头中没有token也返回401（请求身份验证）。
 
-7、如果前端拿到状态码为401，就清除token信息并跳转到登录页面。调取登录接口成功，会在回调函数中将token存储到localStorage和vuex中
+7、如果前端拿到状态码为401（请求身份验证），就清除token信息并跳转到登录页面。调取登录接口成功，会在回调函数中将token存储到localStorage和vuex中。
 
 ------
 
@@ -3138,9 +3326,9 @@ export default {
 
 JavaScript 的加载、解析与执行会阻塞文档的解析，也就是说，在构建 DOM 时，HTML 解析器若遇到了 JavaScript，那么它会暂停文档的解析，将控制权移交给 JavaScript 引擎，等 JavaScript 引擎运行完毕，浏览器再从中断的地方恢复继续解析文档。也就是说，如果想要首屏渲染的越快，就越不应该在首屏就加载 JS 文件，这也是都建议将 script 标签放在 body 标签底部的原因。当然在当下，并不是说 script 标签必须放在底部，因为你可以给 script 标签添加 defer 或者 async 属性。
 
-- 按需加载组件，不一次性加载所有组件
+- **按需加载**组件，不一次性加载所有组件
 
-- 减少打包js，如果打包后的js文件过大，会阻塞加载。如下：
+- 减少打包js体积，如果打包后的js文件过大，会阻塞加载。如下：
       A、在index.html文件中：
       <script src="/static/common/js/vue.min.js"></script>
   ​    B、在vue.config.js文件中配置:
@@ -3163,22 +3351,23 @@ Webkit 和 Firefox 都做了这个优化，当执行 JavaScript 脚本时，另�
 
 ##### 数组key不建议用index
 
-```
 （1）key的作用主要是为了高效的更新虚拟DOM
+
 （2）当以index为key值时，如果数组长度发生变化，会导致key的变化，比如删除其中某一项，那么index会相应变化。
-所以用index作为key和不加index没有什么区别，都不能提升性能。一般用每项数据的唯一值来作为key，就算数组长度变化，也不会影响到这个key
-```
+
+所以**用index作为key和不加index没有什么区别**，都不能提升性能。一般用每项数据的唯一值来作为key，就算数组长度变化，也不会影响到这个key
 
 ------
 
 ##### **npm run dev**
 
-```
 （1）npm run dev是执行配置在package.json中的脚本
+
 （2）调用了webpack配置文件
+
 （3）配置文件中调用了main.js
+
 （4）main.js用到了一个html元素#app，引用路由等开始vue的模板编译
-```
 
 ------
 
