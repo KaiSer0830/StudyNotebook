@@ -968,8 +968,8 @@ JSON 是一种基于文本的轻量级的数据交换格式。它可以被任何
 
 在 js 中提供了两个函数来实现 js 数据结构和 JSON 格式的转换处理，
 
-- JSON.stringify 函数，通过传入一个符合 JSON 格式的数据结构，将其转换为一个 JSON 字符串。如果传入的数据结构不符合 JSON 格式，那么在序列化的时候会对这些值进行对应的特殊处理，使其符合规范。在前端向后端发送数据时，可以调用这个函数将数据对象转化为 JSON 格式的字符串。
-- JSON.parse() 函数，这个函数用来将 JSON 格式的字符串转换为一个 js 数据结构，如果传入的字符串不是标准的 JSON 格式的字符串的话，将会抛出错误。当从后端接收到 JSON 格式的字符串时，可以通过这个方法来将其解析为一个 js 数据结构，以此来进行数据的访问。
+- **JSON.stringify** 函数，通过传入一个符合 JSON 格式的数据结构，将其转换为一个 JSON 字符串。如果传入的数据结构不符合 JSON 格式，那么在序列化的时候会对这些值进行对应的特殊处理，使其符合规范。在前端向后端发送数据时，可以调用这个函数将数据对象转化为 JSON 格式的字符串。
+- **JSON.parse()** 函数，这个函数用来将 JSON 格式的字符串转换为一个 js 数据结构，如果传入的字符串不是标准的 JSON 格式的字符串的话，将会抛出错误。当从后端接收到 JSON 格式的字符串时，可以通过这个方法来将其解析为一个 js 数据结构，以此来进行数据的访问。
 
 
 
@@ -1796,7 +1796,7 @@ console.log(result)
 
 ![image-20220402224940134](前端图片/image-20220402224940134.png)
 
-所以，async 函数返回的是一个 Promise 对象。async 函数（包含函数语句、函数表达式、Lambda表达式）会返回一个 Promise 对象，如果在函数中 `return` 一个直接量，async 会把这个直接量通过 `Promise.resolve()` 封装成 Promise 对象。
+所以，**async 函数返回的是一个 Promise 对象**。async 函数（包含函数语句、函数表达式、Lambda表达式）会返回一个 Promise 对象，如果在函数中 `return` 一个直接量，async 会把这个直接量通过 `Promise.resolve()` 封装成 Promise 对象。
 
 async 函数返回的是一个 Promise 对象，所以在最外层不能用 await 获取其返回值的情况下，当然应该用原来的方式：`then()` 链来处理这个 Promise 对象，就像这样：
 
@@ -2017,7 +2017,7 @@ res.value.then(res => gen.next(res));12345678910
 
 ##### 浅拷贝
 
-扩展运算符：
+###### 扩展运算符
 
 ```javascript
 let outObj = {
@@ -2028,7 +2028,7 @@ newObj.inObj.a = 2
 console.log(outObj) // {inObj: {a: 2, b: 2}}
 ```
 
-Object.assign():
+###### Object.assign()
 
 ```javascript
 let outObj = {
@@ -2041,12 +2041,12 @@ console.log(outObj) // {inObj: {a: 2, b: 2}}
 
 可以看到，两者都是浅拷贝。
 
-- Object.assign()方法接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。它会修改了一个对象，因此会触发 ES6 setter。
+- Object.assign()方法接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。它会修改了一个对象，因此会触发 ES6 setter。**注意： 当对象只有一级属性为深拷贝；当对象中有多级属性时，二级属性后就是浅拷贝。**上述是因为操作的多级属性。
 - 扩展操作符（…）使用它时，数组或对象中的每一个值都会被拷贝到一个新的数组或对象中。它不复制继承的属性或类的属性，但是它会复制ES6的 symbols 属性。
 
 ##### 对象深拷贝的方法（3种）
 
-1.使用递归的方式实现深拷贝
+###### 递归的方式实现深拷贝
 
 ```js
 function deepClone(obj){
@@ -2064,7 +2064,7 @@ function deepClone(obj){
 }
 ```
 
-2.通过JSON对象实现深拷贝
+###### JSON对象实现深拷贝
 
 ```js
 function deepClone2(obj) {
@@ -2077,23 +2077,21 @@ function deepClone2(obj) {
 
 ![](前端图片/903119-20200303223807250-452428697.png)
 
-3.通过Object.assign()拷贝
+###### Object.assign()拷贝
 
-**注意： 当对象只有一级属性为深拷贝；**
-
-**当对象中有多级属性时，二级属性后就是浅拷贝**
+**注意： 当对象只有一级属性为深拷贝；当对象中有多级属性时，二级属性后就是浅拷贝。**
 
 ![](前端图片/903119-20200303224117804-1770050647.png)
 
 ##### 数组深拷贝的方法（2种）
 
-1.concat(arr1, arr2,....)
+###### concat(arr1, arr2,....)
 
 **注意：当数组中的元素均为一维是深拷贝，数组中元素一维以上是值的引用**
 
 ![](前端图片/903119-20200304213232131-2117436364.png)
 
-2.slice(idx1, idx2)
+###### slice(idx1, idx2)
 
 参数可以省略
 
@@ -2127,9 +2125,9 @@ Animal.prototype.eat = function(food) {
 };
 ```
 
-**1、原型链继承**
+###### 原型链继承
 
-**核心：** 将父类的实例作为子类的原型
+**核心：** **将父类的实例作为子类的原型**
 
 ```js
 function Cat(){ 
@@ -2155,13 +2153,41 @@ console.log(cat instanceof Cat); //true
 缺点：
 
 1. 要想为子类新增属性和方法，必须要在`new Animal()`这样的语句之后执行，不能放到构造器中
+
 2. 无法实现多继承
-3. 来自原型对象的所有属性被所有实例共享（来自原型对象的引用属性是所有实例共享的）（详细请看附录代码： 示例1）
+
+3. 来自原型对象的所有属性被所有实例共享（来自原型对象的引用属性是所有实例共享的）
+
+   ```js
+     function Parent1() {
+       this.name = 'parent1';
+       this.play = [1, 2, 3]
+     }
+     function Child1() {
+       this.type = 'child2';
+     }
+     Child1.prototype = new Parent1();
+     console.log(new Child1());
+   ```
+
+   上面的代码看似没有问题，虽然父类的方法和属性都能够访问，但其实有一个潜在的问题，我再举个例子来说明这个问题。
+
+   ```js
+     let s1 = new Child1();
+     let s2 = new Child1();
+     s1.play.push(4);
+     console.log(s1.play, s2.play);
+   ```
+
+   输出结果两个[1, 2, 3, 4]，原因很简单，因为两个实例使用的是同一个原型对象。它们的内存空间是共享的，当一个发生变化的时候，另外一个也随之进行了变化，这就是使用原型链继承方式的一个缺点。
+
 4. 创建子类实例时，无法向父类构造函数传参
 
-**2、构造继承**
+------
 
-**核心：**使用父类的构造函数来增强子类实例，等于是复制父类的实例属性给子类（没用到原型）
+###### 构造继承
+
+**核心：**使用父类的构造函数来增强子类实例，等于是**复制父类的实例属性给子类（没用到原型）**
 
 ```
 function Cat(name){
@@ -2186,66 +2212,33 @@ console.log(cat instanceof Cat); // true
 缺点：
 
 1. 实例并不是父类的实例，只是子类的实例
+
 2. 只能继承父类的实例属性和方法，不能继承原型属性/方法
+
+   ```js 
+     function Parent1(){
+       this.name = 'parent1';
+     }
+    
+     Parent1.prototype.getName = function () {
+       return this.name;
+     }
+    
+     function Child1(){
+       Parent1.call(this);
+       this.type = 'child1'
+     }
+    
+     let child = new Child1();
+     console.log(child);  // 没问题
+     console.log(child.getName());  // 会报错
+   ```
+
 3. 无法实现函数复用，每个子类都有父类实例函数的副本，影响性能
 
-**3、实例继承**
+------
 
-**核心：**为父类实例添加新特性，作为子类实例返回
-
-```
-function Cat(name){
-  var instance = new Animal();
-  instance.name = name || 'Tom';
-  return instance;
-}
-
-// Test Code
-var cat = new Cat();
-console.log(cat.name);
-console.log(cat.sleep());
-console.log(cat instanceof Animal); // true
-console.log(cat instanceof Cat); // false
-```
-
-特点：
-
-1. 不限制调用方式，不管是`new 子类()`还是`子类()`,返回的对象具有相同的效果
-
-缺点：
-
-1. 实例是父类的实例，不是子类的实例
-2. 不支持多继承
-
-**4、拷贝继承**
-
-```
-function Cat(name){
-  var animal = new Animal();
-  for(var p in animal){
-    Cat.prototype[p] = animal[p];
-  }  // 2020年10月10日21点36分：感谢 @baclt 的指出，如下实现修改了原型对象，会导致单个实例修改name，会影响所有实例的name值
-  // Cat.prototype.name = name || 'Tom'; 错误的语句，下一句为正确的实现  this.name = name || 'Tom';
-}
-
-// Test Code
-var cat = new Cat();
-console.log(cat.name);
-console.log(cat.sleep());
-console.log(cat instanceof Animal); // false
-console.log(cat instanceof Cat); // true
-```
-
-特点：
-
-1. 支持多继承
-
-缺点：
-
-1. 效率较低，内存占用高（因为要拷贝父类的属性）
-2. 无法获取父类不可枚举的方法（不可枚举方法，不能使用for in 访问到）
-
-**5、组合继承**
+###### 组合继承
 
 **核心：**通过调用父类构造，继承父类的属性并保留传参的优点，然后通过将父类实例作为子类原型，实现函数复用
 
@@ -2275,9 +2268,104 @@ console.log(cat instanceof Cat); // true
 
 1. 调用了两次父类构造函数，生成了两份实例（子类实例将子类原型上的那份屏蔽了）
 
+   ```js
+     function Parent3 () {
+       this.name = 'parent3';
+       this.play = [1, 2, 3];
+     }
+    
+     Parent3.prototype.getName = function () {
+       return this.name;
+     }
+     function Child3() {
+       // 第二次调用 Parent3()
+       Parent3.call(this);
+       this.type = 'child3';
+     }
+    
+     // 第一次调用 Parent3()
+     Child3.prototype = new Parent3();
+     // 手动挂上构造器，指向自己的构造函数
+     Child3.prototype.constructor = Child3;
+     var s3 = new Child3();
+     var s4 = new Child3();
+     s3.play.push(4);
+     console.log(s3.play, s4.play);  // 不互相影响
+     console.log(s3.getName()); // 正常输出'parent3'
+     console.log(s4.getName()); // 正常输出'parent3'
+   ```
+
+   执行上面的代码，可以看到控制台的输出结果：
+
+   ![img](前端图片/20210915220842269.png)
+
+通过注释我们可以看到 Parent3 执行了两次，第一次是改变Child3 的 prototype 的时候，第二次是通过 call 方法调用 Parent3 的时候，那么 Parent3 多构造一次就多进行了一次性能开销，这是我们不愿看到的。
+
 推荐指数：★★★★（仅仅多消耗了一点内存）
 
-**6、寄生组合继承**
+------
+
+###### 实例继承
+
+**核心：为父类实例添加新特性，作为子类实例返回**
+
+```
+function Cat(name){
+  var instance = new Animal();
+  instance.name = name || 'Tom';
+  return instance;
+}
+
+// Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.sleep());
+console.log(cat instanceof Animal); // true
+console.log(cat instanceof Cat); // false
+```
+
+特点：
+
+1. 不限制调用方式，不管是`new 子类()`还是`子类()`,返回的对象具有相同的效果
+
+缺点：
+
+1. 实例是父类的实例，不是子类的实例
+2. 不支持多继承
+
+------
+
+###### 拷贝继承
+
+```
+function Cat(name){
+  var animal = new Animal();
+  for(var p in animal){
+    Cat.prototype[p] = animal[p];
+  }  // 2020年10月10日21点36分：感谢 @baclt 的指出，如下实现修改了原型对象，会导致单个实例修改name，会影响所有实例的name值
+  // Cat.prototype.name = name || 'Tom'; 错误的语句，下一句为正确的实现  this.name = name || 'Tom';
+}
+
+// Test Code
+var cat = new Cat();
+console.log(cat.name);
+console.log(cat.sleep());
+console.log(cat instanceof Animal); // false
+console.log(cat instanceof Cat); // true
+```
+
+特点：
+
+1. 支持多继承
+
+缺点：
+
+1. 效率较低，内存占用高（因为要拷贝父类的属性）
+2. 无法获取父类不可枚举的方法（不可枚举方法，不能使用for in 访问到）
+
+------
+
+###### 寄生组合继承
 
 **核心：**通过寄生方式，砍掉父类的实例属性，这样，在调用两次父类的构造的时候，就不会初始化两次实例方法/属性，避免的组合继承的缺点
 
@@ -2849,10 +2937,10 @@ var sum_curry =function(a){
 
 **DOM2 级事件模型**，在该事件模型中，一次事件共有三个过程，第一个过程是事件捕获阶段。捕获指的是事件从 document 一直向下传播到目标元素，依次检查经过的节点是否绑定了事件监听函数，如果有则执行。后面两个阶段和 IE 事件模型的两个阶段相同。这种事件模型，事件绑定的函数是addEventListener，其中第三个参数可以指定事件是否在捕获阶段执行。
 
+------
 
 
-
-##### **事件冒泡**
+##### 事件冒泡
 
 当一个元素接收到事件的时候 会把他接收到的事件传给自己的父级，一直到window，过程就像冒泡泡 。如果在某一层想要中止冒泡，使用 event.stopPropagation() 。
 但是当大量标签有大量事件的时候不可能为每个元素都加上事件，（事件绑定占用事件，浏览器要跟踪每个事件，占用更多内存。而且并不是所有事件都会被用户使用到）。所以需要事件委托来解决这个问题。
@@ -2862,9 +2950,9 @@ var sum_curry =function(a){
 - 普通浏览器使用：event.stopPropagation()
 - IE浏览器使用：event.cancelBubble = true;
 
+------
 
-
-##### **事件代理**
+##### 事件代理
 
 事件代理又称**事件委托**。
 
@@ -2940,7 +3028,7 @@ addEventListener(event, function, useCapture);
 document.getElementById("myDiv").addEventListener("click", myFunction, true);
 ```
 
-
+------
 
 ##### 事件触发过程
 
@@ -3125,7 +3213,7 @@ first();
 
 ![](前端图片/image-20220331195507463.png)
 
-```js
+```html
 <div class="container">
      <img src="loading.gif"  data-src="pic.png">
      <img src="loading.gif"  data-src="pic.png">
@@ -3528,7 +3616,7 @@ math.add()与math模块加载不是同步的，浏览器不会发生假死。所
 
 **简介**
 
-抽象语法树（abstract syntax code，AST）是源代码的抽象语法结构的树状表示，树上的每个节点都表示源代码中的一种结构，这所以说是抽象的，是因为抽象语法树并不会表示出真实语法出现的每一个细节，比如说，嵌套括号被隐含在树的结构中，并没有以节点的形式呈现。抽象语法树并不依赖于源语言的语法，也就是说语法分析阶段所采用的上下文无文文法，因为在写文法时，经常会对文法进行等价的转换（消除左递归，回溯，二义性等），这样会给文法分析引入一些多余的成分，对后续阶段造成不利影响，甚至会使合个阶段变得混乱。因些，很多编译器经常要独立地构造语法分析树，为前端，后端建立一个清晰的接口。
+抽象语法树（abstract syntax tree，AST）是源代码的抽象语法结构的树状表示，树上的每个节点都表示源代码中的一种结构，这所以说是抽象的，是因为抽象语法树并不会表示出真实语法出现的每一个细节，比如说，嵌套括号被隐含在树的结构中，并没有以节点的形式呈现。抽象语法树并不依赖于源语言的语法，也就是说语法分析阶段所采用的上下文无文文法，因为在写文法时，经常会对文法进行等价的转换（消除左递归，回溯，二义性等），这样会给文法分析引入一些多余的成分，对后续阶段造成不利影响，甚至会使合个阶段变得混乱。因些，很多编译器经常要独立地构造语法分析树，为前端，后端建立一个清晰的接口。
 
 抽象语法树在很多领域有广泛的应用，比如浏览器，智能编辑器，编译器。
 
@@ -3903,7 +3991,7 @@ function flatten(arr) {
 
 ##### 暂时性死区
 
-当程序的控制流程在新的作用域（module function 或 block作用域）进行实例化时，在此作用域中用let/const声明的变量会先在作用域中被创建出来，但因此时还未进行词法绑定，所以是不能被访问的，如果访问就会抛出错误。因此，在这运行流程进入作用域创建变量，到变量可以被访问之间的这一段时间，就称之为暂时死区。
+当程序的控制流程在新的作用域（module function 或 block作用域）进行实例化时，在此作用域中用let/const声明的变量会先在作用域中被创建出来，但因此时还未进行词法绑定，所以是不能被访问的，如果访问就会抛出错误。因此，**在这运行流程进入作用域创建变量，到变量可以被访问之间的这一段时间，就称之为暂时死区**。
 
 造成该错误的主要原因是：ES6新增的let、const关键字声明的变量会产生块级作用域，如果变量在当前作用域中被创建之前被创建出来，由于此时还未完成语法绑定，如果我们访问或使用该变量，就会产生暂时性死区的问题，由此我们可以得知，从变量的创建到语法绑定之间这一段空间，我们就可以理解为‘暂时性死区’。
 
@@ -4084,7 +4172,7 @@ onkeyup：某个键盘按键被松开
 
 onkeypress：某个键盘按键被按下并松开
 
- onchange：域的内容被改变
+onchange：域的内容被改变
 
 onselect：文本被选中
 
@@ -4226,14 +4314,12 @@ dragend：事件主体是被拖放元素，在整个拖放操作结束时触发
 ```javascript
 let n1 = 0.1, n2 = 0.2
 console.log(n1 + n2)  // 0.30000000000000004
-复制代码
 ```
 
 这里得到的不是想要的结果，要想等于0.3，就要把它进行转化：
 
 ```javascript
 (n1 + n2).toFixed(2) // 注意，toFixed为四舍五入
-复制代码
 ```
 
 `toFixed(num)` 方法可把 Number 四舍五入为指定小数位数的数字。那为什么会出现这样的结果呢？
@@ -4301,7 +4387,7 @@ console.log(numberepsilon(0.1 + 0.2, 0.3)); // true
 
 ##### 尾调用
 
-尾调用指的是函数的最后一步调用另一个函数。代码执行是基于执行栈的，所以当在一个函数里调用另一个函数时，会保留当前的执行上下文，然后再新建另外一个执行上下文加入栈中。使用尾调用的话，因为已经是函数的最后一步，所以这时可以不必再保留当前的执行上下文，从而节省了内存，这就是尾调用优化。但是 ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。
+尾调用指的是**函数的最后一步调用另一个函数**。代码执行是基于执行栈的，所以当在一个函数里调用另一个函数时，会保留当前的执行上下文，然后再新建另外一个执行上下文加入栈中。使用尾调用的话，因为已经是函数的最后一步，所以这时可以不必再保留当前的执行上下文，从而节省了内存，这就是**尾调用优化**。但是 ES6 的尾调用优化只在严格模式下开启，正常模式是无效的。
 
 ------
 
