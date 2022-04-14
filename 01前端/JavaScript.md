@@ -3656,11 +3656,13 @@ Ajax = 异步 JavaScript 和XML。
 　　通过在后台与服务器进行少量数据交换，Ajax可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行更新。
 　　传统的网页（不使用 Ajax）如果需要更新内容，必需重载整个网页面。
 
+![img](前端图片/ae9c1d682751417bb5e2deef085a61b8.png)
+
 **二、Ajax工作原理**
 
 Ajax的工作原理相当于在用户和服务器之间加了—个中间层(AJAX引擎),使用户操作与服务器响应异步化。并不是所有的用户请求都提交给服务器,像—些数据验证和数据处理等都交给Ajax引擎自己来做, 只有确定需要从服务器读取新数据时再由Ajax引擎代为向服务器提交请求。
 
-Ajax（Asynchronous javascript and xml），实现了客户端与服务器进行数据交流过程。使用技术的好处是：不用页面刷新，并且在等待页面传输数据的同时可以进行其他操作。
+Ajax（Asynchronous javascript and xml），实现了客户端与服务器进行数据交流过程。使用技术的好处是：**不用页面刷新，并且在等待页面传输数据的同时可以进行其他操作**。
 
 **三、Ajax的使用及实现步骤**
 
@@ -3697,6 +3699,7 @@ if (window.XMLHttpRequest) { //非IE
 }
 
 //一般是有两种请求方式，一个是GET一个是POST，需要设置具体使用哪个请求方式
+//async：布尔值，表示是否异步执行操作，默认为true
 xmlhttp.open('method',URL,async);
 
 //当前为异步请求的时候，需要写一个回调函数，XMLHttpRequest对象有一个属性，这个属性要返回一个匿名的方法，所谓的回调函数，就是请求在后台处理完，再返回到前台所实现的功能。
@@ -3721,7 +3724,10 @@ xmlhttp.onreadystatechange = function (ev2) {
 }
 
 //发送请求
-xmlhttp.send();
+//body: 在 XHR 请求中要发送的数据体，如果不传递数据则为 null 如果使用GET请求发送数据的时候，需要注意如下：
+//将请求数据添加到open()方法中的url地址中
+//发送请求数据中的send()方法中参数设置为null
+xmlhttp.send([body]);
 ```
 
 ------
@@ -4395,3 +4401,48 @@ console.log(numberepsilon(0.1 + 0.2, 0.3)); // true
 
 - 并发是宏观概念，我分别有任务 A 和任务 B，在一段时间内通过任务间的切换完成了这两个任务，这种情况就可以称之为并发。
 - 并行是微观概念，假设 CPU 中存在两个核心，那么我就可以同时完成任务 A、B。同时完成多个任务的情况就可以称之为并行。
+
+------
+
+##### JS字符串搜索
+
+**Indexof( ) 与 lastIndexOf( )**
+
+- indexOf() 方法可返回某个指定的字符串值在字符串中首次出现的位置，没有找到返回 -1。
+- lastIndexOf() 方法可返回一个指定的字符串值最后出现的位置，如果指定第二个参数 start，则在一个字符串中的指定位置从后向前搜索。
+
+```
+var str="Hello world, welcome to the universe.";
+var n=str.indexOf("welcome"); // 13
+
+var str="I am from runoob，welcome to runoob site.";
+var n=str.lastIndexOf("runoob"); // 28
+```
+
+**search( )**
+
+用于检索字符串中指定的子字符串开始的位置，或检索与正则表达式相匹配的子字符串所在的位置。如果没有找到则返回-1,用法与indexOf相似。
+
+	var str='helloWorld'
+	str.search('W')		//5
+	str.search(/llo/)	//2
+
+**search( )与Indexof( )的区别**
+
+**search()的参数必须是正则表达式，而indexOf()的参数只是普通字符串。indexOf()是比search()更加底层的方法。**
+
+如果只是对一个具体字符串来查找，那么使用indexOf()的系统资源消耗更小，效率更高；如果是查找具有某些特征的字符串（比如查找以a开头，后面是数字的字符串），那么indexOf()就无能为力，必须要使用正则表达式和search()方法了。
+
+很多时候用indexOf()不是为了真的想知道子字符串的位置，而是想知道长字符串中没有包含这个子字符串。如果返回索引值是-1，那么说明没有：不等于-1，那么就是有。
+
+所以一般情况下indexOf比search更省资源。
+
+**includes( )**
+
+- includes() 方法用于判断字符串是否包含指定的子字符串。找到返回true
+
+```
+var str = "Hello world, welcome to the Runoob。";
+var n = str.includes("world");   // true
+```
+
