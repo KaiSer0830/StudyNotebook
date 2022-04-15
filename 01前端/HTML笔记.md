@@ -173,7 +173,7 @@ Doctype声明于文档最前面，告诉浏览器以何种方式来渲染页面�
 
 DOCTYPE不存在或格式不正确会导致文档以**兼容模式**呈现！
 
-DOCTYPE声明是不区分大小写的。
+DOCTYPE声明是**不区分大小写**的。
 
 **用法：**
 
@@ -251,11 +251,11 @@ allow-top-navigation
 
 **缺点：**
 
-会阻塞主页面的onload事件。window 的 onload 事件需要在所有 iframe 加载完毕后（包含里面的元素）才会触发。在 Safari 和 Chrome 里，通过 JavaScript 动态设置 iframe 的 SRC 可以避免这种阻塞情况。
+**会阻塞主页面的onload事件**。window 的 onload 事件需要在所有 iframe 加载完毕后（包含里面的元素）才会触发。在 Safari 和 Chrome 里，通过 JavaScript 动态设置 iframe 的 SRC 可以避免这种阻塞情况。
 
-搜索引擎无法解读这种页面，不利于SEO。
+**搜索引擎无法解读这种页面**，不利于SEO。
 
-iframe和主页面共享连接池，而浏览器对相同区域有限制所以会影响性能。浏览器只能开少量的连接到 web 服务器。这意味着 iframe 在加载资源时可能用光了所有的可用连接，从而阻塞了主页面资源的加载。一种解决办法是，在主页面上重要的元素加载完毕后，再动态设置 iframe 的 SRC。
+iframe和主页面共享连接池，而浏览器对相同区域有限制所以会影响性能。浏览器只能开少量的连接到 web 服务器。这意味着 **iframe 在加载资源时可能用光了所有的可用连接**，从而阻塞了主页面资源的加载。一种解决办法是，在主页面上重要的元素加载完毕后，再动态设置 iframe 的 SRC。
 
 
 
@@ -366,7 +366,7 @@ meta标签属性用法分成两大类：
 
 #### 排序标签
 
-##### 有序标签ol
+##### 有序标签ol(ordered lists)
 
 ```html
 <body>
@@ -398,7 +398,7 @@ meta标签属性用法分成两大类：
 </body>
 ```
 
-##### 无序标签ul
+##### 无序标签ul(unordered list)
 
 ```html
 <body>
@@ -592,7 +592,7 @@ meta标签属性用法分成两大类：
 
 #### DOM操作
 
-##### DOM 节点的获取
+##### DOM 节点的获取(4种)
 
 DOM 节点的获取的API及使用：
 
@@ -652,7 +652,7 @@ container.appendChild(targetSpan)
 
 **删除指定的 DOM 节点，** 已知的 HTML 结构如下：
 
-```javascript
+```html
 <html>
   <head>
     <title>DEMO</title>
@@ -679,7 +679,14 @@ container.removeChild(targetNode)
 或者通过子节点数组来完成删除：
 
 ```javascript
-// 获取目标元素的父元素var container = document.getElementById('container')// 获取目标元素var targetNode = container.childNodes[1]// 删除目标元素container.removeChild(targetNode)
+// 获取目标元素的父元素
+var container = document.getElementById('container')
+
+// 获取目标元素
+var targetNode = container.childNodes[1]
+
+// 删除目标元素
+container.removeChild(targetNode)
 ```
 
 ------
@@ -690,7 +697,7 @@ container.removeChild(targetNode)
 
 **将指定的两个 DOM 元素交换位置，** 已知的 HTML 结构如下：
 
-```javascript
+```html
 <html>
   <head>
     <title>DEMO</title>
@@ -704,7 +711,7 @@ container.removeChild(targetNode)
 </html>
 ```
 
-现在需要调换 title 和 content 的位置，可以考虑 insertBefore 或者 appendChild：
+现在需要调换 title 和 content 的位置，可以考虑 **insertBefore** 或者 appendChild：
 
 ```javascript
 // 获取父元素
@@ -731,9 +738,9 @@ container.insertBefore(content, title)
 
 - 为了在没有CSS的情况下，页面也能呈现出很好地内容结构、代码结构；
 - 用户体验：例如title、alt用于解释名词或解释图片信息、label标签的活用；
-- 有利于[SEO](http://baike.baidu.com/view/1047.htm)（搜索引擎优化）：和搜索引擎建立良好沟通，有助于爬虫抓取更多的有效信息：[爬虫](http://baike.baidu.com/view/998403.htm)依赖于标签来确定上下文和各个关键字的权重；
+- 有利于SEO（搜索引擎优化）：和搜索引擎建立良好沟通，有助于爬虫抓取更多的有效信息：爬虫依赖于标签来确定上下文和各个关键字的权重；
 - 方便其他设备解析（如屏幕阅读器、盲人阅读器、移动设备）以意义的方式来渲染网页；
-- 便于团队开发和维护，语义化更具可读性，是下一步吧网页的重要动向，遵循W3C标准的团队都遵循这个标准，可以减少差异化。
+- 便于团队开发和维护，语义化更具可读性，是下一步网页的重要动向，遵循W3C标准的团队都遵循这个标准，可以减少差异化。
 
 **3、写HTML代码时应注意什么？**
 
@@ -753,7 +760,7 @@ container.insertBefore(content, title)
 
 #### **HTML5元素标签**
 
-首先html5为了更好的实践web语义化，增加了header，footer，nav,aside,section等语义化标签，在表单方面，为了增强表单，为input增加了color，emial,data ,range等类型，在存储方面，提供了sessionStorage，localStorage和离线存储，通过这些存储方式方便数据在客户端的存储和获取，在多媒体方面规定了音频和视频元素audio和video，另外还有地理定位，canvas画布，拖放，多线程编程的web worker和websocket协议。
+首先html5为了更好的实践web语义化，增加了header，footer，nav，aside，section等语义化标签，在表单方面，为了增强表单，为input增加了color，emial，data ，range等类型，在存储方面，提供了sessionStorage，localStorage和离线存储，通过这些存储方式方便数据在客户端的存储和获取，在多媒体方面规定了音频和视频元素audio和video，另外还有地理定位，canvas画布，拖放，多线程编程的web worker和websocket协议。
 
 HTML5节元素标签包括`body article nav aside section header footer hgroup `，还有`h1-h6 address`。
 
@@ -907,7 +914,7 @@ src是source的缩写，src的内容是页面必不可少的一部分，是引�
 <script src="script.js"></script>
 ```
 
-当浏览器解析到该元素时，会暂停浏览器的渲染，直到该资源加载完毕。这也是将js脚本放在底部而不是头部的原因，最好还是放在 body 尾部。
+当浏览器解析到该元素时，**会暂停浏览器的渲染**，直到该资源加载完毕。这也是将js脚本放在底部而不是头部的原因，最好还是放在 body 尾部。
 
 简而言之，**src用于替换当前元素；href用于在当前文档和引用资源之间建立联系。**
 
@@ -995,15 +1002,47 @@ XML 是一种必须正确标记且格式良好的标记语言。
 
 #### Canvas
 
-HTML5 `<canvas>` 元素用于图形的绘制，通过脚本 (通常是JavaScript)来完成。
+**什么是canvas？**
 
-`<canvas>` 标签只是图形容器，您必须使用脚本来绘制图形。
+是HTML5新增的元素，通过使用脚本语言(JS)来在特定的区域绘制图形，可以制作照片集和简单的动画，也可以处理和渲染视频。
+
+HTML5 `<canvas>` 元素用于图形的绘制，通过脚本 (通常是JavaScript)来完成。`<canvas>` 标签只是图形容器，您必须使用脚本来绘制图形。
+
+**canvas 语法**
+
+```html
+<canvas id="first" width="300px" height="300px"></canvas>
+```
+
+**canvas 元素**
+
+`<canvas>`标签和<img>其实是一样的，只是<canvas>只有两个属性：width和height。没有src和alt属性。<canvas>默认值为：width:300px,height:150px。也可以使用 css 属性来设置宽高，但是如宽高属性和初始比例不一致，他会出现扭曲。所以，建议永远不要使用 css 属性来设置 <canvas>的宽高。
+
+**替换内容**
+有些版本的浏览器不支持<canvas>,所以我们可以设置代替内容来显示。不支持的浏览器会直接渲染替代内容。
+
+<canvas>
+你的浏览器不支持 <canvas>，请升级你的浏览器
+<canvas>
+**渲染上下文(Thre Rending Context)**
+
+`<canvas>`开一个或多个渲染上下文(画笔)，使用渲染上下文来绘制和处理要展示的内容。
+
+```js
+var canvas=document.getElementById('first');
+if(canvas.getContext){
+var ctx = canvas.getContext('d2');
+//drawing code here
+}else{
+//not-supporting code here
+}
+```
 
 #### SVG
 
 - SVG 指可伸缩矢量图形 (Scalable Vector Graphics)
 - SVG 用于定义用于网络的基于矢量的图形
-- SVG 使用 XML 格式定义图形
+- SVG **使用 XML 格式定义图****形**
 - SVG 图像在放大或改变尺寸的情况下其图形质量不会有损失
 - SVG 是万维网联盟的标准
 
@@ -1031,13 +1070,13 @@ HTML5 `<canvas>` 元素用于图形的绘制，通过脚本 (通常是JavaScript
 
 ##### 始终将正斜杠添加到子文件夹
 
-假如在标签<a>里这样书写链接：`href="https://www.nowcoder.com/html"`，就会向服务器产生两次 HTTP 请求。这是因为服务器会添加正斜杠到这个地址，然后创建一个新的请求，就像这样：`href="https://www.nowcoder.com/html/"`。
+假如在标签<a>里这样书写链接：`href="https://www.nowcoder.com/html"`，就会向服务器**产生两次 HTTP 请求**。这是因为服务器会添加正斜杠到这个地址，然后创建一个新的请求，就像这样：`href="https://www.nowcoder.com/html/"`。
 
 ------
 
-#####  img的srcset属性的作⽤
+#####  **img的srcset属性的作用**
 
-响应式页面中经常用到根据屏幕密度设置不同的图片。这时就用到了 img 标签的srcset属性。srcset属性用于设置不同屏幕密度下，img 会自动加载不同的图片。用法如下：
+响应式页面中经常用到**根据屏幕密度设置不同的图片**。这时就用到了 img 标签的srcset属性。srcset属性用于设置不同屏幕密度下，img 会自动加载不同的图片。用法如下：
 
 ```html
 <img src="image-128.png" srcset="image-256.png 2x" />
@@ -1074,7 +1113,7 @@ sizes就是指默认显示128px, 如果视区宽度大于360px, 则显示340px�
 <input type="text" id="email">  
 ```
 
-表单控件都是内联元素所以他俩会在一行显示。在网页中当我们点击E-mai字样或文本框时都会在文本框中出现光标，这个就是label标签的功能了。说白了label标签就是他所关联的表单控件的延伸，即鼠标点击了他，就会出现和点击他所关联的表单控件一样的效果。而这前提是label的for属性的属性值与想要关联的表单控件的id一样。
+表单控件都是内联元素所以他俩会在一行显示。**在网页中当我们点击E-mai字样或文本框时都会在文本框中出现光标**，这个就是label标签的功能了。说白了label标签就是他所关联的表单控件的延伸，即鼠标点击了他，就会出现和点击他所关联的表单控件一样的效果。而这前提是label的for属性的属性值与想要关联的表单控件的id一样。
 
 若不想用id和for关联还可用第二种方法。效果是和以前一样的。
 
