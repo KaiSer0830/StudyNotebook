@@ -2,14 +2,14 @@
 
 #### webpack简介
 
-本质上，*webpack* 是一个现代 JavaScript 应用程序的*静态模块打包器(module bundler)*。当 webpack 处理应用程序时，它会递归地构建一个*依赖关系图(dependency graph)*，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 *bundle*。
+本质上，webpack 是一个现代 JavaScript 应用程序的静态模块打包器(module bundler)。当 webpack 处理应用程序时，它会递归地构建一个依赖关系图(dependency graph)，其中包含应用程序需要的每个模块，然后将所有这些模块打包成一个或多个 *bundle*。
 
 其中包含四个核心概念
 
-- 入口(entry)：指示 webpack 应该使用哪个模块，来作为构建其内部*依赖图*的开始。进入入口起点后，webpack 会找出有哪些模块和库是入口起点（直接和间接）依赖的
-- 输出(output)：告诉 webpack 在哪里输出它所创建的 *bundles*，以及如何命名这些文件，默认值为 `./dist`
-- loader：让 webpack 能够去处理那些非 JavaScript 文件（webpack 自身只理解 JavaScript）
-- 插件(plugins)：插件则可以用于执行范围更广的任务。插件的范围包括，从打包优化和压缩，一直到重新定义环境中的变量。插件接口功能极其强大，可以用来处理各种各样的任务
+- **入口(entry)**：指示 webpack 应该使用哪个模块，来作为构建其内部依赖图的开始。进入入口起点后，webpack 会找出有哪些模块和库是入口起点（直接和间接）依赖的
+- **输出(output)**：告诉 webpack 在哪里输出它所创建的 *bundles*，以及如何命名这些文件，默认值为 `./dist`
+- **loader**：让 webpack 能够去处理那些非 JavaScript 文件（**webpack 自身只理解 JavaScript**）
+- **插件(plugins)**：插件则可以用于执行范围更广的任务。插件的范围包括，从打包优化和压缩，一直到重新定义环境中的变量。插件接口功能极其强大，可以用来处理各种各样的任务
 
 “打包”，如何理解？ 假设我们需要寄快递。我们将许多的物品都放进了一个纸皮箱，然后进行封箱。 这就是打包。 对应到前端开发来说，就是将很多的的 css文件，js文件，图片等“物品”，全都写进一个js文件，而不是在一个html页面通过script,link标签去引入多个静态资源。
 
@@ -19,9 +19,9 @@
 
 ##### webpack作用
 
-1.进行重新加载编译。实际就是将浏览器不认识的语法编译成浏览器认识的语法。比如less编译成css，ES6 语法 转成 ES5等等。
+1.**进行重新加载编译**。实际就是将浏览器不认识的语法编译成浏览器认识的语法。比如less编译成css，ES6 语法 转成 ES5等等。
 
-2.减少IO请求。通常我们在请求后，会返回一个html到浏览器。这时，我们如果打开控制台，就会发现在html页面通过script,link等标签引用的静态资源， 浏览器会再次发出请求去获取这些资源。但是webpack的打包，将所有的静态资源都合并好了，减少了IO请求。
+2.**减少IO请求**。通常我们在请求后，会返回一个html到浏览器。这时，我们如果打开控制台，就会发现在html页面通过script，link等标签引用的静态资源， 浏览器会再次发出请求去获取这些资源。但是webpack的打包，将所有的静态资源都合并好了，减少了IO请求。
 
 
 
@@ -63,7 +63,7 @@
 
 - 配置打包目录
 
-  在项目目录下，新建config文件夹，用于存放配置文件；src文件夹，用于存放源码；out文件夹，用于存放打包生成文件。
+  **在项目目录下，新建config文件夹，用于存放配置文件；src文件夹，用于存放源码；out文件夹，用于存放打包生成文件。**
 
 -  添加webpack.config.js文件
 
@@ -164,7 +164,7 @@ webpack打包过后是将一个一个的模块变成了一个对象，key是模�
 
 ##### webpack plugin的工作机制
 
-在 Webpack 运行的生命周期中会广播出许多事件，Plugin 可以监听这些事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。
+**在 Webpack 运行的生命周期中会广播出许多事件，Plugin 可以监听这些事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。**
 
 主要靠两个对象：compiler对象和compilation对象。
 
@@ -240,7 +240,7 @@ uglifyjs-webpack-plugin：缩小（压缩优化）js文件
 loader是文件加载器，能够加载资源文件，并对这些文件进行一些处理，诸如编译、压缩等，最终一起打包到指定的文件中。
 
 1. 处理一个文件可以使用多个loader，**loader的执行顺序和配置中的顺序是相反的，即最后一个loader最先执行，第一个loader最后执行**
-2. 第一个执行的loader接收源文件内容作为参数，其它loader接收前一个执行的loader的返回值作为参数，最后执行的loader会返回此模块的JavaScript源
+2. 第一个执行的loader接收源文件内容作为参数，**其它loader接收前一个执行的loader的返回值作为参数**，最后执行的loader会返回此模块的JavaScript源
 
 **plugin:**
 
@@ -326,7 +326,7 @@ module.exports = {
 }
 ```
 
-运行webpack，我们看生成的index.html页面，自动为display:flex添加兼容浏览器的前缀。
+运行webpack，我们看生成的index.html页面，自动为display: flex添加兼容浏览器的前缀。
 
 ```css
 ul,li {
@@ -349,7 +349,7 @@ const uglify = require('uglifyjs-webpack-plugin');
 
 2、然后在plugins里配置
 
-```
+```js
 //插件，用于生产模版和各项功能
 plugins:[
     new uglify()
@@ -440,7 +440,7 @@ Gulp就是为了规范前端开发流程，实现前后端分离、模块化开�
 
 **webpack**
 
-[Webpack](https://github.com/webpack/webpack) 是当下最热门的前端资源模块化管理和打包工具。它可以将许多松散的模块按照依赖和规则打包成符合生产环境部署的前端资源。还可以将按需加载的模块进行代码分隔，等到实际需要的时候再异步加载。通过 loader的转换，任何形式的资源都可以视作模块，比如 CommonJs 模块、AMD 模块、ES6 模块、CSS、图片、JSON、Coffeescript、LESS 等。
+Webpack 是当下最热门的前端资源模块化管理和打包工具。它可以将许多松散的模块按照依赖和规则打包成符合生产环境部署的前端资源。还可以将按需加载的模块进行代码分隔，等到实际需要的时候再异步加载。通过 loader的转换，任何形式的资源都可以视作模块，比如 CommonJs 模块、AMD 模块、ES6 模块、CSS、图片、JSON、Coffeescript、LESS 等。
 
 
 
@@ -485,7 +485,7 @@ document.getElementById('root').appendChild(greeter());
 
 解析过程中，发现一个 `app.scss` 文件，然后根据 `webpack.config.js` 配置文件中的 `module.loaders` 属性去查找处理 `.scss` 文件的loader进行处理，处理 `app.scss` 文件过程中，如果发现该文件还有其他依赖文件，则继续处理 `app.scss` 文件的依赖文件，直至处理完成该“链路”上的依赖文件，然后又遇到一个 `Greeter.js` 模块，于是像之前一样继续去查找对应的loader去处理…
 
-所以，Webpack中对资源文件的处理是通过入口文件产生的依赖形成的，不会像Gulp那样，配置好路径后，该路径下所有规定的文件都会受影响。
+所以，**Webpack中对资源文件的处理是通过入口文件产生的依赖形成的**，不会像**Gulp那样，配置好路径后，该路径下所有规定的文件都会受影响**。
 
 
 
@@ -540,7 +540,7 @@ Hot Module Replacement，简称HMR，无需完全刷新整个页面的同时，�
   - 编译完成后通过`socket`向客户端推送当前编译的`hash戳`
 - 客户端的`websocket`监听到有文件改动推送过来的`hash戳`，会和上一次对比
   - 一致则走缓存
-  - 不一致则通过`ajax`和`jsonp`向服务端获取最新资源
+  - **不一致则通过`ajax`和`jsonp`向服务端获取最新资源**
 - 使用`内存文件系统`去替换有修改的内容实现局部刷新
 
 
@@ -549,7 +549,7 @@ Hot Module Replacement，简称HMR，无需完全刷新整个页面的同时，�
 
 ##### 优化 Loader
 
-对于 Loader 来说，影响打包效率首当其冲必属 Babel 了。因为 Babel 会将代码转为字符串生成 AST，然后对 AST 继续进行转变最后再生成新的代码，项目越大，**转换代码越多，效率就越低**。当然了，这是可以优化的。
+对于 Loader 来说，影响打包效率首当其冲必属 Babel 了。因为 Babel 会将代码转为字符串生成 AST，然后对 AST 继续进行转变最后再生成新的代码，项目越大，转换代码越多，效率就越低。当然了，这是可以优化的。
 
 首先我们**优化 Loader 的文件搜索范围**
 
@@ -569,16 +569,14 @@ module.exports = {
     ]
   }
 }
-复制代码
 ```
 
 对于 Babel 来说，希望只作用在 JS 代码上的，然后 `node_modules` 中使用的代码都是编译过的，所以完全没有必要再去处理一遍。
 
-当然这样做还不够，还可以将 Babel 编译过的文件**缓存**起来，下次只需要编译更改过的代码文件即可，这样可以大幅度加快打包时间
+当然这样做还不够，还可以**将 Babel 编译过的文件缓存起来**，下次只需要编译更改过的代码文件即可，这样可以大幅度加快打包时间
 
 ```javascript
 loader: 'babel-loader?cacheDirectory=true'
-复制代码
 ```
 
 ------
@@ -609,7 +607,6 @@ plugins: [
     threads: 4
   })
 ]
-复制代码
 ```
 
 ------
@@ -643,7 +640,6 @@ module.exports = {
     })
   ]
 }
-复制代码
 ```
 
 然后需要执行这个配置文件生成依赖文件，接下来需要使用 `DllReferencePlugin` 将依赖文件引入项目中
@@ -660,7 +656,6 @@ module.exports = {
     })
   ]
 }
-复制代码
 ```
 
 ------
@@ -758,7 +753,7 @@ import { a } from './test.js'
 
 对于以上情况，`test` 文件中的变量 `b` 如果没有在项目中使用到的话，就不会被打包到文件中。
 
-如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。
+**如果使用 Webpack 4 的话，开启生产环境就会自动启动这个优化功能。****
 
 
 
@@ -769,8 +764,8 @@ import { a } from './test.js'
 - **压缩代码**：删除多余的代码、注释、简化代码的写法等等⽅式。可以利⽤webpack的 UglifyJsPlugin 和 ParallelUglifyPlugin 来压缩JS⽂件， 利⽤ cssnano （css-loader?minimize）来压缩css
 - **利⽤CDN加速**: 在构建过程中，将引⽤的静态资源路径修改为CDN上对应的路径。可以利⽤webpack对于 output 参数和各loader的 publicPath 参数来修改资源路径
 - **Tree Shaking**: 将代码中永远不会⾛到的⽚段删除掉。可以通过在启动webpack时追加参数 --optimize-minimize 来实现
-- **Code Splitting:** 将代码按路由维度或者组件分块(chunk),这样做到按需加载,同时可以充分利⽤浏览器缓存
-- **提取公共第三⽅库**: SplitChunksPlugin插件来进⾏公共模块抽取,利⽤浏览器缓存可以⻓期缓存这些⽆需频繁变动的公共代码
+- **Code Splitting:** 将代码按路由维度或者组件分块(chunk)，这样做到按需加载，同时可以充分利⽤浏览器缓存
+- **提取公共第三⽅库**: SplitChunksPlugin插件来进⾏公共模块抽取，利⽤浏览器缓存可以⻓期缓存这些⽆需频繁变动的公共代码
 
 
 
@@ -778,7 +773,7 @@ import { a } from './test.js'
 
 1. 多⼊⼝情况下，使⽤ CommonsChunkPlugin 来提取公共代码
 2. 通过 externals 配置来提取常⽤库
-3. 利⽤ DllPlugin 和 DllReferencePlugin 预编译资源模块 通过 DllPlugin 来对那些我们引⽤但是绝对不会修改的npm包来进⾏预编译，再通过 DllReferencePlugin 将预编译的模块加载进来。
+3. 利⽤ DllPlugin 和 DllReferencePlugin 预编译资源模块，通过 DllPlugin 来对那些我们引⽤但是绝对不会修改的npm包来进⾏预编译，再通过 DllReferencePlugin 将预编译的模块加载进来。
 4. 使⽤ Happypack 实现多线程加速编译
 5. 使⽤ webpack-uglify-parallel 来提升 uglifyPlugin 的压缩速度。 原理上 webpack-uglify-parallel 采⽤了多核并⾏压缩来提升压缩速度
 6. 使⽤ Tree-shaking 和 Scope Hoisting 来剔除多余代码

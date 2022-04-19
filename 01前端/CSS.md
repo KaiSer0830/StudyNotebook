@@ -3254,3 +3254,38 @@ Windows 自带的点阵宋体（中易宋体）从 Vista 开始只提供 12、14
 ##### CSS 如何阻塞文档解析
 
 理论上，既然样式表不改变 DOM 树，也就没有必要停下文档的解析等待它们。然而，存在一个问题，JavaScript 脚本执行时可能在文档的解析过程中请求样式信息，如果样式还没有加载和解析，脚本将得到错误的值，显然这将会导致很多问题。所以如果浏览器尚未完成 CSSOM 的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟 JavaScript 脚本执行和文档的解析，直至其完成 CSSOM 的下载和构建。也就是说，在这种情况下，浏览器会先下载和构建 CSSOM，然后再执行 JavaScript，最后再继续文档的解析。
+
+------
+
+##### haslayout
+
+`haslayout`是IE7-浏览器的特有属性。`hasLayout`是一种只读属性，有两种状态：true或false。当其为true时，代表该元素有自己的布局，否则代表该元素的布局继承于父元素。
+[注意]通过`element.currentStyle.hasLayout`可以得出当前元素的`hasLayout`情况。
+
+IE使用Layout概念来控制元素的尺寸和位置。如果一个元素有Layout，它就有自身的尺寸和位置；如果没有，它的尺寸和位置由最近的拥有布局的祖先元素控制。
+
+在默认情况下，拥有Layout的元素包括：
+
+> - `<html>, <body>`
+> - `<table>, <tr>, <th>, <td>`
+> - `<img>`
+> - `<hr>`
+> - `<input>, <button>, <select>, <textarea>, <fieldset>, <legend>`
+> - `<iframe>, <embed>, <object>, <applet>`
+> - `<marquee>`
+
+**（注意，<p>和<div>默认不拥有Layout。）**
+
+凡是具有以下CSS属性的元素，也会拥有布局：
+
+> - position: absolute
+> - float: left|right
+> - display: inline-block
+> - width: any value other than 'auto'
+> - height: any value other than 'auto'
+> - zoom: any value other than 'normal' （IE专用属性）
+> - writing-mode: tb-rl（IE专用属性）
+> - overflow: hidden|scroll|auto（只对IE 7及以上版本有效）
+> - overflow-x|-y: hidden|scroll|auto（只对IE 7及以上版本有效）
+
+`hasLayout`是IE特有的属性，不是CSS属性。可以用`Javascript`函数`hasLayout`查看一个元素是否拥有Layout。如果有，这个函数就返回true；否则返回false。`hasLayout`是一个只读属性，所以无法使用`Javascript`进行设置。
