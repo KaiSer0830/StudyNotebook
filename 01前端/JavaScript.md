@@ -145,7 +145,7 @@ NaN 的数据类型是 number。
 
 ------
 
-##### 判断数组方法
+##### 判断数组方法（5种）
 
 - 通过Object.prototype.toString.call()做判断
 
@@ -794,7 +794,7 @@ for (let key in myObject) {
 //输出a b c method
 ```
 
-for in 可以遍历到myObject的原型方法method，如果不想遍历原型方法和属性的话，可以在循环内部判断一下，**hasOwnPropery方法可以判断某属性是否是该对象的实例属性**。
+for in 可以遍历到myObject的原型方法method，如果不想遍历原型方法和属性的话，可以在循环内部判断一下，**hasOwnProperty方法可以判断某属性是否是该对象的实例属性**。
 
 ```js
 for (var key in myObject) {
@@ -1234,7 +1234,7 @@ f.apply(zs,[23,'nan']);
 
 ##### bind、apply和call的区别
 
-通过apply和call改变函数的this指向，他们两个函数的第一个参数都是一样的表示要改变指向的那个对象，第二个参数，apply是数组，而call则是arg1,arg2...这种形式。通过bind改变this作用域会返回一个新的函数，这个函数不会马上执行。
+通过apply和call改变函数的this指向，他们两个函数的第一个参数都是一样的表示要改变指向的那个对象，第二个参数，apply是数组，而call则是arg1,arg2...这种形式。**通过bind改变this作用域会返回一个新的函数，这个函数不会马上执行。**
 
 **call**
 

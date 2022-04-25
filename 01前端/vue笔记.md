@@ -655,7 +655,7 @@ Vue2.x中new出的实例对象，所有的东西都在这个vue对象上，这�
 
 优点：一个基于函数的API。将同一功能逻辑的代码集合到一起。优化了之前项目大时，同一功能的逻辑代码分散的问题。可以更灵活的组织组件的逻辑
 
-compositionAPI侧重于将同一功能的代码，都封装在同一个函数中，比如变量的定义，变量的使用等等，都在一起，然后最终，在setup中调用。
+**compositionAPI侧重于将同一功能的代码，都封装在同一个函数中**，比如变量的定义，变量的使用等等，都在一起，然后最终，在setup中调用。
 
 **6.源码**
 
@@ -2187,6 +2187,8 @@ vm.userProfile.age = 27;// 非响应
 Vue.set(vm.userProfile, 'age', 27);		//方案一，响应式
 vm.$set(vm.userProfile, 'age', 27);		//等同方案一，响应式
 this.$set(this.userProfile, 'age', 27); 	//在methods内部使用，等同方案一，响应式
+
+
 vm.userProfile = Object.assign({}, vm.userProfile, {
   age: 27,
   favoriteColor: 'Vue Green'
