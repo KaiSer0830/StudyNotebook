@@ -70,6 +70,36 @@
 
 
 
+#### HTML5的优点与缺点
+
+**优点：**
+
+网络标准统一
+
+多设备跨平台
+
+及时更新
+
+提高可用性并改进用户的友好体验
+
+有几个新标签，有助于开发人员定义重要的内容
+
+可以给站点带来更多的多媒体元素（video和audio）
+
+涉及到网站的抓爬和索引时，对SEO很友好
+
+**缺点：**
+
+安全性
+
+完善性：许多特性各浏览器的支持程度也不一样
+
+性能：某些平台的引擎问题导致HTML5的性能低下
+
+浏览器兼容性：这是HTML5最大的缺点，IE9以下浏览器几乎全军覆没
+
+
+
 #### 元素分类
 
 ##### 行内元素
@@ -95,6 +125,56 @@
 ◆<strong>显示为加粗，<b>也可以用来设置粗体;
 
 ◆<u></u>表示下划线;
+
+
+
+#### Doctype
+
+Doctype声明于文档最前面，告诉浏览器以何种方式来渲染页面，这里有两种模式，严格模式和混杂模式。
+
+严格模式的排版和JS 运作模式是以该浏览器支持的最高标准运行。
+
+混杂模式，向后兼容，模拟老式浏览器，防止浏览器无法兼容页面。
+
+DOCTYPE不存在或格式不正确会导致文档以**兼容模式**呈现！
+
+DOCTYPE声明是**不区分大小写**的。
+
+
+
+HTML4规定了三种声明方式，分别是：严格模式、过渡模式和框架集模式；而HTML5因为不是SGML的子集，只需要<!DOCTYPE>就可以了。
+
+
+
+对于HTML5文档，**HTML5 没有 DTD ，因此也就没有严格模式与混杂模式的区别**，HTML5 有相对宽松的语法，实现时，已经尽可能大的实现了向后兼容。( HTML5 没有严格和混杂之分)
+
+**用法：**
+
+```
+<!DOCTYPE>声明必须是 HTML 文档的第一行，位于 <html> 标签之前。
+<!DOCTYPE> 声明不是 HTML 标签；它是指示 web 浏览器关于页面使用哪个HTML版本进行编写的指令。
+在 HTML 4.01 中，<!DOCTYPE> 声明引用 DTD，因为HTML4.01基于 SGML。DTD 规定了标记语言的规则，这样浏览器才能正确地呈现内容。
+HTML5 不基于 SGML，所以不需要引用 DTD。
+```
+
+**常用的 DOCTYPE 声明：**
+
+```html
+<!-- html5 -->
+<!DOCTYPE html>
+
+<!-- HTML 4.01 Strict -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<!-- HTML 4.01 Transitional -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<!--HTML 4.01 Frameset -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+
+<!-- XHTML 1.0 Strict -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+```
 
 
 
@@ -163,48 +243,6 @@ funtion () {
 
 
 
-#### Doctype
-
-Doctype声明于文档最前面，告诉浏览器以何种方式来渲染页面，这里有两种模式，严格模式和混杂模式。
-
-严格模式的排版和JS 运作模式是以该浏览器支持的最高标准运行。
-
-混杂模式，向后兼容，模拟老式浏览器，防止浏览器无法兼容页面。
-
-DOCTYPE不存在或格式不正确会导致文档以**兼容模式**呈现！
-
-DOCTYPE声明是**不区分大小写**的。
-
-**用法：**
-
-```
-<!DOCTYPE>声明必须是 HTML 文档的第一行，位于 <html> 标签之前。
-<!DOCTYPE> 声明不是 HTML 标签；它是指示 web 浏览器关于页面使用哪个HTML版本进行编写的指令。
-在 HTML 4.01 中，<!DOCTYPE> 声明引用 DTD，因为HTML4.01基于 SGML。DTD 规定了标记语言的规则，这样浏览器才能正确地呈现内容。
-HTML5 不基于 SGML，所以不需要引用 DTD。
-```
-
-**常用的 DOCTYPE 声明：**
-
-```html
-<!-- html5 -->
-<!DOCTYPE html>
-
-<!-- HTML 4.01 Strict -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-
-<!-- HTML 4.01 Transitional -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-
-<!--HTML 4.01 Frameset -->
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
-
-<!-- XHTML 1.0 Strict -->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-```
-
-
-
 #### iframe
 
 **定义：**iframe 用于在页面内显示页面，使用 <iframe> 会创建包含另外一个文档的内联框架（即行内框架）
@@ -248,8 +286,13 @@ allow-top-navigation
 - 可以使脚本可以并行下载
 - 可以实现跨子域通信
 - 用来加载速度较慢的内容（如广告）
+- iframe 能够原封不动地把嵌入的网页展现出来
 
 **缺点：**
+
+**会产生很多页面，不容易管理**。
+
+很多的移动设备(PDA 手机)无法完全显示框架，设备**兼容性差**。
 
 **会阻塞主页面的onload事件**。window 的 onload 事件需要在所有 iframe 加载完毕后（包含里面的元素）才会触发。在 Safari 和 Chrome 里，通过 JavaScript 动态设置 iframe 的 SRC 可以避免这种阻塞情况。
 
@@ -796,6 +839,20 @@ hgroup使用注意：
 
 
 
+#### HTML5新特性
+
+（1）用于绘画的 canvas 元素
+
+（2）用于媒介回放的 video 和 audio 元素
+
+（3）对本地离线存储的更好的支持
+
+（4）新的特殊内容元素，比如 article、footer、header、nav、section
+
+（5）新的表单控件，比如 calendar、date、time、email、url、search
+
+
+
 #### 浏览器渲染引擎
 
 **一个渲染引擎主要包括**：`HTML解析器`，`CSS解析器`，`javascript引擎`，`布局layout模块`，`绘图模块`
@@ -827,6 +884,8 @@ hgroup使用注意：
 6.将各个节点绘制到屏幕上。
 
 `总结：`**真正渲染到页面，一定是发生在DOM-Tree和CSSOM树都已经构建完成时，所以HTML和CSS都是阻碍页面渲染的东西**
+
+------
 
 ##### CSS阻塞
 
@@ -862,6 +921,8 @@ hgroup使用注意：
 
 (4).优化样式表的代码（避免出现太多级的选择器）
 
+------
+
 ##### JS阻塞
 
  1.阻塞DOM解析:
@@ -891,6 +952,74 @@ hgroup使用注意：
 3.WebKit 和 Firefox 都进行了【预解析】这项优化。在执行js脚本时，浏览器的其他线程会解析文档的其余部分，找出并加载需要通过网络加载的其他资源。通
 
 过这种方式，资源可以在并行连接上加载，从而提高总体速度。请注意，预解析器不会修改 DOM 树。
+
+------
+
+##### 渲染顺序
+
+1.根据html文件构建DOM树和CSSOM树。构建DOM树期间，如果遇到JS，阻塞DOM树及CSSOM树的构建，优先加载JS文件，加载完毕，再继续构建DOM树及CSSOM树。
+
+2.构建渲染树（Render Tree）。
+
+3.页面的重绘（repaint）与重排（reflow，也有称回流）。页面渲染完成后，若JS操作了DOM节点，根据JS对DOM操作动作的大小，浏览器对页面进行重绘或是重排。
+
+**一、构建DOM树及CSSOM树**
+
+- **构建DOM树**
+- **构建CSSOM树**
+- **加载JS**
+
+**二.构建渲染树**
+
+渲染树（Render Tree）由DOM树、CSSOM树合并而成，但并不是必须等DOM树及CSSOM树加载完成后才开始合并构建渲染树。三者的构建并无先后条件，亦非完全独立，而是会有交叉，并行构建。因此会形成一边加载，一边解析，一边渲染的工作现象。
+
+构建渲染树，根据渲染树计算每个可见元素的布局，并输出到绘制流程，将像素渲染到屏幕上。
+
+**问题一：渲染过程中遇到JS文件怎么处理？**
+JavaScript的加载、解析与执行会阻塞DOM的构建，也就是说，在构建DOM时，HTML解析器若遇到了JavaScript，那么它会暂停构建DOM，将控制权移交给JavaScript引擎，等JavaScript引擎运行完毕，浏览器再从中断的地方恢复DOM构建。
+
+也就是说，如果你想首屏渲染的越快，就越不应该在首屏就加载 JS 文件，这也是都建议将 script 标签放在 body 标签底部的原因。当然在当下，并不是说 script 标签必须放在底部，因为你可以给 script 标签添加 defer 或者 async 属性（下文会介绍这两者的区别）。
+
+JS文件不只是阻塞DOM的构建，它会导致CSSOM也阻塞DOM的构建。
+
+原本DOM和CSSOM的构建是互不影响，井水不犯河水，但是一旦引入了JavaScript，CSSOM也开始阻塞DOM的构建，只有CSSOM构建完毕后，DOM再恢复DOM构建。
+
+这是什么情况？
+
+这是因为JavaScript不只是可以改DOM，它还可以更改样式，也就是它可以更改CSSOM。前面我们介绍，不完整的CSSOM是无法使用的，但JavaScript中想访问CSSOM并更改它，那么在执行JavaScript时，必须要能拿到完整的CSSOM。所以就导致了一个现象，如果浏览器尚未完成CSSOM的下载和构建，而我们却想在此时运行脚本，那么浏览器将延迟脚本执行和DOM构建，直至其完成CSSOM的下载和构建。也就是说，在这种情况下，浏览器会先下载和构建CSSOM，然后再执行JavaScript，最后在继续构建DOM。
+
+**问题二：为什么操作 DOM 慢**
+因为 DOM 是属于**渲染引擎**中的东西，而 JS 又是 **JS 引擎**中的东西。当我们通过 JS 操作 DOM 的时候，其实这个操作**涉及到了两个线程之间的通信**，那么势必会带来一些性能上的损耗。操作 DOM 次数一多，也就等同于一直在进行线程之间的通信，并且操作 DOM 可能还会带来重绘回流的情况，所以也就导致了性能上的问题。
+
+**问题三：渲染页面时的常见不良现象（FOUC、白屏）**
+FOUC : 主要指的是样式闪烁的问题。即CSS加载之前，先加载了HTML，则出现了“先展示无样式内容，然后再突然呈现样式”的现象。原因是：CSS加载时间过长、CSS放在文档底部
+
+FOUC (Flash of Unstyled Content) 无样式内容闪烁：
+如果把样式放在底部，对于IE浏览器,在某些场景下(点击链接,输入URL,使用书签进入等),会出现 FOUC 现象(逐步加载无样式的内容,等CSS加载后页面才突然展现出样式)。对于 Firefox 会一直表现出 FOUC 。
+由于：
+脚本会阻塞后面内容的呈现
+
+脚本会阻塞其后组件的下载
+
+对于图片和CSS, 在加载时会并发加载(如一个域名下同时加载两个文件)。但在加载 JavaScript 时,会禁用并发,并且阻止其他内容的下载
+
+所以尽量把 JavaScript 放入页面body底部。
+
+白屏：浏览器迟迟未渲染页面。有的浏览器需要先构建DOM树和CSSOM树，构建完成再渲染。有可能因为CSS放在HTML尾部，CSS未加载完成，则就不能构建完成，从而不能渲染而白屏；也有可能是JS放在了头部，阻塞了DOM的解析
+
+白屏的根本原因是浏览器在渲染的时候没有请求到或请求时间过长造成的。
+
+浏览器对于图片和CSS，在加载时会并发加载（比如一个域名下同时加载多个文件），浏览器对于JavaScript，在加载时会禁用并发，并且阻止其后的文件及组件的下载。所以将js放在页面的顶部也可能会导致白屏。
+
+不同浏览器的处理CSS和HTML的方式是不同的：
+
+比如，IE、chrome浏览器的渲染机制，采用的是等CSS全部加载解析完后再渲染展示页面。
+
+Firefox则是在CSS未加载前先展示html的内容，等CSS加载后重新对样式进行修改。
+
+所以：白屏的出现情况往往因为CSS样式被置于底部（最后加载）,当新窗口打开,刷新等的时候，页面会出现白屏。 如果使用@import标签,它引用的文件则会等页面全部下载完毕再被加载，也可能出现白屏。
+
+因此， **css使用 link 标签将样式表放在顶部，防止白屏问题出现。 JS 的放置位置一般是在body的闭合标签之前**。
 
 
 

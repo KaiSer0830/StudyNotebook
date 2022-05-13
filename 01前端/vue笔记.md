@@ -11,6 +11,15 @@ webpack安装    npm install -g webpack
 
 
 
+#### vue-cli安装scss步骤：
+
+- 用npm下载三个loader(sass-loader、css-loader、node-sass)
+- 在build目录找到webpack.base.config.js，在那个extends属性加一个拓展.scss
+- 还是在同一个文件，配置一个module属性
+- 然后在组件的style标签上加上lang属性，例如：lang=“scss”
+
+
+
 #### vue2.0目录框架结构
 
 ```
@@ -1582,6 +1591,71 @@ export default {
 
 
 
+#### 如何实现浏览器内多个标签页之间的通信
+
+##### cookie+setInterval
+
+要想在多个窗口中通信，通信的内容一定不能放在window对象中，因为window是当前窗口的[作用域](https://so.csdn.net/so/search?q=作用域&spm=1001.2101.3001.7020)，里面的内容只属于当前窗口。而cookie是浏览器的本地存储机制，和窗口无关。
+
+将要发送的信息写入cookie：
+
+```js
+var msg = documet.querySelector('#msg');
+ if(msg.value.trim() != ""){
+ 	docment.cookie = "msg=" + msg.value.trim();
+ }
+```
+
+在另一个页面读取cookie：
+
+```js
+ var recMsg = document.querySelector('#recMsg');
+ function getValue(key){
+	var cookies = '{"'+document.cookie.replace(/=/g,'":"').replace(/;\s+/g,'", "')+'"}';
+    cookies = JSON.parse(cookies);
+    return cookies[key];
+ }
+ setInterval(function(){
+    recMsg.innerHTML = getValue("msg1");
+ },500);
+
+```
+
+但是由于仅仅从cookie读取信息不能实时更新，需要手动刷新，因此采用setInterval定时器解决，将读取信息的代码封装成一个函数，在定时器内调用即可
+
+缺点：
+
+> 1）cookie空间有限，容量4k
+> 2）每次http请求都会把当前域的cookie发送到服务器上，浪费带宽
+> 3）setInterval频率设置过大会影响浏览器性能，过小会影响时效性
+
+优点：每个浏览器都兼容
+
+------
+
+##### localstorage
+
+localStorage比cookie好在它在**setItem存东西时会自动触发整个浏览器的storage事件**，除了当前页面之外，所有打开的标签窗口都会受影响。
+
+缺点：localStorage是h5属性，高版本浏览器才支持，而且不同浏览器的localStorage大小限制不统一；localStorage只能监听非己页面的数据变化
+
+优点：解决了cookie容量小和时效性问题
+
+------
+
+##### html5浏览器新特性——SharedWorker
+
+WebWorker的升级版，webworker只能在一个窗口内使用，而SharedWorker可以在多个窗口之间通信
+SharedWorker也是纯客户端的，没有服务端参与
+SharedWorker在客户端有一个自己维护的对象worker.js，消息存储在worker.js的data中
+SharedWorker不如localStorage的是接收消息不是自动的，也要用定时器实时从worker.js中获取消息
+
+------
+
+##### websocket
+
+
+
 
 #### computed和watch区别
 
@@ -1890,6 +1964,195 @@ new Vue({
       return price ? ('￥' + price) : '--'
     }
   }
+```
+
+
+
+#### vue的内置指令
+
+**我们学过的指令：**
+
+-  v-bind : 单向绑定解析表达式, 可简写为 :xxx
+-  v-model : 双向数据绑定
+-  v-for : 遍历数组/对象/字符串
+-  v-on : 绑定事件监听, 可简写为@
+-  v-if : 条件渲染（动态控制节点是否存存在）
+-  v-else : 条件渲染（动态控制节点是否存存在）
+-  v-show : 条件渲染 (动态控制节点是否展示)
+
+**v-text指令：**
+
+-  1.作用：向其所在的节点中渲染文本内容。
+-  2.与插值语法的区别：v-text会替换掉节点中的内容，{{xx}}则不会。
+
+**v-html指令：**
+
+-  1.作用：向指定节点中渲染包含html结构的内容。
+-  2.与插值语法的区别：
+-  (1).v-html会替换掉节点中所有的内容，{{xx}}则不会。
+-  (2).v-html可以识别html结构。
+-  3.严重注意：v-html有安全性问题！！！！
+-  (1).在网站上动态渲染任意HTML是非常危险的，容易导致XSS攻击。
+-  (2).一定要在可信的内容上使用v-html，永不要用在用户提交的内容上！
+
+**v-cloak指令（没有值）：**
+
+-  1.本质是一个特殊属性，Vue实例创建完毕并接管容器后，会删掉v-cloak属性。
+-  2.使用css配合v-cloak可以解决网速慢时页面展示出{{xxx}}的问题。
+
+**v-once指令：**
+
+-  1.v-once所在节点在初次动态渲染后，就视为静态内容了。
+-  2.以后数据的改变不会引起v-once所在结构的更新，可以用于优化性能。
+
+**v-pre指令：**
+
+-  1.跳过其所在节点的编译过程。
+-  2.可利用它跳过：没有使用指令语法、没有使用插值语法的节点，会加快编译。
+
+
+
+#### vue-自定义指令
+
+vue可以自定义指令。自定义指令分为：全局指令和局部指令。
+
+##### 自定义全局指令
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>自定义指令</title>
+  <!--引入vue-->
+  <script src="../js/vue.js"></script>
+</head>
+<body>
+
+    <div id="hello">
+        <!-- 使用指令的时候，必须在指令之前加v-。即格式为：v-指令ID -->
+        <h3 v-test>{{msg}}</h3>
+        <button @click='changeData'>更新数据</button>
+        <hr>
+        <h3 v-word>{{name}}</h3>
+        <h4 v-word:param.haha='userName'>{{name}}</h4>
+        <hr>
+        <h3 v-lolo>{{text}}</h3>
+    </div>
+
+    <script>
+
+        //自定义全局指令（注意：Vue.directive()这个方法要写在new Vue之前）
+
+        //1.自定义全局指令test
+        Vue.directive('test',{
+            //钩子函数(可选)
+            bind(){    //常用
+                alert('指令第一次绑定到元素上时调用，只调用一次，可以执行初始化操作');
+            },
+            inserted(){
+                alert('指令所绑定的元素插入到DOM中时调用');
+            },
+            update(){
+                alert('被绑定元素所在模板更新时调用');
+            },
+            componentUpdated(){
+                alert('被绑定元素所在模板完成一次更新周期时调用');
+            },
+            unbind(){
+                alert('指令与元素解绑时调用，只执行一次');
+            }
+        });
+
+        //2.自定义全局指令word
+        Vue.directive('word',{
+            bind(el,binding){
+                console.log('bind函数的参数el',el);    //el是当前指令所绑定的元素，DOM对象
+                el.style.backgroundColor='red';    //对el进行操作
+
+                console.log('bind函数的参数binding',binding);    //一个对象，包含很多property
+                console.log('指令名(不带v-)',binding.name);        //指令名(不带v-)
+                console.log('指令名(带有v-)',binding.rawName);    //指令名(带有v-)
+                console.log('指令的绑定值',binding.value);                //指令的绑定值
+                console.log('指令的绑定值字符串形式',binding.expression);    //绑定值的字符串形式
+                console.log('指令的参数',binding.arg);                    //传给指令的参数
+                console.log('指令的包含修饰符的对象',binding.modifiers);    //一个包含修饰符的对象
+            }
+        });
+
+        //3.自定义全局指令lolo（这是自定义全局指令的简单写法：传入一个简单的指令函数,bind和update时会调用）
+        Vue.directive('lolo',function(){
+            console.log('这是自定义全局指令的简单写法');
+        })
+
+        //vue实例
+        let vm = new Vue({
+            el:'#hello',
+            data:{
+                msg:'欢迎来到王者荣耀',
+                name:'辣木阳子',
+                userName:'方文山',
+                text:'我们是中国人'
+            },
+            methods:{
+                changeData(){
+                    this.msg='欢迎来到更新后的王者荣耀'
+                }
+            },
+        });
+    </script>
+</body>
+</html>
+```
+
+------
+
+##### 自定义局部指令
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>自定义指令</title>
+  <!--引入vue-->
+  <script src="../js/vue.js"></script>
+</head>
+<body>
+
+    <div id="hello">
+        <!-- 使用指令的时候，必须在指令之前加v-。即格式为：v-指令ID -->
+        <input type="text" v-model='text' v-fo>
+    </div>
+
+    <script>
+        //vue实例
+        let vm = new Vue({
+            el:'#hello',
+            data:{
+                msg:'欢迎来到王者荣耀',
+                name:'辣木阳子',
+                userName:'方文山',
+                text:'我们是中国人'
+            },
+            methods:{
+                changeData(){
+                    this.msg='欢迎来到更新后的王者荣耀'
+                }
+            },
+            //自定义局部指令
+            directives:{
+                //自定义局部指令foc
+                foc:{
+                    inserted(el){
+                        el.focus();    //实现被绑定该指令的文本框自动获得焦点
+                    }
+                }
+            },
+        });
+    </script>
+</body>
+</html>
 ```
 
 
@@ -2243,6 +2506,22 @@ vm.`$set` 的实现原理是：
 
 #### 路由
 
+路由这个概念最初是由后端提出来的，在我们没有SPA单页面应用之前，使用的一直都是后端路由，根据不同的路由返回不同的页面，后来随着单页面应用的诞生，开始有了前端路由，实现不刷新但是更新页面的效果。
+
+##### 三种路由模式
+
+hash模式
+
+- 默认模式，通过路径中的hash值来控制路由跳转，不存在兼容问题
+
+history模式
+
+- H5新增的 history API，相对hash而言，不会显示#号，但是需要服务器端配置
+
+abstract模式
+
+- 支持javascript的所有运行环境，常指Node.js服务器环境
+
 ##### Vue-Router 的懒加载
 
 **官方的解释：**
@@ -2343,7 +2622,7 @@ Vue-Router有两种模式：**hash模式**和**history模式**。默认的路由
 
 **简介：** hash模式是开发中默认的模式，它的URL带着一个#，例如：[www.abc.com/#/vue](https://link.juejin.cn?target=http%3A%2F%2Fwww.abc.com%2F%23%2Fvue)，它的hash值就是`#/vue`。
 
-**特点**：hash值会出现在URL里面，但是不会出现在HTTP请求中，对后端完全没有影响。所以改变hash值，不会重新加载页面。这种模式的浏览器支持度很好，低版本的IE浏览器也支持这种模式。hash路由被称为是前端路由，已经成为SPA（单页面应用）的标配。
+**特点**：hash值会出现在URL里面，但是不会出现在HTTP请求中，对后端完全没有影响。所以改变hash值，不会重新加载页面。这种模式的浏览器支持度很好，低版本的IE浏览器也支持这种模式。**hash路由被称为是前端路由，已经成为SPA（单页面应用）的标配**。
 
 **原理：** hash模式的主要原理就是**onhashchange()事件**：
 
@@ -2354,16 +2633,48 @@ window.onhashchange = function(event){
 }
 ```
 
-使用onhashchange()事件的好处就是，在页面的hash值发生变化时，无需向后端发起请求，window就可以监听事件的改变，并按规则加载相应的代码。除此之外，hash值变化对应的URL都会被浏览器记录下来，这样浏览器就能实现页面的前进和后退。虽然是没有请求后端服务器，但是页面的hash值和对应的URL关联起来了。
+使用onhashchange()事件的好处就是，在**页面的hash值发生变化时，无需向后端发起请求**，window就可以监听事件的改变，并按规则加载相应的代码。除此之外，hash值变化对应的URL都会被浏览器记录下来，这样浏览器就能实现页面的前进和后退。虽然是没有请求后端服务器，但是页面的hash值和对应的URL关联起来了。
+
+`onhashchange` 方法的触发时机
+
+- 直接更改浏览器地址，在最后面增加或改变#hash；
+- 通过改变location.href或location.hash的值；
+- 通过触发点击带锚点的链接；
+- 浏览器前进后退可能导致hash的变化，前提是两个网页地址中的hash值不同。
+
+```html
+<body>
+  <ul>
+    <li>
+       <a href="#/home">home</a>
+    </li>
+    <li>
+       <a href="#/list">list</a>
+    </li>
+    <li>
+       <a href="#/detail">detail</a>
+    </li>
+ </ul>
+</body>
+<script>
+window.onhashchange = function() {
+    //  做页面切换渲染等
+    console.log(location.href);
+    console.log(location.hash);
+}
+</script>
+```
+
+通过点击`a`标签，传递一个`hash`值，然后通过`window.onhashchange`方法来监听`hash`的变化，然后在这个事件触发的时候，根据`location.hash`来动态的修改单页面应用的内容即可
 
 **2. history模式**
 
 **简介：** history模式的URL中没有#，它使用的是传统的路由分发模式，即用户在输入一个URL时，服务器会接收这个请求，并解析这个URL，然后做出相应的逻辑处理。 **特点：** 当使用history模式时，URL就像这样：[abc.com/user/id](https://link.juejin.cn?target=http%3A%2F%2Fabc.com%2Fuser%2Fid)。相比hash模式更加好看。但是，history模式需要后台配置支持。如果后台没有正确配置，访问时会返回404。 **API：** history api可以分为两大部分，切换历史状态和修改历史状态：
 
-- **修改历史状态**：包括了 HTML5 History Interface 中新增的 `pushState()` 和 `replaceState()` 方法，这两个方法应用于浏览器的历史记录栈，提供了对历史记录进行修改的功能。只是当他们进行修改时，虽然修改了url，但浏览器不会立即向后端发送请求。如果要做到改变url但又不刷新页面的效果，就需要前端用上这两个API。
+- **修改历史状态**：包括了 HTML5 History Interface 中新增的 `pushState()` 和 `replaceState()` 方法，这两个方法应用于浏览器的历史记录栈，提供了对历史记录进行修改的功能。只是**当他们进行修改时，虽然修改了url，但浏览器不会立即向后端发送请求**。如果要做到改变url但又不刷新页面的效果，就需要前端用上这两个API。
 - **切换历史状态：** 包括`forward()`、`back()`、`go()`三个方法，对应浏览器的前进，后退，跳转操作。
 
-虽然history模式丢弃了丑陋的#。但是，它也有自己的缺点，就是在刷新页面的时候，如果没有相应的路由或资源，就会刷出404来。
+虽然history模式丢弃了丑陋的#。但是，它也有自己的缺点，就是**在刷新页面的时候，如果没有相应的路由或资源，就会刷出404来**。
 
 如果想要切换到history模式，就要进行以下配置（后端也要进行配置）：
 
@@ -2374,21 +2685,59 @@ const router = new VueRouter({
 })
 ```
 
+`window.onpopstate`事件的触发时机
+
+- 仅仅调用pushState方法或replaceState方法 ，并不会触发该事件；
+- 只有用户点击浏览器倒退按钮和前进按钮，或者使用JavaScript调用back、forward、go方法时才会触发。
+- 另外，该事件只针对同一个文档，如果浏览历史的切换，导致加载不同的文档，该事件也不会触发。
+
+```html
+<body>
+  <ul>
+    <li>
+      <a href="/home">home</a>
+    </li>
+    <li>
+      <a href="/list">list</a>
+    </li>
+    <li>
+      <a href="/detail">detail</a>
+    </li>
+  </ul>
+</body>
+<script>
+document.querySelectorAll('a').forEach(item => {
+  item.onclick = function (e) {
+      e.preventDefault();
+      let link = item.getAttribute('href');
+      window.history.pushState({link}, link, link);
+   };
+});
+window.addEventListener('popstate', function (e) {
+   console.log(e.state);
+   console.log(location.href);
+})
+</script>
+```
+
+当点击浏览器的后退或前进按钮，或者调用history上的go、back方法时，就会触发事件，打印出对应的数据，e.state 中就存放着pushState方法中的state对象
+ 通过在修改路由信息的同时执行切换DOM的操作，来实现了路由切换。
+
 **3. 两种模式对比**
 
 调用 history.pushState() 相比于直接修改 hash，存在以下优势:
 
-- pushState() 设置的新 URL 可以是与当前 URL 同源的任意 URL；而 hash 只可修改 # 后面的部分，因此只能设置与当前 URL 同文档的 URL；
+- pushState() 设置的新 URL 可以是与当前 URL 同源的任意 URL；而 **hash 只可修改 # 后面的部分，因此只能设置与当前 URL 同文档的 URL**；
 - pushState() 设置的新 URL 可以与当前 URL 一模一样，这样也会把记录添加到栈中；而 hash 设置的新值必须与原来不一样才会触发动作将记录添加到栈中；
 - pushState() 通过 stateObject 参数可以添加任意类型的数据到记录中；而 hash 只可添加短字符串；
 - pushState() 可额外设置 title 属性供后续使用。
-- hash模式下，仅hash符号之前的url会被包含在请求中，后端如果没有做到对路由的全覆盖，也不会返回404错误；history模式下，前端的url必须和实际向后端发起请求的url一致，如果没有对用的路由处理，将返回404错误。
+- **hash模式下，仅hash符号之前的url会被包含在请求中**，后端如果没有做到对路由的全覆盖，也不会返回404错误；history模式下，前端的url必须和实际向后端发起请求的url一致，如果没有对用的路由处理，将返回404错误。
 
 hash模式和history模式都有各自的优势和缺陷，还是要根据实际情况选择性的使用。
 
 ------
 
-##### 如何获取页面的hash变化
+##### 如何获取页面的hash变化(2种)
 
 **（1）监听$route的变化**
 
@@ -2406,6 +2755,12 @@ watch: {
 ```
 
 **（2）window.location.hash读取#值** window.location.hash 的值可读可写，读取来判断状态是否改变，写入时可以在不重载网页的前提下，添加一条历史访问记录。
+
+------
+
+##### abstract模式实现原理
+
+`abstract`模式是不依赖于浏览器环境，所以没有使用`hash`或者`history`等浏览器才会提供的`API`，而是`VueRouter`内部使用数组进行模拟了路由管理，在`node`环境，或者原生`App`环境下，都会默认使用`abstract`模式，`VueRouter`内部会根据所处的环境自行判断，默认使用`hash`模式，如果检测到没有浏览器API的时候，就会使用`abstract`模式。
 
 ------
 
@@ -2495,7 +2850,7 @@ this.$router.push({ name: 'users', query:{ uname:james }})
 this.$router.push({ path: '/user', query:{ uname:james }})
 
 // 方法5：
-this.$router.push('/user?uname=' + jsmes)
+this.$router.push('/user?uname=' + james)
 ```
 
 3）获取参数
@@ -2506,7 +2861,7 @@ this.$router.push('/user?uname=' + jsmes)
 
 ------
 
-##### Vue-router 路由钩子
+##### Vue-router 路由钩子(三种类型)
 
 Vue-Router导航守卫
 
@@ -2542,6 +2897,8 @@ router.beforeEach((to, from, next) => {
     }
 })
 ```
+
+注意：next 方法必须要调用，否则钩子函数无法 resolved
 
 - afterEach （跳转之后滚动条回到顶部）
 
@@ -2645,6 +3002,10 @@ beforeRouteEnter(to, from, next) {
 - 触发 DOM 更新。
 - 用创建好的实例调用 beforeRouteEnter守卫中传给 next 的回调函数。
 - 导航完成
+
+**vue-router响应路由参数的变化**
+
+- 当使用路由参数时，例如从 /user/foo 导航到 /user/bar，**原来的组件实例会被复用**。因为两个路由都渲染同个组件，比起销毁再创建，复用则显得更加高效。不过，这也意味着**组件的生命周期钩子不会再被调用**。
 
 ------
 
@@ -2845,6 +3206,78 @@ Vue.mixin({
 
 
 
+#### axios
+
+axios时目前最流行的ajax封装库之一，用于很方便地实现ajax请求的发送。
+
+支持的功能：
+
+- 从浏览器发出 XMLHttpRequests请求。
+- 从 node.js 发出 http 请求。
+- 支持 Promise API。
+- 能拦截请求和响应。
+- 能转换请求和响应数据。
+- 取消请求。
+- 实现JSON数据的自动转换。
+- 客户端支持防止 XSRF攻击。
+
+##### axios拦截器
+
+实质就是函数。
+分为两种类型：
+
+- 请求拦截器：用于拦截请求，自定义做一个逻辑后再把请求发送，可以用于配置公用的逻辑，就不用每个请求都配一遍。
+- 响应拦截器：用于拦截响应，做一些处理后再出发响应回调。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>axios拦截器</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        //这个是设置请求拦截器的api，传入两个回调，第一个成功回调，第二个失败回调。
+        axios.interceptors.request.use(
+            function(config){
+                console.log("请求拦截器1调用成功");
+                return config;
+            },
+            function(error){
+                console.log("请求拦截器1调用失败");
+                return Promise.reject(error)
+            }
+        )
+
+        //这个是设置响应拦截器的api，第一个成功回调，第二个失败回调
+        axios.interceptors.response.use(
+            function(response){
+                console.log("响应拦截器1调用成功");
+                return response;
+            },
+            function(error){
+                console.log("响应拦截器1调用失败");
+                return Promise.reject(error);
+            }
+        )
+
+        axios.get("http://localhost:3000/posts/1")
+        .then(function(response){
+            //
+            console.log("请求回调成功");
+        }).catch(function(error){
+            console.log("请求回调失败");
+        })
+    </script>
+</body>
+</html>
+```
+
+效果：
+
+![img](前端图片/90a363f02d724560adc60230c224e4f3.png)
 
 #### SSR
 
@@ -2945,8 +3378,8 @@ const store = new Vuex.Store({
 Action 函数接受一个与 store 实例具有相同方法和属性的 context 对象，因此你可以调用 context.commit 提交一个 mutation，或者通过 context.state 和 context.getters 来获取 state 和 getters。 所以，两者的不同点如下：
 
 - Mutation专注于修改State，理论上是修改State的唯一途径；Action业务代码、异步请求。
-- Mutation：必须同步执行；Action：可以异步，但不能直接操作State。
-- 在视图更新时，先触发actions，actions再触发mutation
+- Mutation：**必须同步执行**；Action：**可以异步，但不能直接操作State**。
+- **在视图更新时，先触发actions，actions再触发mutation**。
 - mutation的参数是state，它包含store中的数据；actions的参数是context，它是 state 的父级，包含 state、getters
 
 ------
@@ -3120,6 +3553,12 @@ keep-alive有以下三个属性：
 2. 获取组件实例 key ，如果有获取实例的 key，否则重新生成。
 3. key生成规则，cid +"∶∶"+ tag ，仅靠cid是不够的，因为相同的构造函数可以注册为不同的本地组件。
 4. 如果缓存对象内存在，则直接从缓存对象中获取组件实例给 vnode ，不存在则添加到缓存对象中。 5.最大缓存数量，当缓存组件数量超过 max 值时，清除 keys 数组内第一个组件。
+
+------
+
+##### active-class是哪个组件的属性
+
+vue-router模块的router-link组件。					
 
 ------
 

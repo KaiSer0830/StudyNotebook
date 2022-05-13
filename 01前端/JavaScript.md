@@ -34,6 +34,69 @@ typeof y // 返回 Object
 
 NaN 的数据类型是 number。
 
+------
+
+##### Symbol的作用
+
+```js
+// 只能通过 变量 来获取值。（还有一种，后面说道）
+let n = Symbol('a');
+
+let obj = {
+	name: 'uzi',
+	age: 12,
+	[n]: 1100
+}
+console.log( obj[n] )
+```
+
+Symbol类似于*内建对象类*，具有`constructor`（Symbol.prototype），但不能`new`。
+
+```javascript
+var sym = new Symbol(); // TypeError
+```
+
+**1.防止变量名起冲突**
+
+**2.可以使用symbol避免魔术字符串**
+
+魔术字符串：
+
+在代码中多次出现、与代码形成强耦合的某一个具体的字符串或者数值。
+
+```js
+function getdata(val) {
+	case 'magicString' :
+		return ['this','is','magicString']
+	default :
+		return []
+}
+
+let data = getData('magicString')
+// 'magicString' 就是魔术字符串
+```
+风格良好的代码，应该尽量消除魔术字符串，改成含义清晰的变量代替。
+
+**3.定义不重复的常量**
+
+**4.symbol作为键名时，不被常规方法遍历出来，因此可以给对象定义非私有，但只用于内部使用的方法和属性**
+
+```js
+// 可被迭代对象：拥有Symbol.iterator这个属性。
+let n = Symbol('a');
+let obj = {
+	name: 'uzi',
+	age: 12,
+	[n]: 1100,
+	[Symbol('b')]: 2200
+}
+// 拿Symbol的另一种方法。
+let symbolArr = Object.getOwnPropertySymbols(obj) // 获取symbol的 键
+symbolArr.forEach( item => {
+	console.log(obj[item])
+} )js
+```
+
 
 
 #### JS外部引用
@@ -179,6 +242,16 @@ Array.prototype.isPrototypeOf(obj)
 
 ------
 
+##### 类数组转成数组（5种）
+
+- Array.prototype.slice.call(arrayLike);
+- Array.prototype.splice.call(arrayLike, 0);
+- Array.prototype.concat.apply([], arrayLike);
+- Array.from(arrayLike);
+- for循环遍历类数组对象，push到新创建的数组对象里
+
+------
+
 ##### undefined 和 null 区别
 
 - null
@@ -273,6 +346,48 @@ NaN 是一个特殊值，它和自身不相等，是唯一一个非自反（自�
 - 返回`false`。
 
   由于`0`的类型是数值，`null`的类型是Null。因此上面的前11步都得不到结果，要到第12步才能得到`false`。
+
+------
+
+##### []==[] 为false
+
+在JS中，数组是属于引用型数据类型，所以“==”左右两边所表示的实际只是数组的所在的地址而已。在创建一个新数组时，其地址均不相同，因此[]==[]最终返回false。
+
+------
+
+##### [ ] == ![ ] 结果为true
+
+！可将变量转换成boolean类型，null、undefined、NaN以及空字符串('')取反都为true，其余都为false。
+
+就是 [ ] == ! [ ] 相当于 [ ] == false 相当于 [ ] == 0
+
+**如果一个操作数是对象，另一个操作数不是，则调用对象的valueOf()方法，用得到的基本类型值按照前面的规则进行比较，如果对象没有valueOf()方法，则调用 toString()**
+
+而对于空数组，[ ].toString() -> ' ' (返回的是空字符串)
+
+也就是 [ ] == 0 相当于 ' ' == 0
+
+**如果一个操作数是字符串，另一个操作数是数值，在比较相等性之前先将字符串转换为数值**
+
+Number(' ') -> 返回的是 0
+
+相当于 0 == 0 自然就返回 true了
+
+**总结一下：**
+
+**[ ] == ! [ ]  ->  [ ] == false -> [ ] == 0 ->  ' ' == 0  -> 0 == 0  -> true**
+
+------
+
+#####  {} == !{} 结果为false
+
+关键在于  {}.toString() ->  NaN(返回的是NaN)
+
+根据上面的规则（如果有一个操作数是NaN，则相等操作符返回 false）
+
+总结一下：
+
+{} == ! {}   ->   {} == false  ->  {} == 0  ->   NaN == 0    ->  false
 
 ------
 
@@ -571,6 +686,33 @@ function myFunction(y) {
     return y * y;
 }
 ```
+
+
+
+#### 作用域与作用域链
+
+**作用域**就是在一定的空间里可以对数据进行读写操作，这个空间就是数据的作用域。
+
+```js
+var a = "xiaoxujs";
+function fun1(){
+    function fun2(){
+        console.log(a)
+    }
+}
+```
+
+作用域链就是 当fun2调用a的时候，就会先在函数fun2中寻找，找不到就会去fun1中寻找，再找不到就会去全局里面寻找。
+
+
+
+#### ES6的class和static
+
+被`static`修饰的属性和方法都是静态方法和属性，只能被类名调用，不能被实例化对象调用。同时也不能被子类继承，换句话说它属于当前这个类的。
+
+`ES6` 的 `class` 可以看作只是一个**语法糖** ，它的绝大部分功能，`ES5` 都可以做到，新的 `class` 写法只是让对象原型的写法更加清晰、更像面向对象编程的语法
+
+![img](前端图片/ff8e4a5df9325b2c1ba1a5e54a8038f7.png)
 
 
 
@@ -1183,9 +1325,16 @@ arr[0]()
 
 我不明白为什么需要讨论箭头函数，实际上箭头函数里并没有 this，如果你在箭头函数里看到 this，你直接把它当作箭头函数外面的 this 即可。外面的 this 是什么，箭头函数里面的 this 就还是什么，因为箭头函数本身不支持 this。
 
-有人说「箭头函数里面的 this 指向箭头函数外面的 this」，这很傻，因为箭头函数内外 this 就是同一个东西，并不存在什么指向不指向。
+有人说「箭头函数里面的 this 指向箭头函数外面的 this」，这很傻，**因为箭头函数内外 this 就是同一个东西**，并不存在什么指向不指向。
 
 函数作为对象提供了`call()`，`apply()` 方法，他们也可以用来调用函数，这两个方法都接受一个对象作为参数，用来指定本次调用时函数中this的指向；
+
+**特殊性**
+
+- 箭头函数不应用普通函数this绑定的四种规则，而是根据外层（函数或全局）的作用域来决定this，且箭头函数的绑定无法被修改（new也不行）
+- 箭头函数没有原型、this、super、arguments、new.target
+
+------
 
 ##### call()方法
 
@@ -1275,6 +1424,91 @@ function fn2(){
 由于 fn3实际上就是 call 函数，所以, fn2.fn3() 等价于 fn2.call()。
 
 所以，上面那一串代码的最终结果，就是调用 fn2，所以结果输出 22。
+
+------
+
+##### 绑定优先级
+
+**New 绑定 > 显示绑定 > 隐式绑定 > 默认绑定**
+
+- 默认绑定，没有其他修饰（bind、apply、call)，在非严格模式下定义指向全局对象，在严格模式下定义指向 undefined
+
+```jsx
+function foo() {
+    console.log(this.a); 
+}
+
+var a = 2;
+foo();
+```
+
+- 隐式绑定：调用位置是否有上下文对象，或者是否被某个对象拥有或者包含，那么隐式绑定规则会把函数调用中的 this 绑定到这个上下文对象。而且，对象属性链只有上一层或者说最后一层在调用位置中起作用
+
+```jsx
+function foo() {
+  console.log(this.a);
+}
+
+var obj = {
+  a: 2,
+  foo: foo,
+}
+
+obj.foo(); // 2
+```
+
+- 显示绑定：通过在函数上运行 call 和 apply ，来显示的绑定 this
+
+```jsx
+function foo() {
+  console.log(this.a);
+}
+
+var obj = {
+  a: 2
+};
+
+foo.call(obj);
+```
+
+显示绑定之硬绑定
+
+```jsx
+function foo(something) {
+  console.log(this.a, something);
+
+  return this.a + something;
+}
+
+function bind(fn, obj) {
+  return function() {
+    return fn.apply(obj, arguments);
+  };
+}
+
+var obj = {
+  a: 2
+}
+
+var bar = bind(foo, obj);
+```
+
+New 绑定，new 调用函数会创建一个全新的对象，并将这个对象绑定到函数调用的 this。
+
+- New 绑定时，如果是 new 一个硬绑定函数，那么会用 new 新建的对象替换这个硬绑定 this，
+
+```jsx
+function foo(a) {
+  this.a = a;
+}
+
+var bar = new foo(2);
+console.log(bar.a)
+```
+
+**如果一个构造函数，bind了一个对象，用这个构造函数创建出的实例会继承这个对象的属性吗？为什么？**
+
+不会继承。因为根据this绑定四大规则，new绑定的优先级高于bind显示绑定，通过new进行构造函数调用时，会创建一个新对象，这个新对象会代替bind的对象绑定，作为函数的this，并且在此函数没有返回对象的情况下，返回这个新建的对象。
 
 
 
@@ -1686,6 +1920,8 @@ promise
 
 上面代码中，如果不使用`finally`方法，同样的语句需要为成功和失败两种情况各写一次。有了`finally`方法，则只需要写一次。
 
+finally中的res参数表示的是上一层的返回值。
+
 ------
 
 ##### Promise解决了什么问题
@@ -1765,7 +2001,7 @@ read('./a.txt').then(data=>{
 
 ```js
 async function async1(){
-   console.log('async1 start');
+    console.log('async1 start');
     await async2();
     console.log('async1 end')
 }
@@ -2580,7 +2816,7 @@ js的任务队列分为同步任务和异步任务，所有的同步任务都是
 
 **主线程**
 
-就是访问到的script标签里面包含的内容，或者是直接访问某一个js文件的时候，里面的可以在当前作用域直接执行的所有内容（**执行的方法，new出来的对象等**）
+就是访问到的script标签里面包含的内容，**这属于宏任务**。或者是直接访问某一个js文件的时候，里面的可以在当前作用域直接执行的所有内容（**执行的方法，new出来的对象等**）
 
 **宏队列**（macrotask）
 
@@ -2602,7 +2838,7 @@ promise.then、process.nextTick、对 Dom 变化监听的 MutationObserver
 
 5、执行微队列（microtask），微队列（microtask）执行完毕
 
-6、执行一次宏队列（macrotask）中的一个任务，执行完毕
+6、**执行一次**宏队列（macrotask）中的**一个任务**，执行完毕
 
 7、执行微队列（microtask），执行完毕
 
@@ -2869,6 +3105,74 @@ Worker 线程内部还能再新建 Worker 线程（目前只有 Firefox 浏览�
 
 缺点：会引起内存泄漏（引用无法被销毁，一直存在）
 
+------
+
+##### 闭包的原理
+
+闭包的实现原理，其实是利用了作用域链的特性。
+
+``` js
+function addAge(){
+    var age = 21;
+    return function(){js
+        age++;
+        console.log(age);
+    }
+}
+var clourse = addAge();
+clourse();
+clourse();
+clourse();
+```
+
+- 第一阶段：在内存中创建执行执行环境栈、把全局对象window压入栈底、在window中声明变量
+
+  ![img](前端图片/4642829-83f8f1228cc24b39.png)
+
+- 第二阶段：
+  1、在栈中添加addAge的函数调用
+
+  2、为addAge函数创建活动对象AO、根据addAge函数的scope可以知道其活动对象指向window
+
+  3、window对象中的clourse变量记录着addAge()返回的匿名函数的地址[现在addAge()和clourse变量都可以找到匿名函数和addAge()产生的AO]
+
+  ![img](前端图片/4642829-901f4f1254bad097.png)
+
+- 第三阶段：addAge()调用完毕出栈、其对活动对象AO的引用也随之消失。
+
+   由于匿名函数中的scope引用着活动对象AO、匿名函数的地址也被clourse变量记录着。因此，addAge()虽然出栈了，对它的活动对象的引用也消失了，但是其活动对象被匿名函数的scope拽着、所以无法释放不会被回收。
+
+  大家观看蓝色的箭头，其实可以发现、蓝色的箭头已经形成了一个闭环了。
+
+  此时，由图也可以看出，活动对象AO只能通过clourse变量来找到。这里形成了一个闭包。保存了addAge()函数中的局部变量，使其可以重复使用，但是又不会造成全局污染。这就是闭包的一个使用场景:保存现场。
+
+  至于怎么调用重复使用局部变量，具体过程请看下面两幅图。
+
+  ![img](前端图片/4642829-cd90123b17f9cdcf.png)
+
+- 第四阶段：clourse()进栈，产生clouse()的活动对象AO，根据它的scope可以知道它的**parent**指向addAge()产生的活动对象AO。
+
+  clouse()执行age++，由于在它自己的作用域里面没有age、于是它会到上一级作用域查找age，它在它的上一级作用域中找到了age，于是对其进行了age++，age从21变成了22。执行console.log(age)输出22。
+
+  ![img](前端图片/4642829-5c378206cfe9adfe.png)
+
+- 第五阶段：clourse()出栈，因为clourse产生的AO没有scope拽着它，因此clourse的AO是可以正常释放的。函数出栈，其AO被JS的垃圾回收机制回收。
+
+  clourse变量中的匿名函数中的scope依旧拽着addAge()产生的活动对象AO，于是这个活动对象依旧无法被释放[而且这个AO现在只能被clourse找到、clourse可以重复使用这个AO里面的局部变量age、又不会造成全局污染]
+
+  ![img](前端图片/4642829-8048e650d287cf42.png)
+
+闭包就像一层保护膜，只要引用的函数一直存在，闭包就保护该作用域内的变量不被垃圾回收。针对在函数声明那一时间点的作用域内的所有函数和变量，闭包创建了一个“安全气泡”，因此函数获得了执行操作所需要的所有东西，包含了函数及其变量，和函数本身在一起。
+
+------
+
+##### 闭包的应用场景
+
+- setTimeout
+- 回调
+- 函数防抖
+- 封装私有变量
+
 
 
 #### **柯里化函数**
@@ -2924,6 +3228,22 @@ var sum_curry =function(a){
 
 
 #### 事件模型
+
+##### 事件流
+
+ **1.事件的捕获阶段**
+
+事件捕获是火狐浏览器提出来的，IE678不支持事件捕获（基本上，我们都是用事件冒泡）事件的处理将从DOM层次的根开始，而不是从触发事件的目标元素开始，事件被从目标元素的所有祖先元素依次往下传递
+
+ **2.事件的目标阶段**
+
+ 触发自己的事件
+
+ **3.事件的冒泡阶段**
+
+ 当一个元素的事件被触发时，同样的事件将会在该元素的所有祖先元素中依次被触发。这一过程被称为事件冒泡。
+
+事件有三个阶段，首先发生的是捕获阶段，然后是目标阶段，最后才是冒泡阶段，**对于捕获和冒泡，我们只能干预其中的一个**，通常来说，我们可能会干预事件冒泡阶段，而不去干预事件捕获阶段。
 
 ##### 事件模型
 
@@ -4446,3 +4766,71 @@ var str = "Hello world, welcome to the Runoob。";
 var n = str.includes("world");   // true
 ```
 
+------
+
+#####  new 一个构造函数，不同的返回值会发生什么
+
+- 什么都不返回
+
+  ```js
+  function Person() {
+    
+  }
+  
+  let p1 = new Person()
+  console.log(p1)  //Person {}
+  ```
+
+- 返回一个新的对象
+
+  ```
+  function Person() {
+    return {
+      name: "1234"
+    }
+  }
+  
+  let p1 = new Person()
+  console.log(p1)  //{name: '1234'}
+  ```
+
+- 返回一个原始值
+
+  ```js
+  function Person() {
+    return 111
+  }
+  
+  let p1 = new Person()
+  console.log(p1)  // Person {}
+  ```
+
+- 返回null
+
+  ```js
+  function Person() {
+    return null
+  }
+  
+  let p1 = new Person()
+  console.log(p1)  // Person {}
+  ```
+
+- 返回true
+
+  ```js
+  function Person() {
+    return true
+  }
+  
+  let p1 = new Person()
+  console.log(p1)  // Person {}
+  ```
+
+------
+
+##### setTimeout(0)
+
+setTimeout(fn, 0)的含义是，指定某个任务在主线程最早可得的空闲时间执行，也就是说，当前代码执行完（执行栈清空）以后，尽可能的早执行。它在“任务队列”的尾部添加一个事件，因此要等到同步任务和“任务队列”现有的事件都处理完，才会得到执行。
+
+HTML5标准规定了setTimeout()的**第二个参数的最小值不得小于4毫秒**，如果低于这个值，则默认是4毫秒。在此之前。老版本的浏览器都将最短时间设为10毫秒。另外，对于那些DOM的变动（尤其是涉及页面重新渲染的部分），通常是间隔16毫秒执行。这时使用**requestAnimationFrame()**的效果要好于setTimeout();

@@ -151,6 +151,7 @@ CSS的命名方式：
 
 | **选择器**     | **格式**      | **优先级权重** |
 | -------------- | ------------- | -------------- |
+| 行内样式       | style         | 1000           |
 | id选择器       | #id           | 100            |
 | 类选择器       | .classname    | 10             |
 | 属性选择器     | a[ref=“eee”]  | 10             |
@@ -163,6 +164,10 @@ CSS的命名方式：
 | 通配符选择器   | *             | 0              |
 
 **优先级关系：内联样式 > ID 选择器 > 类选择器 = 属性选择器 = 伪类选择器 > 标签选择器 = 伪元素选择器**
+
+**权重相同，写在后面的覆盖前面的。**
+
+**使用!important达到最大优先级，都使用!important时，权重大的优先级高。**
 
 1.优先级最高的-!important
 
@@ -888,11 +893,11 @@ CSS 的继承特性指的是应用在一个标签上的那些 CSS 属性被传�
 
 **方法一：**使用带clear属性的空元素
 
-在浮动元素同级后使用一个空元素如<div class="clear"></div>，并在CSS中赋予.clear{clear:both;}属性即可清理浮动。亦可使用<br class="clear" />或<hr class="clear" />来进行清理。这种方法有一个非常大的致命问题，**它所在的标签，margin属性失效了**。因为div的高度为零。
+在浮动元素同级后使用一个空元素如<div class="clear"></div>，并在CSS中赋予.clear{clear: both;}属性即可清理浮动。亦可使用<br class="clear" />或<hr class="clear" />来进行清理。这种方法有一个非常大的致命问题，**它所在的标签，margin属性失效了**。因为div的高度为零。
 
 **方法二：**使用CSS的overflow属性
 
-当子元素浮动时，给浮动元素的父级样式添加overflow:hidden;或overflow:auto;可以清除浮动，另外在 IE6 中还需要触发 hasLayout ，例如为父元素设置容器宽高或设置 zoom:1。
+当子元素浮动时，给浮动元素的父级样式添加overflow: hidden;或overflow: auto;可以清除浮动，另外在 IE6 中还需要触发 hasLayout ，例如为父元素设置容器宽高或设置 zoom: 1。
 
 在添加overflow属性后，浮动元素又回到了容器层，把容器高度撑起，达到了清理浮动的效果。
 
@@ -981,12 +986,13 @@ box-sizing(有3个值哦)：border-box,padding-box,content-box.
 
 区别：从图中我们可以看出，这两种盒子模型最主要的区别就是width的包含范围，在标准的盒子模型中，width指content部分的宽度，在IE盒子模型中，width表示content+padding+border这三个部分的宽度，故这使得在计算整个盒子的宽度时存在着差异：
 
-标准盒子模型的盒子宽度：左右border+左右padding+width
-IE盒子模型的盒子宽度：width
+**标准盒子模型的盒子宽度：左右border+左右padding+width**
 
-在CSS3中引入了box-sizing属性，box-sizing:content-box;表示标准的盒子模型，box-sizing:border-box表示的是IE盒子模型
+**IE盒子模型的盒子宽度：width**
 
-最后，前面我们还提到了，box-sizing:padding-box,这个属性值的宽度包含了左右padding+width
+在CSS3中引入了box-sizing属性，box-sizing: content-box;表示标准的盒子模型，box-sizing: border-box表示的是IE盒子模型
+
+最后，前面我们还提到了，box-sizing: padding-box,这个属性值的**宽度包含了左右padding+width**
 
 
 
@@ -1110,11 +1116,11 @@ Position属性把元素放置在一个静态的，相对的，绝对的，固定
 
 折叠的结果为：
 
-两个相邻的外边距都是正数时，折叠结果是它们两者之间较大的值。
+两个相邻的外边距都是正数时，折叠结果是它们两者之间**较大的值**。
 
-两个相邻的外边距都是负数时，折叠结果是两者绝对值的较大值。
+两个相邻的外边距都是负数时，折叠结果是两者**绝对值的较大值**。
 
-两个外边距一正一负时，折叠结果是两者的相加的和。
+两个外边距一正一负时，折叠结果是两者的**相加的和**。
 
 **解决办法：** 对于折叠的情况，主要有两种：**兄弟之间重叠**和**父子之间重叠** 
 
@@ -2949,6 +2955,9 @@ div{
 }
 ```
 
+- 伪元素设置 margin-top 等!!!
+- 双重嵌套，外层relative，内层absolute。
+
 ------
 
 ##### 画一条0.5px的线
@@ -2975,9 +2984,9 @@ display为block
 
 ##### 隐藏页面中某个元素的方法
 
-display:none; 
+display: none; 
 
-visibility:hidden;
+visibility: hidden;
 
 opacity: 0;
 
@@ -2988,6 +2997,48 @@ z-index设置负值遮盖元素;
 clip/clip-path：使用元素裁剪的方法来实现元素的隐藏，这种方法下，元素仍在页面中占据位置，但是不会响应绑定的监听事件。
 
 transform: scale(0,0)：将元素缩放为 0，来实现元素的隐藏。这种方法下，元素仍在页面中占据位置，但是不会响应绑定的监听事件。
+
+------
+
+##### **display: none、visibility: hidden和opacity: 0**
+
+|                                                    | **display: none** | **visibility: hidden** | **opacity: 0** |
+| :------------------------------------------------- | :---------------- | :--------------------- | :------------- |
+| 是否占有空间                                       | ×                 | √                      | √              |
+| 是否可以进行DOM事件监听                            | ×                 | ×                      | √              |
+| 是否可以点击                                       | ×                 | ×                      | √              |
+| 是否可以被子元素继承                               | ×                 | √                      | √              |
+| 子元素能否通过改变属性值来改变继承自父亲的隐藏状态 | ×                 | √                      | ×              |
+
+**1. display: none**
+
+- **DOM 结构：**浏览器不会渲染 display 属性为 none 的元素，会让元素完全从渲染树中消失，渲染的时候不占据任何空间；
+- **事件监听：**无法进行 DOM 事件监听，不能点击；
+- **性能：**修改元素会造成文档重绘重排（ repaint 与reflow ）,读屏器不会读取display: none元素内容，性能消耗较大；
+- **继承：**是非继承属性，由于元素从渲染树消失，造成子孙节点消失，即使修改子孙节点属性子孙节点也无法显示，毕竟子类也不会被渲染；
+- **属性值从 none 改为非 none 时的效果：**显示出原来这里不存在的结构；
+- **transition：**transition 不支持 display。
+- **用途：**虽然会造成大量的重绘重排，但是也是对复杂结构减少重绘重排常用的办法。常常将一个“会被大量修改结构和视觉效果”的结构先赋予 display:none 属性，让其在 DOM 树中消失，然后进行 DOM 操作，操作完再让其显示。更多有关重绘重排的方法可以参考这篇文章：[前端性能优化之重排和重绘](https://segmentfault.com/a/1190000016990089)。
+
+**2. visibility: hidden**
+
+- **DOM 结构：**不会让元素从渲染树消失，渲染元素继续占据空间，但是内容不可见；
+- **事件监听：**无法进行 DOM 事件监听，不能点击；
+- **性能：**修改元素只会造成本元素的重绘（repaint），是重绘操作，比重排操作性能高一些，性能消耗较少；读屏器读取visibility: hidden元素内容；
+- **继承：**是继承属性，子孙节点消失是由于继承了visibility: hidden，子元素可以通过设置 visibility: visible 来取消隐藏；
+- **属性值从 hidden 改为 visible 时的效果：**显示不会导致页面结构发生变动，不会撑开；
+- **transition：**transition 支持 visibility，visibility 会立即显示，隐藏时会延时。
+
+**3. opacity: 0**
+
+- **DOM 结构：**透明度为 100%，不会让元素从渲染树消失，渲染元素继续占据空间，只是内容不可见；
+- **事件监听：**可以进行 DOM 事件监听，可以点击；
+- **性能：**提升为合成层，是**重建图层**，不和动画属性一起则**不会产生repaint**（不脱离文档流，不会触发重绘），性能消耗较少；
+- **继承：**会被子元素继承，且子元素并不能通过 opacity: 1 来取消隐藏；
+- **场景：**可以跟transition搭配；
+- **transition：**transition 支持 opacity，opacity 可以延时显示和隐藏。
+
+打个比方： **display: none**： 从这个世界消失了, 不存在了； **opacity: 0**： 视觉上隐身了, 看不见, 可以触摸得到； **visibility: hidden**： 视觉和物理上都隐身了, 看不见也摸不到, 但是存在的；
 
 ---
 
@@ -3213,18 +3264,6 @@ metaEl.setAttribute('content', `width=device-width,user-scalable=no,initial-scal
 3.使用font-size:0
 4.letter-spacing——设置对象中的单词之间插入的空格数
 5.word-spacing——设置对象中的文字之间的间隔.每一个中文文字以及英文字母之间
-
-------
-
-##### **display:none与visibility:hidden**
-
-```css
-//设置后，该元素在dom元素中消失，不再占用空间
-display: none;
-
-//设置后，该元素存在的空间还在，只是不可见，依然会影响到页面布局，具有继承性
-visibility: hidden;
-```
 
 ------
 
