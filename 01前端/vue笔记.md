@@ -1319,7 +1319,7 @@ eventBus.$off('eventBusName');
 
 ------
 
-##### 依赖注入（provide / inject）
+##### 依赖注入（provide / inject）（祖孙）
 
 这种方式就是Vue中的**依赖注入**，该方法用于**父子组件之间的通信**。当然这里所说的父子不一定是真正的父子，也可以是祖孙组件，在**层数很深的情况**下，可以使用这种方法来进行传值。就不用一层一层的传递了。
 
@@ -1368,7 +1368,7 @@ console.log(this.app.num)
 
 ------
 
-##### ref / $refs
+##### ref / $refs（父子）
 
 这种方式也是实现**父子组件**之间的通信。
 
@@ -1411,7 +1411,7 @@ export default {
 
 ------
 
-##### $parent / $children
+##### $parent / $children（父子）
 
 - 使用`$parent`可以让组件访问父组件的实例（访问的是上一级父组件的属性和方法）
 - 使用`$children`可以让组件访问子组件的实例，但是，`$children`并不能保证顺序，并且访问的数据也不是响应式的。
@@ -1482,7 +1482,7 @@ export default {
 
 ------
 
-##### $attrs / $listeners
+##### $attrs / $listeners（隔代）
 
 考虑一种场景，如果A是B组件的父组件，B是C组件的父组件。如果想要组件A给组件C传递数据，这种隔代的数据，该使用哪种方式呢？
 
@@ -1968,7 +1968,9 @@ new Vue({
 
 
 
-#### vue的内置指令
+#### vue的常用内置指令
+
+##### vue常用的修饰符
 
 **我们学过的指令：**
 
@@ -2009,6 +2011,50 @@ new Vue({
 
 -  1.跳过其所在节点的编译过程。
 -  2.可利用它跳过：没有使用指令语法、没有使用插值语法的节点，会加快编译。
+
+**v-stop：**
+
+- 等同于JavaScript中的event.stopPropagation()，防止事件冒泡；
+
+**v-prevent：**
+
+- 等同于JavaScript中的event.preventDefault()，防止执行预设的行为（如果事件可取消，则取消该事件，而不停止事件的进一步传播）；
+
+**v-capture：**
+
+- 与事件冒泡的方向相反，事件捕获由外到内；
+
+**v-self：**
+
+- 只会触发自己范围内的事件，不包含子元素；
+
+**v-model**
+
+- v-model指令的本质是： 它负责监听用户的输入事件，从而更新数据，并对一些极端场景进行一些特殊处理。同时，v-model会忽略所有表单元素的value、checked、selected特性的初始值，它总是将vue实例中的数据作为数据来源。 然后当输入事件发生时，实时更新vue实例中的数据。
+
+```html
+<!--input输入框-->
+<div id="app">
+     <input type="text" v-model="message" placeholder="请输入">
+    <p>输入的内容是: {{message}}</p>
+</div>
+
+<script>
+    var  vue=new Vue({
+        el:'#app',
+        data:{
+           message:''
+        }
+    });
+</script>
+```
+
+原理：
+
+```html
+ <input v-bind:value="message" v-on:input="message = $event.target.value" />
+//把input输入框的value属性值和vue实例的message属性进行绑定，同时监听输入事件。
+```
 
 
 
@@ -2241,7 +2287,35 @@ vue可以自定义指令。自定义指令分为：全局指令和局部指令�
 
 
 
-#### **vue怎么注册全局插件**
+#### **vue怎么注册插件**
+
+##### 创建组件（3种）
+
+- **使用Vue.extend()**
+
+```js
+var myCom = Vue.extend({
+    template: '<div>这是我的组件</div>'
+})
+```
+
+- **`template `标签**
+
+```html
+<template id="myCom">
+    <div>这是template标签构建的组件</div>
+</template>
+```
+
+- **`script`标签**
+
+```html
+<script type="text/x-template" id="myCom1">
+    <div>这是script标签构建的组件</div>
+</script>
+```
+
+##### 全局插件
 
 首先建一个自定义组件的文件夹，比如叫components，里面有一个index.js，还有一个自定义组件loading.vue。
 
@@ -2325,6 +2399,47 @@ new Vue({
 ```
 
 第四步：在页面home.vue中直接运用组件，无需重新引入
+
+------
+
+##### 局部插件
+
+**局部注册：只能在注册该组件的实例中使用，一处注册，一处使用**
+
+```js
+  var app = new Vue({
+    el: '#app',
+    components: {
+        'my-com': myCom
+    }
+  })
+```
+
+**局部注册语法糖：**
+
+```js
+  var app = new Vue({
+    el: '#app',
+    components: {
+        'my-com': {
+           template: '<div>这是我的组件</div>'
+        }
+    }
+  })
+```
+
+**`<template>`及`<script>`创建的组件，局部注册**
+
+```js
+var app = new Vue({
+    el: '#app',
+    components: {
+        'my-com': {
+           template: '#myCom'
+        }
+    }
+})
+```
 
 
 
@@ -3052,8 +3167,8 @@ SPA极大地提升了用户体验，它允许页面在不刷新的情况下更�
 
 **概念：**
 
-- SPA单页面应用（SinglePage Web Application），指只有一个主页面的应用，一开始只需要加载一次js、css等相关资源。所有内容都包含在主页面，对每一个功能模块组件化。单页应用跳转，就是切换相关组件，仅仅刷新局部资源。
-- MPA多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载js、css等相关资源。多页应用跳转，需要整页资源刷新。
+- SPA单页面应用（SinglePage Web Application），指只有一个主页面的应用，**一开始只需要加载一次js、css等相关资源**。所有内容都包含在主页面，对每一个功能模块组件化。单页应用跳转，就是切换相关组件，仅仅刷新局部资源。常用于PC端官网、购物等网站。
+- MPA多页面应用 （MultiPage Application），指有多个独立页面的应用，每个页面必须重复加载js、css等相关资源。多页应用跳转，需要整页资源刷新。常用于 app 或 客户端等。
 
 SPA（ single-page application ）仅在 Web 页面初始化时加载相应的 HTML、JavaScript 和 CSS。一旦页面加载完成，SPA 不会因为用户的操作而进行页面的重新加载或跳转；取而代之的是利用路由机制实现 HTML 内容的变换，UI 与用户的交互，避免页面的重新加载。
 
@@ -3068,6 +3183,28 @@ SPA（ single-page application ）仅在 Web 页面初始化时加载相应的 H
 - 初次加载耗时多：为实现单页 Web 应用功能及显示效果，需要在加载页面的时候将 JavaScript、CSS 统一加载，部分页面按需加载；
 - 前进后退路由管理：由于单页应用在一个页面中显示所有的内容，所以不能使用浏览器的前进后退功能，所有的页面切换需要自己建立堆栈管理；
 - SEO 难度较大：由于所有的内容都在一个页面中动态替换显示，所以在 SEO 上其有着天然的弱势。
+
+|                   | 单页面应用（SinglePage Web Application，SPA）                | 多页面应用（MultiPage Application，MPA）     |
+| ----------------- | ------------------------------------------------------------ | -------------------------------------------- |
+| 组成              | 一个外壳页面和多个页面片段组成                               | 多个完整页面构成                             |
+| 资源共用(css,js)  | 共用，只需在外壳部分加载                                     | 不共用，每个页面都需要加载                   |
+| 刷新方式          | 页面局部刷新或更改                                           | 整页刷新                                     |
+| url 模式          | `a.com/#/pageone`  `a.com/#/pagetwo`                         | `a.com/pageone.html`  `a.com/pagetwo.html`   |
+| 用户体验          | 页面片段间的切换快，用户体验良好                             | 页面切换加载缓慢，流畅度不够，用户体验比较差 |
+| 转场动画          | 容易实现                                                     | 无法实现                                     |
+| 数据传递          | 容易                                                         | 依赖 url传参、或者cookie 、localStorage等    |
+| 搜索引擎优化(SEO) | 需要单独方案、实现较为困难、不利于SEO检索 可利用服务器端渲染(SSR)优化 | 实现方法简易                                 |
+| 试用范围          | 高要求的体验度、追求界面流畅的应用                           | 适用于追求高度支持搜索引擎的应用             |
+| 开发成本          | 较高，常需借助专业的框架                                     | 较低 ，但页面重复代码多                      |
+| 维护成本          | 相对容易                                                     | 相对复杂                                     |
+
+------
+
+#####  SPA首屏加载慢如何解决
+
+1. 将公用的js库用script引入，让浏览器并行下载资源
+2. 配置路由，组件，页面。使用懒加载，在调用某个组件时在下载 某个js
+3. 加一个首屏的loading图，可以提高用户体验
 
 
 
@@ -3214,12 +3351,14 @@ axios时目前最流行的ajax封装库之一，用于很方便地实现ajax请�
 
 - 从浏览器发出 XMLHttpRequests请求。
 - 从 node.js 发出 http 请求。
-- 支持 Promise API。
-- 能拦截请求和响应。
+- **支持 Promise API**。
+- 能**拦截请求和响应**。
 - 能转换请求和响应数据。
-- 取消请求。
+- **取消请求**。
 - 实现JSON数据的自动转换。
 - 客户端支持防止 XSRF攻击。
+
+axios中的发送字段的**参数是data跟params两个**，两者的区别在于params是跟请求地址一起发送的，data的作为一个请求体进行发送，params一般适用于get请求，data一般适用于post put 请求
 
 ##### axios拦截器
 
@@ -3278,6 +3417,93 @@ axios时目前最流行的ajax封装库之一，用于很方便地实现ajax请�
 效果：
 
 ![img](前端图片/90a363f02d724560adc60230c224e4f3.png)
+
+------
+
+##### axios跨域
+
+**step1：配置 baseURL**
+
+- 可以自定义一个 js 文件，也可以直接在 main.js 中写。
+
+```js
+import Vue from 'vue'
+import App from './App.vue'
+// step1：引入 axios
+import Axios from 'axios'
+
+Vue.config.productionTip = false
+
+// step2：把axios挂载到vue的原型中，在vue中每个组件都可以使用axios发送请求,
+// 不需要每次都 import一下 axios了，直接使用 $axios 即可
+Vue.prototype.$axios = Axios
+
+// step3：使每次请求都会带一个 /api 前缀 
+Axios.defaults.baseURL = '/api'
+
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+```
+
+**step2：修改配置文件（修改后要重启服务）**
+
+- vue 3.0 通过 vue.config.js 文件 修改配置（若没有，则直接在项目路径下新建即可）
+
+```js
+module.exports = {
+    devServer: {
+        proxy: {
+            '/api': {
+                // 此处的写法，目的是为了 将 /api 替换成 https://www.baidu.com/
+                target: 'https://www.baidu.com/',
+                // 允许跨域
+                changeOrigin: true,
+                ws: true,
+                pathRewrite: {
+                    '^/api': ''
+                }
+            }
+        }
+    }
+}
+```
+
+**step3：修改 axios 使用方式**
+
+```html
+<template>
+    <div>
+        <button @click="testAxios">TestAxios</button>
+    </div>
+    <!--App -->
+</template>
+
+<script>
+    export default {
+        methods: {
+            testAxios() {
+                // 由于 main.js 里全局定义的 axios,此处直接使用 $axios 即可。
+                // 由于 main.js 里定义了每个请求前缀，此处的 / 即为 /api/， 
+                // 经过 vue.config.js 配置文件的代理设置，会自动转为 https://www.baidu.com/，从而解决跨域问题
+                this.$axios.get('/').then(response => {
+                    if (response.data) {
+                        console.log(response.data)
+                    }
+                }).catch(err => {
+                    alert('请求失败')
+                })
+            }
+        }
+    }
+</script>
+
+<style>
+
+</style>
+```
+
+
 
 #### SSR
 
@@ -3539,6 +3765,8 @@ react可以通过高阶组件（HOC）来扩展，而Vue需要通过mixins来扩
 
 keep-alive标签用于切换组件时**保留隐藏组件的状态**。例如当组件a变更了组件a的data，然后把组件a切换为组件b，再切回组件a：如果组件被keep-alive包裹，则组件a的data为变更后的状态；如果组件未被keep-alive包裹，则组件a的data为初始化状态。
 
+对于一个操作频率很高的页面，那么就可以对列表组件使用`<keep-alive></keep-alive>`进行缓存，这样用户每次返回列表的时候，都能从缓存中快速渲染，而不是重新渲染。
+
 keep-alive有以下三个属性：
 
 - include 字符串或正则表达式，只有名称匹配的组件会被匹配；
@@ -3677,20 +3905,6 @@ export default {
 不相同点：**assets中存放的静态资源文件在项目打包时，也就是运行npm run build时会将assets中放置的静态资源文件进行打包上传**，所谓打包简单点可以理解为压缩体积，代码格式化。而压缩后的静态资源文件最终也都会放置在static文件中跟着index.html一同上传至服务器。**static中放置的静态资源文件就不会要走打包压缩格式化等流程**，而是直接进入打包好的目录，直接上传至服务器。因为避免了压缩直接进行上传，在打包时会提高一定的效率，但是static中的资源文件由于没有进行压缩等操作，所以文件的体积也就相对于assets中打包后的文件提交较大点。在服务器中就会占据更大的空间。
 
 建议：将项目中template需要的样式文件js文件等都可以放置在assets中，走打包这一流程。减少体积。而项目中引入的第三方的资源文件如iconfoont.css等文件可以放置在static中，因为这些引入的第三方文件已经经过处理，我们不再需要处理，直接上传。
-
-------
-
-##### vue常用的修饰符
-
-**.stop**：等同于JavaScript中的event.stopPropagation()，防止事件冒泡；
-
-**.prevent**：等同于JavaScript中的event.preventDefault()，防止执行预设的行为（如果事件可取消，则取消该事件，而不停止事件的进一步传播）；
-
-**.capture**：与事件冒泡的方向相反，事件捕获由外到内；
-
-**.self**：只会触发自己范围内的事件，不包含子元素；
-
-**.once**：只会触发一次。
 
 ------
 
@@ -3838,3 +4052,20 @@ move(){
 
 所以，template和jsx的都是render的一种表现形式，不同的是：JSX相对于template而言，具有更高的灵活性，在复杂的组件中，更具有优势，而 template 虽然显得有些呆滞。但是 template 在代码结构上更符合视图与逻辑分离的习惯，更简单、更直观、更好维护。
 
+------
+
+##### delete和Vue.delete删除数组的区别
+
+- delete只是被删除的元素变成了 empty/undefined，其他的元素的键值还是不变。
+- Vue.delete 直接删除了数组，改变了数组的键值
+
+------
+
+##### vue常用的UI组件库
+
+- Vuetify
+- Bootstrap-Vue
+- Vue-blu
+- MintUI
+- Vue-strap
+- ElementUI
