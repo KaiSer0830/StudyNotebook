@@ -24,7 +24,7 @@
 
 ------
 
-**1.字母处理：**
+##### 1.字母处理：
 
 ```
 .upper()    # 全部大写
@@ -34,7 +34,7 @@
 .title()    # 首字母大写
 ```
 
-**2.格式化相关**
+##### 2.格式化相关
 
 ```
 .ljust(width)     # 获取固定长度，左对齐，右边不够用空格补齐
@@ -43,7 +43,7 @@
 .zfill(width)      # 获取固定长度，右对齐，左边不足用0补齐
 ```
 
-**3.字符串搜索相关**
+##### 3.字符串搜索相关
 
 ```
 .find()    # 搜索指定字符串，没有返回-1，有返回索引，可以指定查找范围，如.find("a", 2, 4),代表查找索引[2:4)的范围
@@ -54,7 +54,7 @@
 # 上面所有方法都可以用index代替，不同的是使用index查找不到会抛异常，而find返回-1
 ```
 
-**4.字符串替换**
+##### 4.字符串替换
 
 ```python
 .replace('old','new')    # 替换old为new，返回替换后的字符串，不修改原字符串
@@ -71,7 +71,7 @@ heppo world
 heppo worpd
 ```
 
-**5.字符串去空格及去指定字符**
+##### 5.字符串去空格及去指定字符
 
 ```
 .strip()    # 去两边空格
@@ -82,7 +82,7 @@ heppo worpd
 .split('指定字符')    # 按指定字符分割字符串为数组
 ```
 
-**6.字符串判断相关**
+##### 6.字符串判断相关
 
 ```
 .startswith('start')    # 是否以start开头
@@ -96,7 +96,8 @@ heppo worpd
 .isspace()    # 判断字符是否为空格
 
 # 补充
-bin()    # 十进制数转八进制
+bin()    # 十进制数转二进制
+oct()    # 十进制数转二进制
 hex()    # 十进制数转十六进制
 range()    # 函数：可以生成一个整数序列
 type()    # 查看数据类型
@@ -104,7 +105,16 @@ len()    # 计算字符串长度
 format()    # 格式化字符串，类似%s，传递值能多不能少
 ```
 
-**7.其它**
+##### 7.字符串反转
+
+```
+s = "abc"
+print("".join(reversed(list(s))))
+```
+
+
+
+##### 8.其它
 
 ```
 ord：返回Unicode字符对应的整数
@@ -120,7 +130,9 @@ print(chr(97))
 
 ------
 
-**1.创建列表。**只要把逗号分隔的不同的数据项使用方括号括起来即可
+##### 1.创建列表。
+
+只要把逗号分隔的不同的数据项使用方括号括起来即可
 
 ```python
 List = ['wade','james','bosh','haslem']
@@ -131,7 +143,7 @@ List = list(map(int, input().split()))
 
 与字符串的索引一样，列表索引从0开始。列表可以进行截取、组合等
 
-**2.添加新的元素**
+##### 2.添加新的元素
 
 ```python
 List.append('allen') #方式一：向list结尾添加 参数object
@@ -154,14 +166,15 @@ List.extend(tableList)  #方式三：扩展列表，参数：iterable参数
 [1, 2, 3, 4, 5, 6]
 ```
 
-**3.遍历列表**
+##### 3.遍历列表
 
 ```python
 for i in List:
 	print i,
 ```
 
-**4.访问列表中的值**
+##### 4.访问列表中的值
+
 使用下标索引来访问列表中的值，同样你也可以使用方括号的形式截取字符，如下所示：
 
 ```python
@@ -170,7 +183,7 @@ for i in List:
 4
 ```
 
-**5.从list删除元素**
+##### 5.从list删除元素
 
 ```python
 List.remove()   #删除方式一：参数object 如有重复元素，只会删除最靠前的
@@ -201,7 +214,7 @@ Traceback (most recent call last):
     print(a)
 ```
 
-**6.排序和反转代码**
+##### 6.排序和反转代码
 
 ```python
 List.reverse()
@@ -236,7 +249,7 @@ List.sort(reverse = True) #sort反序排列
 [1, 2, 3, 4, 5]                     
 ```
 
-**7.Python列表截取**
+##### 7.Python列表截取
 
 ```python
 Python的列表截取与字符串操作类型相同，如下所示：
@@ -248,7 +261,7 @@ L[-2] 'Spam' 读取列表中倒数第二个元素
 L[1:] ['Spam', 'SPAM!'] 从第二个元素开始截取列表
 ```
 
-**8.Python列表操作的函数和方法**
+##### 8.Python列表操作的函数和方法
 
 ```
 列表操作包含以下函数:
@@ -273,6 +286,35 @@ L[1:] ['Spam', 'SPAM!'] 从第二个元素开始截取列表
 9、list.sort([func])：对原列表进行排序
 ```
 
+##### 9.去括号输出列表全部元素
+
+列表前面加星号作用是将列表**解开**（unpacke）成多个独立的参数，传入函数。
+
+```python
+s = [2,3,4,5]
+print(*s)			    #2 3 4 5
+print(*s, sep=" ")		#与前一句效果相同
+print(*s, sep="-", end="+")		#末尾与中间分隔符不同，2-3-4-5+
+```
+
+##### 10.列表反转
+
+```python
+# reverse()方法
+a = [1, 2, 3, 4, 5, 6, 7, 'abc', 'def']
+a.reverse()
+print('列表反转结果：', a)
+
+# 内置reversed()函数
+a = [1, 2, 3, 4, 5, 6, 7, 'abc', 'def']
+a1 = reversed(a)
+print('列表反转结果（迭代对象）：', a1)
+print('列表反转结果转换成列表：', list(a1))
+```
+
+列表反转结果（迭代对象）：<list_reverseiterator object at 0x00000243EF467A20>
+列表反转结果转换成列表：[‘def’, ‘abc’, 7, 6, 5, 4, 3, 2, 1]
+
 
 
 #### 字典
@@ -295,14 +337,14 @@ print (dict)
 
 
 
-**1.创建字典**
+##### 1.创建字典
 
 ```python
 dict1 = { 'abc': 456 }
 dict2 = { 'abc': 123, 98.6: 37 }
 ```
 
-**2.访问字典里的值**
+##### 2.访问字典里的值
 
 ```python
 dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
@@ -311,7 +353,7 @@ print ("dict['Name']: ", dict['Name'])
 print ("dict['Age']: ", dict['Age'])
 ```
 
-**3.修改和添加字典元素**
+##### 3.修改和添加字典元素
 
 ```python
 dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
@@ -320,7 +362,7 @@ dict['Age'] = 8               # 更新 Age
 dict['School'] = "菜鸟教程"  	# 添加信息
 ```
 
-**4.删除字典元素**
+##### 4.删除字典元素
 
 ```python
 dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
@@ -334,7 +376,7 @@ del dic[list(dic.keys())[0]]	# 删除第一个元素
 dic.pop(list(dic.keys())[0])	# 删除第一个元素
 ```
 
-**5.排序**
+##### 5.排序
 
 ```python
 #sorted
@@ -351,7 +393,7 @@ L.sort(key=lambda x:x[1],reverse=False)  # 按列表中，每一个元组的第�
 print(L)      # 得到:  [('a', 1), ('b', 2), ('c', 3)]
 ```
 
-**6.其它函数方法**
+##### 6.其它函数方法
 
 ```python
 len(dict)
@@ -394,3 +436,44 @@ popitem()
 随机返回一对键值并删除字典中的最后一对键和值。
 ```
 
+##### 7.输出字典
+
+```python
+dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
+for item in dict:
+    print(item) 	#输出Name、Age、Class
+```
+
+要想key和value一起输出，应该如下：
+
+```
+dict = {'Name': 'Runoob', 'Age': 7, 'Class': 'First'}
+for item in dict:
+    print(item, dict[item]) 	#输出Name Runoob、Age 7、Class First
+```
+
+
+
+##### 8.字典（dict）前面加两星号（`**`）
+
+字典前面加两个星号，是将字典**解开**成为独立的元素作为**实参**。
+
+```python
+def add(a, b):
+    return a + b
+data = {'a':8, 'b':9}
+print('add(**data)=====',add(**data))		#输出17
+print('add(*data)=====',add(*data))			#输出ab
+```
+
+字典中的key和函数中的参数名，**保持一致**，否则会报错。如下：
+
+```python
+def add(c, d):
+    return c + d
+data = {'a':8, 'b':9}
+print('add(**data)=====',add(**data))
+print('add(*data)=====',add(*data))
+```
+
+TypeError: add() got an unexpected keyword argument 'a'
